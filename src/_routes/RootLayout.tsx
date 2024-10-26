@@ -1,10 +1,10 @@
 import { Outlet } from "react-router-dom";
 
-const AdminLayout = () => {
+const RootLayout = () => {
   return (
     <div className="w-screen h-screen">
       <Outlet />
     </div>
   );
-}
-export default AdminLayout
+};
+export default RootLayout;
