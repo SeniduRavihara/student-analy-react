@@ -32,7 +32,7 @@ const LoginPage = () => {
   // 2. Define a submit handler.
   async function onSubmit(values: z.infer<typeof loginSchema>) {
     try {
-      // await login(values);
+      await login(values);
       navigate("/");
     } catch (error) {
       console.log(error);
