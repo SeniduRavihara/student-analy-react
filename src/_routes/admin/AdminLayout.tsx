@@ -1,5 +1,5 @@
 import { useData } from "@/hooks/useData";
-// import { CircularProgress } from "@ch     akra-ui/react";
+// import { CircularProgress } from "@chakra-ui/react";
 import { Navigate, Outlet } from "react-router-dom";
 
 const AdminLayout = () => {
@@ -7,20 +7,18 @@ const AdminLayout = () => {
 
   const token = localStorage.getItem("token");
 
-  // if (!token) return <Navigate to="/" />;
+  if (!token) return <Navigate to="/" />;
 
-  if (!currentUserData)
+  if (!currentUserData) {
     return (
-      <div className="w-full h-screen flex items-center justify-center">dfghdg
+      <div className="w-full h-screen flex items-center justify-center">
+        Loading...
         {/* <CircularProgress size="60px" isIndeterminate color="green.300" /> */}
       </div>
     );
+  }
 
-  return currentUserData.roles.includes("superAdmin") ? (
-    <Outlet />
-  ) : (
-    <Navigate to="/" />
-  );
+  return currentUserData.roles == "ADMIN" ? <Outlet /> : <Navigate to="/" />;
 };
 
 export default AdminLayout;

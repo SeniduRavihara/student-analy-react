@@ -56,13 +56,13 @@ export const signup = async ({
 
     const payload = {
       name: "",
-      id: "",
+      uid: "",
       email: "",
     };
 
     await setDoc(doc(db, "users", user.uid), {
       ...payload,
-      id: user.uid,
+      uid: user.uid,
       name,
       email,
     });

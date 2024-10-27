@@ -5,25 +5,27 @@ import {
   RouterProvider,
 } from "react-router-dom";
 import AuthLayout from "@/_routes/_auth/AuthLayout";
-import AuthContextProvider from "./context/AuthContext";
+import AuthContextProvider from "@/context/AuthContext";
 import HomePage from "@/_routes/public/pages/HomePage";
 import RootLayout from "@/_routes/RootLayout";
-import DataContextProvider from "./context/DataContext";
-import LoginPage from "./_routes/_auth/forms/LoginPage";
-import PublicLayout from "./_routes/public/PublicLayout";
-import PrivateLayout from "./_routes/private/PrivateLayout";
-import AdminLayout from "./_routes/admin/AdminLayout";
-import StudentDetailsPage from "./_routes/admin/pages/StudentDetailsPage";
-import StudentProfilePage from "./_routes/private/pages/StudentProfilePage";
-import AddNewStudentPage from "./_routes/admin/pages/AddNewStudentPage";
-import AnalyticsPage from "./_routes/admin/pages/AnalyticsPage";
+import DataContextProvider from "@/context/DataContext";
+import LoginPage from "@/_routes/_auth/forms/LoginPage";
+import PublicLayout from "@/_routes/public/PublicLayout";
+import PrivateLayout from "@/_routes/private/PrivateLayout";
+import AdminLayout from "@/_routes/admin/AdminLayout";
+import StudentDetailsPage from "@/_routes/admin/pages/StudentDetailsPage";
+import StudentProfilePage from "@/_routes/private/pages/StudentProfilePage";
+import AddNewStudentPage from "@/_routes/admin/pages/AddNewStudentPage";
+import AnalyticsPage from "@/_routes/admin/pages/AnalyticsPage";
+import SignupPage from "./_routes/_auth/forms/SignupPage";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
     <Route element={<RootLayout />}>
-      {/* public routes */}
+      {/* auth routes */}
       <Route element={<AuthLayout />}>
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/signup" element={<SignupPage />} />
       </Route>
 
       {/* public routes */}

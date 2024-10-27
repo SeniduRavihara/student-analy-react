@@ -2,13 +2,14 @@ import { FcGoogle } from "react-icons/fc";
 import { FaGithub } from "react-icons/fa";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
+import { googleSignIn } from "@/firebase/api";
 
 const Social = () => {
 
   const navigate = useNavigate()
 
   const handleGooglesignin = async () => {
-    // await googleSignIn()
+    await googleSignIn()
     navigate("/")
   };
 
