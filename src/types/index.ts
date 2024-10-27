@@ -11,4 +11,6 @@ export type CurrentUserDataType = {
   uid: string;
   userName: string;
   regNo: string;
+  gender: "male" | "female";
+  roles: string[];
 };

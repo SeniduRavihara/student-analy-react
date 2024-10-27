@@ -15,6 +15,8 @@ import PrivateLayout from "./_routes/private/PrivateLayout";
 import AdminLayout from "./_routes/admin/AdminLayout";
 import StudentDetailsPage from "./_routes/admin/pages/StudentDetailsPage";
 import StudentProfilePage from "./_routes/private/pages/StudentProfilePage";
+import AddNewStudentPage from "./_routes/admin/pages/AddNewStudentPage";
+import AnalyticsPage from "./_routes/admin/pages/AnalyticsPage";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -31,12 +33,14 @@ const router = createBrowserRouter(
 
       {/* private routes */}
       <Route element={<PrivateLayout />}>
-        <Route index element={<StudentProfilePage />} />
+        <Route path="/profile" element={<StudentProfilePage />} />
       </Route>
 
       {/* admin routes */}
       <Route path="/admin" element={<AdminLayout />}>
         <Route index element={<StudentDetailsPage />} />
+        <Route path="add-student" element={<AddNewStudentPage />} />
+        <Route path="analytics" element={<AnalyticsPage />} />
       </Route>
     </Route>
   )
