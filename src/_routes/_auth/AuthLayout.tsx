@@ -1,12 +1,11 @@
-import { useAuth } from "@/hooks/useAuth";
 import { Navigate, Outlet } from "react-router-dom";
 
 const AuthLayout = () => {
-  const { currentUser } = useAuth();
+  const token = localStorage.getItem("token");
 
   return (
     <div className="w-screen h-screen flex items-center justify-center">
-      {!currentUser ? <Outlet /> : <Navigate to="/" />}
+      {!token ? <Outlet /> : <Navigate to="/" />}
     </div>
   );
 };

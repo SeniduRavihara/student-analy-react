@@ -9,6 +9,9 @@ const DataContextProvider = ({ children }: { children: React.ReactNode }) => {
   const [currentUserData, setCurrentUserData] =
     useState<CurrentUserDataType | null>(null);
 
+    console.log(currentUserData);
+    
+
   const value = {
     currentUserData,
     setCurrentUserData,

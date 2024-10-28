@@ -1,6 +1,13 @@
+
+import ProfileImageCard from "../components/ProfileImageCard";
+
 const StudentProfilePage = () => {
+
+
   return (
-    <div>StudentProfilePage</div>
-  )
-}
-export default StudentProfilePage
+    <div className="p-10">
+      <ProfileImageCard />
+    </div>
+  );
+};
+export default StudentProfilePage;

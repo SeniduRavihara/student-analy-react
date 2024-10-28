@@ -3,9 +3,11 @@ import {
   signInWithEmailAndPassword,
   signInWithPopup,
   signOut,
+  User,
 } from "firebase/auth";
 import { auth, db, provider } from "./config";
 import { doc, getDoc, setDoc } from "firebase/firestore";
+import { CurrentUserDataType } from "@/types";
 
 export const logout = async () => {
   try {
@@ -55,15 +57,18 @@ export const signup = async ({
     const user = userCredential.user;
 
     const payload = {
-      name: "",
       uid: "",
+      userName: "",
+      regNo: null,
       email: "",
+      roles: "STUDENT",
+      registered: false,
     };
 
     await setDoc(doc(db, "users", user.uid), {
       ...payload,
       uid: user.uid,
-      name,
+      userName: name,
       email,
     });
   } catch (error) {
@@ -82,13 +87,35 @@ export const googleSignIn = async () => {
     const userDoc = await getDoc(userDocRef);
 
     if (!userDoc.exists()) {
-      const userData = {
-        name: user.displayName || "",
-        email: user.email || "",
+      const payload = {
         uid: user.uid,
+        userName: user.displayName || "",
+        regNo: null,
+        email: user.email || "",
+        roles: "STUDENT",
+        registered: false,
       };
 
-      await setDoc(userDocRef, userData);
+      await setDoc(userDocRef, payload);
+    }
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+};
+
+export const featchCurrentUserData = async (currentUser: User) => {
+  try {
+    const documentRef = doc(db, "users", currentUser.uid);
+    const userDataDoc = await getDoc(documentRef);
+
+    if (userDataDoc.exists()) {
+      const userData = userDataDoc.data() as CurrentUserDataType;
+      console.log("Current user data fetched successfully");
+      return userData;
+    } else {
+      console.log("Document does not exist.");
+      return null;
     }
   } catch (error) {
     console.error(error);
