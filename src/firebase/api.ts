@@ -31,7 +31,8 @@ export const login = async ({
       email,
       password
     );
-    console.log(userCredential);
+    // console.log(userCredential);
+    return  userCredential.user;
   } catch (error) {
     console.log(error);
     throw error;
@@ -53,7 +54,7 @@ export const signup = async ({
       email,
       password
     );
-    console.log(userCredential);
+    // console.log(userCredential);
     const user = userCredential.user;
 
     const payload = {
@@ -80,7 +81,7 @@ export const signup = async ({
 export const googleSignIn = async () => {
   try {
     const userCredential = await signInWithPopup(auth, provider);
-    console.log(userCredential);
+    // console.log(userCredential);
 
     const user = userCredential.user;
     const userDocRef = doc(db, "users", user.uid);
@@ -98,6 +99,8 @@ export const googleSignIn = async () => {
 
       await setDoc(userDocRef, payload);
     }
+
+    return user
   } catch (error) {
     console.error(error);
     throw error;
@@ -121,4 +124,14 @@ export const featchCurrentUserData = async (currentUser: User) => {
     console.error(error);
     throw error;
   }
+};
+
+//--------------------------------------------------------
+
+export const getUserRole = async (uid: string) => {
+  const documentRef = doc(db, "users", uid);
+  const userData = await getDoc(documentRef);
+
+  // Use nullish coalescing to provide a default value if userData is undefined
+  return userData?.data()?.roles ?? null;
 };

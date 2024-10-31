@@ -1,15 +1,12 @@
-import { Button } from "@/components/ui/button";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { HiOutlineUserCircle } from "react-icons/hi2";
-import { LogOut, SquareMenu, User } from "lucide-react";
+import { LogOut, User } from "lucide-react";
 import { logout } from "@/firebase/api";
 import { useAuth } from "@/hooks/useAuth";
 
