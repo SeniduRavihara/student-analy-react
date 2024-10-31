@@ -2,7 +2,7 @@ import { FcGoogle } from "react-icons/fc";
 import { FaGithub } from "react-icons/fa";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import { getUserRole, googleSignIn } from "@/firebase/api";
+import { getRegisteredStatus, getUserRole, googleSignIn } from "@/firebase/api";
 
 const Social = () => {
   const navigate = useNavigate();
@@ -10,11 +10,16 @@ const Social = () => {
   const handleGooglesignin = async () => {
     const user = await googleSignIn();
     const roles = await getUserRole(user.uid);
+    const isRegistered = await getRegisteredStatus(user.uid);
 
     if (roles && roles == "ADMIN") {
       navigate("/admin");
     } else {
-      navigate("/");
+      if (isRegistered) {
+        navigate("/dashboard");
+      } else {
+        navigate("/register-as-new");
+      }
     }
   };
 

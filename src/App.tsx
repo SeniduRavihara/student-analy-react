@@ -20,6 +20,7 @@ import SignupPage from "./_routes/_auth/forms/SignupPage";
 import DashboardPage from "./_routes/private/pages/DashboardPage";
 import AnalyticsPage from "./_routes/admin/pages/AnalyticsPage";
 import StudentAnalyticsPage from "./_routes/private/pages/StudentAnalyticsPage";
+import RegisterAsNewPage from "./_routes/private/pages/RegisterAsNewPage";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -41,6 +42,7 @@ const router = createBrowserRouter(
           <Route index element={<StudentAnalyticsPage />} />
           <Route path="profile" element={<StudentProfilePage />} />
         </Route>
+        <Route path="register-as-new" element={<RegisterAsNewPage />} />
       </Route>
 
       {/* admin routes */}
