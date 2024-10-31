@@ -14,7 +14,7 @@ import { z } from "zod";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import CardWrapper from "../components/CardWrapper";
-import { login } from "@/firebase/api";
+import { getUserRole, login } from "@/firebase/api";
 import { useNavigate } from "react-router-dom";
 
 const LoginPage = () => {
@@ -32,8 +32,14 @@ const LoginPage = () => {
   // 2. Define a submit handler.
   async function onSubmit(values: z.infer<typeof loginSchema>) {
     try {
-      await login(values);
-      navigate("/");
+      const user = await login(values);
+      const roles = await getUserRole(user.uid);
+
+      if (roles && roles == "ADMIN") {
+        navigate("/admin");
+      } else {
+        navigate("/");
+      }
     } catch (error) {
       console.log(error);
     }

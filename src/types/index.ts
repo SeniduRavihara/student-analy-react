@@ -16,7 +16,8 @@ export type AuthContextType = {
 export type CurrentUserDataType = {
   uid: string;
   userName: string;
-  regNo: string;
+  regNo: string | null;
   gender: "male" | "female";
   roles: "ADMIN" | "STUDENT";
+  registered: boolean;
 };

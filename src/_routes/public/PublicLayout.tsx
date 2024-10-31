@@ -2,7 +2,7 @@ import { Outlet } from "react-router-dom";
 
 const PublicLayout = () => {
   return (
-    <div className="w-screen h-screen">
+    <div className="">
       <Outlet />
     </div>
   );

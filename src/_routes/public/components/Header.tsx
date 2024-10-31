@@ -1,19 +1,37 @@
+import { useNavigate } from "react-router-dom";
+import ProfileDropdown from "./ProfileDropdown";
 
-const Header = () => (
-  <header className="bg-blue-700 text-white py-4 px-6 flex justify-between items-center">
-    <div className="text-xl font-bold">EduAnalytics</div>
-    <nav className="space-x-4">
-      <a href="/" className="hover:underline">
-        Home
-      </a>
-      <a href="/dashboard" className="hover:underline">
-        Dashboard
-      </a>
-      <a href="/profile" className="hover:underline">
-        Profile
-      </a>
-    </nav>
-  </header>
-);
+const Header = () => {
+  const navigate = useNavigate();
+
+  return (
+    <ul className="shadow-xl w-[90%] ml-auto mr-auto border-2 rounded-xl bg-[#e2f1e7c5] text-black h-[70px] flex justify-between items-center fixed top-5 backdrop-blur-xl left-0 right-0 z-50">
+      <li
+        onClick={() => navigate("/")}
+        className="text-2xl font-bold cursor-pointer text-[#243642]"
+      >
+        EduAnalytics
+      </li>
+
+      <li>
+        <ul className="flex space-x-5 items-center justify-center h-[70px] text-[#243642]">
+          <li className="cursor-pointer hover:bg-accent px-3 py-2 rounded-lg duration-500">
+            About
+          </li>
+          <li className="cursor-pointer hover:bg-accent px-3 py-2 rounded-lg duration-500">
+            Classes
+          </li>
+          <li className="cursor-pointer hover:bg-accent px-3 py-2 rounded-lg duration-500">
+            Contact
+          </li>
+        </ul>
+      </li>
+
+      <li className="mr-10">
+        <ProfileDropdown />
+      </li>
+    </ul>
+  );
+};
 
 export default Header;

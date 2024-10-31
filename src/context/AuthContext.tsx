@@ -1,9 +1,9 @@
 import { INITIAL_AUTH_CONTEXT } from "@/constants";
-import { auth, db } from "@/firebase/config";
+import { featchCurrentUserData } from "@/firebase/api";
+import { auth} from "@/firebase/config";
 import { useData } from "@/hooks/useData";
-import { AuthContextType, CurrentUserDataType } from "@/types";
+import { AuthContextType } from "@/types";
 import { User, onAuthStateChanged } from "firebase/auth";
-import { doc, onSnapshot } from "firebase/firestore";
 import { createContext, useEffect, useState } from "react";
 
 // eslint-disable-next-line react-refresh/only-export-components
@@ -22,6 +22,10 @@ const AuthContextProvider = ({ children }: { children: React.ReactNode }) => {
         console.log("Auth state is changed: LoggedOut");
         return;
       }
+
+      const userData = await featchCurrentUserData(user);
+      setCurrentUserData(userData);
+
       setCurrentUser(user);
 
       const accessToken = await user.getIdToken();
@@ -32,28 +36,28 @@ const AuthContextProvider = ({ children }: { children: React.ReactNode }) => {
     });
 
     return unsubscribe;
-  }, []);
+  }, [setCurrentUserData]);
 
-  useEffect(() => {
-    if (currentUser) {
-      const documentRef = doc(db, "users", currentUser.uid);
+  // useEffect(() => {
+  //   if (currentUser) {
+  //     const documentRef = doc(db, "users", currentUser.uid);
 
-      const unsubscribe = onSnapshot(documentRef, (documentSnapshot) => {
-        if (documentSnapshot.exists()) {
-          const userData = documentSnapshot.data() as CurrentUserDataType;
-          setCurrentUserData(userData);
-          console.log("Current user data fetched successfully");
-        } else {
-          setCurrentUserData(null);
-          console.log("Document does not exist.");
-        }
-      });
-      return unsubscribe;
-    } else {
-      setCurrentUserData(null);
-      console.log("currentUser is not available.");
-    }
-  }, [currentUser, setCurrentUserData]);
+  //     const unsubscribe = onSnapshot(documentRef, (documentSnapshot) => {
+  //       if (documentSnapshot.exists()) {
+  //         const userData = documentSnapshot.data() as CurrentUserDataType;
+  //         setCurrentUserData(userData);
+  //         console.log("Current user data fetched successfully");
+  //       } else {
+  //         setCurrentUserData(null);
+  //         console.log("Document does not exist.");
+  //       }
+  //     });
+  //     return unsubscribe;
+  //   } else {
+  //     setCurrentUserData(null);
+  //     console.log("currentUser is not available.");
+  //   }
+  // }, [currentUser, setCurrentUserData]);
 
   const value = {
     currentUser,
