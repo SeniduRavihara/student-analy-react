@@ -14,7 +14,7 @@ import { z } from "zod";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import CardWrapper from "../components/CardWrapper";
-import { getUserRole, login } from "@/firebase/api";
+import { getRegisteredStatus, getUserRole, login } from "@/firebase/api";
 import { useNavigate } from "react-router-dom";
 
 const LoginPage = () => {
@@ -34,11 +34,16 @@ const LoginPage = () => {
     try {
       const user = await login(values);
       const roles = await getUserRole(user.uid);
+      const isRegistered = await getRegisteredStatus(user.uid)
 
       if (roles && roles == "ADMIN") {
         navigate("/admin");
       } else {
-        navigate("/");
+        if (isRegistered) {
+          navigate("/dashboard");
+        } else {
+          navigate("/register-as-new");
+        }
       }
     } catch (error) {
       console.log(error);

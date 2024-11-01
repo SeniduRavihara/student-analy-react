@@ -6,7 +6,7 @@ import {
   User,
 } from "firebase/auth";
 import { auth, db, provider } from "./config";
-import { doc, getDoc, setDoc } from "firebase/firestore";
+import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
 import { CurrentUserDataType } from "@/types";
 
 export const logout = async () => {
@@ -32,7 +32,7 @@ export const login = async ({
       password
     );
     // console.log(userCredential);
-    return  userCredential.user;
+    return userCredential.user;
   } catch (error) {
     console.log(error);
     throw error;
@@ -100,7 +100,7 @@ export const googleSignIn = async () => {
       await setDoc(userDocRef, payload);
     }
 
-    return user
+    return user;
   } catch (error) {
     console.error(error);
     throw error;
@@ -132,6 +132,52 @@ export const getUserRole = async (uid: string) => {
   const documentRef = doc(db, "users", uid);
   const userData = await getDoc(documentRef);
 
-  // Use nullish coalescing to provide a default value if userData is undefined
   return userData?.data()?.roles ?? null;
+};
+
+//--------------------------------------------------------
+
+export const getRegisteredStatus = async (uid: string) => {
+  const documentRef = doc(db, "users", uid);
+  const userData = await getDoc(documentRef);
+
+  return userData?.data()?.registered;
+};
+
+// -------------------------------------------------------
+
+export const registerStudent = async (
+  data: {
+    firstName: string;
+    lastName: string;
+    whatsapp: string;
+    nic: string;
+    bDate: Date | undefined;
+    phone: string;
+    school: string;
+    examYear: string;
+    media: string;
+    stream: string;
+  },
+  uid: string
+) => {
+  const userInfoDocRef = doc(db, "users", uid, "studentInfo", uid);
+  const userDocRef = doc(db, "users", uid);
+
+  console.log("submit");
+
+  try {
+    await setDoc(userInfoDocRef, {
+      ...data,
+      bDate: data.bDate ? data.bDate.toISOString() : null, // Ensure date is in a string format
+    });
+
+    await updateDoc(userDocRef, {
+      registered: true,
+    });
+
+    console.log("Student registered successfully:", data);
+  } catch (error) {
+    console.error("Error registering student:", error);
+  }
 };

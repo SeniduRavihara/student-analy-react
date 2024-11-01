@@ -1,12 +1,11 @@
-
-import ProfileImageCard from "../components/ProfileImageCard";
+import ProfileSidebar from "../components/ProfileSidebar";
+import StudentInfo from "../components/StudentInfo";
 
 const StudentProfilePage = () => {
-
-
   return (
-    <div className="p-10">
-      <ProfileImageCard />
+    <div className="w-full h-full overflow-scroll flex justify-between">
+      <StudentInfo />
+      <ProfileSidebar />
     </div>
   );
 };

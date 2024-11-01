@@ -54,7 +54,7 @@ const SignupPage = () => {
       //   return;
       // }
 
-      navigate("/");
+      navigate("/register-as-new");
     } catch (error) {
       console.log(error);
     }
