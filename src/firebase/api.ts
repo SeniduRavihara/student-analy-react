@@ -181,3 +181,12 @@ export const registerStudent = async (
     console.error("Error registering student:", error);
   }
 };
+
+// ----------------------------------------------
+
+export const fetchUserInfo = async (uid: string) => {
+  const userInfoDocRef = doc(db, "users", uid, "studentInfo", uid);
+  const userInfo = await getDoc(userInfoDocRef);
+
+  return userInfo.data();
+};

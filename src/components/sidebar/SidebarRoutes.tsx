@@ -1,4 +1,4 @@
-import { BarChart, Layout, List, User } from "lucide-react";
+import { BarChart, Layout, List, User, Users } from "lucide-react";
 import SidebarItem from "./SidebarItem";
 import { useLocation } from "react-router-dom";
 
@@ -8,7 +8,7 @@ const guestRoutes = [
 ];
 
 const teacherRoutes = [
-  { icon: List, label: "Courses", href: "/admin" },
+  { icon: Users, label: "Students", href: "/admin" },
   { icon: BarChart, label: "Analytics", href: "/admin/analytics" },
 ];
 

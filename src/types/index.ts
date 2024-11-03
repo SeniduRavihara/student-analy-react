@@ -21,3 +21,23 @@ export type CurrentUserDataType = {
   roles: "ADMIN" | "STUDENT";
   registered: boolean;
 };
+
+export type UserInfoType = {
+  firstName: string;
+  lastName: string;
+  whatsapp: string;
+  nic: string;
+  bDate: Date | undefined;
+  phone: string;
+  school: string;
+  examYear: string;
+  media: string;
+  stream: string;
+};
+
+export type StudentTable = {
+  indexNo: string;
+  name: string;
+  email: string;
+  lastResult: number;
+};
