@@ -1,0 +1,10 @@
+.custom-border-text {
+  font-weight: bold;
+  color: transparent;
+  letter-spacing: 0.1em;
+  text-shadow: 
+    -1px -1px 0 #F2ED53, /* Top left */
+     1px -1px 0 #6e6693, /* Top right */
+    -1px  1px 0 #91237f, /* Bottom left */
+     1px  1px 0 #3a3919; /* Bottom right */
+}

@@ -21,7 +21,7 @@ const AdminLayout = () => {
   }
 
   return currentUserData.roles == "ADMIN" ? (
-    <div className="w-screen h-screen bg-[#E2F1E7]">
+    <div className="w-screen h-screen bg-[#fff]">
       <div className="w-full h-full flex items-center justify-between">
         <div className="hidden md:flex h-full w-56 flex-col inset-y-0 z-50">
           <Sidebar />

@@ -1,6 +1,10 @@
+import { Chart } from "../components/charts/Chart";
+
 const AnalyticsPage = () => {
   return (
-    <div>AnalyticsPage</div>
-  )
-}
-export default AnalyticsPage
+    <div>
+      <Chart />
+    </div>
+  );
+};
+export default AnalyticsPage;

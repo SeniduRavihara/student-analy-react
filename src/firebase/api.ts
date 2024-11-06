@@ -6,8 +6,8 @@ import {
   User,
 } from "firebase/auth";
 import { auth, db, provider } from "./config";
-import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
-import { CurrentUserDataType } from "@/types";
+import { doc, getDoc, runTransaction, setDoc, updateDoc } from "firebase/firestore";
+import { CurrentUserDataType, UserInfoType } from "@/types";
 
 export const logout = async () => {
   try {
@@ -188,5 +188,66 @@ export const fetchUserInfo = async (uid: string) => {
   const userInfoDocRef = doc(db, "users", uid, "studentInfo", uid);
   const userInfo = await getDoc(userInfoDocRef);
 
-  return userInfo.data();
+  return userInfo.data() as UserInfoType;
+};
+
+// -------------------------------------------
+export const genarateIndexNumber = async (uid: string, examYear: string) => {
+  const userGenaralInfoDocRef = doc(db, "general", examYear);
+  const userGenaralInfo = await getDoc(userGenaralInfoDocRef);
+
+  console.log(userGenaralInfo.data());
+
+  const isGenerating = userGenaralInfo.data()?.isGenerating;
+
+  let regNo: string;
+
+  if (isGenerating) {
+    await updateDoc(userGenaralInfoDocRef, {
+      isGenerating: true,
+    });
+
+    regNo = examYear + userGenaralInfo.data()?.lastRegNo + 1;
+
+    await updateDoc(userGenaralInfoDocRef, {
+      isGenerating: false,
+      lastRegNo: userGenaralInfo.data()?.lastRegNo + 1,
+    });
+  }
+
+  return regNo;
+};
+
+
+export const generateIndexNumber = async (uid: string, examYear: string) => {
+  const userGeneralInfoDocRef = doc(db, "general", examYear);
+
+  try {
+    const regNo = await runTransaction(db, async (transaction) => {
+      const userGeneralInfoDoc = await transaction.get(userGeneralInfoDocRef);
+
+      if (!userGeneralInfoDoc.exists()) {
+        throw new Error("Document does not exist!");
+      }
+
+      const data = userGeneralInfoDoc.data();
+      const lastRegNo = data.lastRegNo || 0;
+
+      // Generate new registration number with exam year prefix
+      const newRegNo = examYear + String(lastRegNo + 1).padStart(4, "0");
+
+      // Update the document with the new last registration number
+      transaction.update(userGeneralInfoDocRef, {
+        lastRegNo: lastRegNo + 1,
+      });
+
+      return newRegNo;
+    });
+
+    console.log(`Generated Index Number: ${regNo}`);
+    return regNo;
+  } catch (error) {
+    console.error("Failed to generate index number:", error);
+    throw error;
+  }
 };

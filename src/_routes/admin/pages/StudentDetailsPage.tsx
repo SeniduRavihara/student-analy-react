@@ -1,5 +1,5 @@
 import { DataTable } from "@/_routes/private/components/DataTable";
-import { columns } from "@/_routes/private/components/student-data/Coloumns";
+import { columns } from "@/_routes/admin/components/student-data/Coloumns";
 // import { DataTable } from "@/_routes/private/components/student-data/DataTable";
 import { StudentTable } from "@/types";
 

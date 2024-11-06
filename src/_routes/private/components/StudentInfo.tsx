@@ -5,6 +5,23 @@ import { fetchUserInfo } from "@/firebase/api";
 import { useAuth } from "@/hooks/useAuth";
 import { UserInfoType } from "@/types";
 import { useEffect, useState } from "react";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Button } from "@/components/ui/button";
+import { CalendarIcon } from "lucide-react";
+import { Calendar } from "@/components/ui/calendar";
+import { format } from "date-fns";
+import { cn } from "@/lib/utils";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const StudentInfo = () => {
   const { currentUser } = useAuth();
@@ -46,9 +63,9 @@ const StudentInfo = () => {
   }, [currentUser]);
 
   return (
-    <div className="w-full h-full flex items-center justify-center">
-      <Card>
-        <CardContent>
+    <div className="w-full h-full flex items-center justify-center p-5">
+      <Card className="w-full h-full">
+        <CardContent className="flex flex-col relative gap-2 md:grid grid-cols-1 md:grid-cols-2 text-left p3">
           <div>
             <Label htmlFor="firstName" className="text-[#787e81]">
               First Name
@@ -107,6 +124,116 @@ const StudentInfo = () => {
               placeholder="07xxxxxxxx"
               className="focus-visible:ring-blue-500"
             />
+          </div>
+
+          <div>
+            <Label htmlFor="nic" className="text-[#787e81]">
+              NIC Number
+            </Label>
+            <Input
+              type="text"
+              id="nic"
+              value={nic}
+              onChange={(e) => setNic(e.target.value)}
+              required
+              placeholder="200xxxxxxxxx"
+              className="focus-visible:ring-blue-500"
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="bdate" className="text-[#787e81]">
+              Birth Day
+            </Label>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant={"outline"}
+                  className={cn(
+                    "w-full justify-start text-left font-normal",
+                    !bDate && "text-muted-foreground"
+                  )}
+                >
+                  <CalendarIcon />
+                  {bDate ? format(bDate, "PPP") : <span>Pick a date</span>}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0">
+                <Calendar
+                  mode="single"
+                  selected={bDate}
+                  onSelect={setBDate}
+                  initialFocus
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
+
+          <div>
+            <Label htmlFor="school" className="text-[#787e81]">
+              School
+            </Label>
+            <Input
+              type="text"
+              id="school"
+              value={school}
+              onChange={(e) => setSchool(e.target.value)}
+              required
+              placeholder="School"
+              className="focus-visible:ring-blue-500"
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="firstName" className="text-[#787e81]">
+              Exam Year
+            </Label>
+            <Select onValueChange={setExamYear} defaultValue="2024">
+              <SelectTrigger className="">
+                <SelectValue placeholder="2024 A/L" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="2024">2024 A/L</SelectItem>
+                <SelectItem value="2025">2025 A/L</SelectItem>
+                <SelectItem value="2026">2026 A/L</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div>
+            <Label htmlFor="firstName" className="text-[#787e81]">
+              Stream
+            </Label>
+            <Select onValueChange={setStream} defaultValue="maths">
+              <SelectTrigger className="">
+                <SelectValue placeholder="Mathematics" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="maths">Mathematics</SelectItem>
+                <SelectItem value="bio">Biology</SelectItem>
+                <SelectItem value="other">Other</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div>
+            <Label htmlFor="firstName" className="text-[#787e81]">
+              Medium
+            </Label>
+            <Select onValueChange={setMedia} defaultValue="sinhala">
+              <SelectTrigger className="">
+                <SelectValue placeholder="සිංහල" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="sinhala">සිංහල</SelectItem>
+                <SelectItem value="english">English</SelectItem>
+                <SelectItem value="tamil">தமிழ்</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="absolute -bottom-14 right-7">
+            <Button>Save</Button>
           </div>
         </CardContent>
       </Card>

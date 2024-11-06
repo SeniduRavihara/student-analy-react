@@ -8,7 +8,7 @@ const ProfileImageCard = () => {
   const { currentUser } = useAuth();
 
   return (
-    <div className="w-60 h-60 pt-2 bg-[#E2F1E7]">
+    <div className="w-60 h-60 pt-2 bg-[#fff]">
       {/* <CardHeader>
         <CardTitle>Card Title</CardTitle>
         <CardDescription>Card Description</CardDescription>
@@ -16,7 +16,7 @@ const ProfileImageCard = () => {
       <CardContent className="flex flex-col items-center justify-center text-[#858796]">
         <img
           src={currentUser?.photoURL || ""}
-          className="w-28 h-22 rounded-full cursor-pointer"
+          className="w-36 h-36 rounded-full cursor-pointer"
         />
         <p className="text-center text-nowrap mt-2 text-xl">
           {currentUser?.displayName}
