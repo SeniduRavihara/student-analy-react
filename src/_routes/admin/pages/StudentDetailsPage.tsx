@@ -68,7 +68,7 @@ export const data: StudentTable[] = [
 
 const StudentDetailsPage = () => {
   return (
-    <div className="p-5">
+    <div className="p-5 w-full h-full overflow-auto">
       <DataTable />
       {/* <DataTable columns={columns} data={data} /> */}
     </div>
