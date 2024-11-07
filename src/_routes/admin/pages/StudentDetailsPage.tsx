@@ -1,9 +1,9 @@
-import { DataTable } from "@/_routes/private/components/DataTable";
-import { columns } from "@/_routes/admin/components/student-data/Coloumns";
-// import { DataTable } from "@/_routes/private/components/student-data/DataTable";
+// import { DataTable } from "@/_routes/private/components/DataTable";
+import { columns } from "@/_routes/admin/components/student-data/Coloumns"
 import { StudentTable } from "@/types";
+import { DataTable } from "../components/student-data/DataTable";
 
-export const data: StudentTable[] = [
+const data: StudentTable[] = [
   {
     indexNo: "S001",
     name: "John Doe",
@@ -69,8 +69,8 @@ export const data: StudentTable[] = [
 const StudentDetailsPage = () => {
   return (
     <div className="p-5 w-full h-full overflow-auto">
-      <DataTable />
-      {/* <DataTable columns={columns} data={data} /> */}
+      {/* <DataTable /> */}
+      <DataTable columns={columns} data={data} />
     </div>
   );
 };
