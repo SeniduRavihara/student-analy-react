@@ -28,7 +28,7 @@ export const exameDetailsSchema = z.object({
 });
 
 export const parentDetailsSchema = z.object({
-  parentName: z.string().min(1, { message: "Parent name is required" }),
+  GuardianName: z.string().min(1, { message: "Parent name is required" }),
   parentNic: z.string().min(1, { message: "Parent NIC is required" }),
   parentWhatsapp: z.string().min(1, { message: "Parent Whatsapp is required" }),
   parentEmail: z.string().email({ message: "Parent email is required" }),

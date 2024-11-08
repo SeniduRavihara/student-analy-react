@@ -1,4 +1,4 @@
-import {  ChartSpline, Layout,  User, Users } from "lucide-react";
+import {  ChartSpline, Layout,  NotebookPen,  User, Users } from "lucide-react";
 import SidebarItem from "./SidebarItem";
 import { useLocation } from "react-router-dom";
 
@@ -10,6 +10,7 @@ const guestRoutes = [
 const teacherRoutes = [
   { icon: Users, label: "Students", href: "/admin" },
   { icon: ChartSpline, label: "Analytics", href: "/admin/analytics" },
+  { icon: NotebookPen, label: "Exams", href: "/admin/exams" },
 ];
 
 const SidebarRoutes = () => {

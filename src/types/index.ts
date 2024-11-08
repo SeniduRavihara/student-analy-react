@@ -41,3 +41,12 @@ export type StudentTable = {
   email: string;
   lastResult: number;
 };
+
+export type ExamTable = {
+  examId: string;
+  examName: string;
+  examDate: Date;
+  lastResult: number | null;
+  status: "pending" | "completed";
+  avgResult: number | null;
+};

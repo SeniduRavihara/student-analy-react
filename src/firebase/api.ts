@@ -6,7 +6,16 @@ import {
   User,
 } from "firebase/auth";
 import { auth, db, provider } from "./config";
-import { doc, getDoc, runTransaction, setDoc, updateDoc } from "firebase/firestore";
+import {
+  addDoc,
+  collection,
+  deleteDoc,
+  doc,
+  getDoc,
+  runTransaction,
+  setDoc,
+  updateDoc,
+} from "firebase/firestore";
 import { CurrentUserDataType, UserInfoType } from "@/types";
 
 export const logout = async () => {
@@ -158,6 +167,9 @@ export const registerStudent = async (
     examYear: string;
     media: string;
     stream: string;
+    gurdianName: string;
+    gurdianPhone: string;
+    address: string;
   },
   uid: string
 ) => {
@@ -218,7 +230,6 @@ export const genarateIndexNumber = async (uid: string, examYear: string) => {
   return regNo;
 };
 
-
 export const generateIndexNumber = async (uid: string, examYear: string) => {
   const userGeneralInfoDocRef = doc(db, "general", examYear);
 
@@ -250,4 +261,20 @@ export const generateIndexNumber = async (uid: string, examYear: string) => {
     console.error("Failed to generate index number:", error);
     throw error;
   }
+};
+
+// ------------------------------------------
+
+export const createExam = async (examName: string, examDate: Date) => {
+  const examCollectionRef = collection(db, "exams");
+  await addDoc(examCollectionRef, {
+    examName,
+    examDate: examDate.toISOString(),
+    examStatus: "pending",
+  });
+};
+
+export const deleteExam = async (examId: string) => {
+  const examDocRef = doc(db, "exams", examId);
+  await deleteDoc(examDocRef);
 };

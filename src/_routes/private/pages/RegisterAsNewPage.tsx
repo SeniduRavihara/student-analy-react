@@ -4,7 +4,6 @@ import Stepper from "@mui/material/Stepper";
 import Step from "@mui/material/Step";
 import StepLabel from "@mui/material/StepLabel";
 import Button from "@mui/material/Button";
-import Typography from "@mui/material/Typography";
 import { Fragment, useState } from "react";
 import PersonalDetailsForm from "../components/PersonalDetailsForm";
 import ExameDetailsForm from "../components/ExameDetailsForm";
@@ -12,11 +11,14 @@ import ParentDetailsForm from "../components/ParentDetailsForm";
 import { registerStudent } from "@/firebase/api";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
 
 const steps = ["Personal Details", "Exame Details", "Parent Details"];
 
 const RegisterAsNewPage = () => {
   const { currentUser } = useAuth();
+  const { toast } = useToast();
+
   const [activeStep, setActiveStep] = useState(0);
   const [skipped, setSkipped] = useState(new Set<number>());
 
@@ -31,6 +33,10 @@ const RegisterAsNewPage = () => {
   const [examYear, setExamYear] = useState("2024");
   const [media, setMedia] = useState("sinhala");
   const [stream, setStream] = useState("maths");
+
+  const [gurdianName, setGurdiandName] = useState("");
+  const [gurdianPhone, setGurdianPhone] = useState("");
+  const [address, setAddress] = useState("");
 
   const navigate = useNavigate();
 
@@ -72,6 +78,30 @@ const RegisterAsNewPage = () => {
 
   const handleSubmit = async () => {
     if (currentUser) {
+      console.log(gurdianName, gurdianPhone, address);
+
+      if (
+        !gurdianName ||
+        !gurdianPhone ||
+        !address ||
+        !firstName ||
+        !lastName ||
+        !whatsapp ||
+        !nic ||
+        !bDate ||
+        !phone ||
+        !school ||
+        !examYear ||
+        !media ||
+        !stream
+      ) {
+        toast({
+          title: "Please fill all the fields",
+          variant: "destructive",
+        });
+        return;
+      }
+
       await registerStudent(
         {
           firstName,
@@ -84,6 +114,9 @@ const RegisterAsNewPage = () => {
           examYear,
           media,
           stream,
+          gurdianName,
+          gurdianPhone,
+          address,
         },
         currentUser?.uid
       );
@@ -152,37 +185,37 @@ const RegisterAsNewPage = () => {
                   />
                 )}
               </div>
-              <div>{activeStep == 2 && <ParentDetailsForm />}</div>
+              <div>
+                {activeStep == 2 && (
+                  <ParentDetailsForm
+                    address={address}
+                    setAddress={setAddress}
+                    gurdianName={gurdianName}
+                    setGurdiandName={setGurdiandName}
+                    gurdianPhone={gurdianPhone}
+                    setGurdianPhone={setGurdianPhone}
+                  />
+                )}
+              </div>
             </div>
 
             <div className="absolute bottom-10 w-full flex justify-center items-center">
               <div className="w-[50%]">
-                {activeStep === steps.length ? (
-                  <Fragment>
-                    <Typography sx={{ mt: 2, mb: 1 }}>
-                      All steps completed - you&apos;re finished
-                    </Typography>
-                    <Box sx={{ display: "flex", flexDirection: "row", pt: 2 }}>
-                      <Box sx={{ flex: "1 1 auto" }} />
-                      <Button onClick={handleSubmit}>Submit</Button>
-                    </Box>
-                  </Fragment>
-                ) : (
-                  <Fragment>
-                    {/* <Typography sx={{ mt: 2, mb: 1 }}>
+                <Fragment>
+                  {/* <Typography sx={{ mt: 2, mb: 1 }}>
                   Step {activeStep + 1}
                 </Typography> */}
-                    <Box sx={{ display: "flex", flexDirection: "row", pt: 2 }}>
-                      <Button
-                        color="inherit"
-                        disabled={activeStep === 0}
-                        onClick={handleBack}
-                        sx={{ mr: 1 }}
-                      >
-                        Back
-                      </Button>
-                      <Box sx={{ flex: "1 1 auto" }} />
-                      {/* {isStepOptional(activeStep) && (
+                  <Box sx={{ display: "flex", flexDirection: "row", pt: 2 }}>
+                    <Button
+                      color="inherit"
+                      disabled={activeStep === 0}
+                      onClick={handleBack}
+                      sx={{ mr: 1 }}
+                    >
+                      Back
+                    </Button>
+                    <Box sx={{ flex: "1 1 auto" }} />
+                    {/* {isStepOptional(activeStep) && (
                         <Button
                           color="inherit"
                           onClick={handleSkip}
@@ -191,12 +224,13 @@ const RegisterAsNewPage = () => {
                           Skip
                         </Button>
                       )} */}
-                      <Button onClick={handleNext}>
-                        {activeStep === steps.length - 1 ? "Submit" : "Next"}
-                      </Button>
-                    </Box>
-                  </Fragment>
-                )}
+                    {activeStep < steps.length - 1 ? (
+                      <Button onClick={handleNext}>Next</Button>
+                    ) : (
+                      <Button onClick={handleSubmit}>Submit</Button>
+                    )}
+                  </Box>
+                </Fragment>
               </div>
             </div>
           </div>
