@@ -272,6 +272,8 @@ export const createExam = async (examName: string, examDate: Date) => {
     examDate: examDate.toISOString(),
     examStatus: "pending",
   });
+
+  
 };
 
 export const deleteExam = async (examId: string) => {

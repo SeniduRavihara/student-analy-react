@@ -37,13 +37,6 @@ export const columns: ColumnDef<ExamTable>[] = [
     ),
   },
   {
-    accessorKey: "lastResult",
-    header: () => <div className="text-right">Last Result</div>,
-    cell: ({ row }) => (
-      <div className="text-right font-medium">{row.getValue("lastResult")}</div>
-    ),
-  },
-  {
     accessorKey: "status",
     header: "Status",
     cell: ({ row }) => (
@@ -82,6 +75,12 @@ export const columns: ColumnDef<ExamTable>[] = [
             <DropdownMenuItem>View Details</DropdownMenuItem>
             <DropdownMenuItem onClick={() => deleteExam(exam.examId)}>
               Delete
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              onClick={() => navigator.clipboard.writeText(exam.examName)}
+            >
+              Add Results
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

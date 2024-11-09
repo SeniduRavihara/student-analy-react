@@ -46,7 +46,6 @@ export type ExamTable = {
   examId: string;
   examName: string;
   examDate: Date;
-  lastResult: number | null;
   status: "pending" | "completed";
   avgResult: number | null;
 };
