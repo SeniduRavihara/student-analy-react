@@ -12,7 +12,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { set } from "date-fns";
-import { fetchUserInfo, genarateIndexNumber } from "@/firebase/api";
+import { fetchUserInfo, generateIndexNumber } from "@/firebase/api";
 import { doc, updateDoc } from "firebase/firestore";
 import { db } from "@/firebase/config";
 
@@ -25,7 +25,7 @@ const DashboardPage = () => {
       if (!currentUserData?.regNo && currentUserData) {
         const examYear = (await fetchUserInfo(currentUserData?.uid)).examYear;
         console.log(examYear);
-        const regNo = await genarateIndexNumber(currentUserData?.uid, examYear);
+        const regNo = await generateIndexNumber(currentUserData?.uid, examYear);
 
         const userDocRef = doc(db, "users", currentUserData?.uid);
         await updateDoc(userDocRef, {

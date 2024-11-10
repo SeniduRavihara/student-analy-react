@@ -52,3 +52,10 @@ export type ExamTable = {
   status: "pending" | "completed";
   avgResult: number | null;
 };
+
+export type ExamDataType = {
+  examDate: Date;
+  examName: string;
+  examStatus: "pending" | "completed";
+  result: number;
+};

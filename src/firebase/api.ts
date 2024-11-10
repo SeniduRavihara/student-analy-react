@@ -187,31 +187,31 @@ export const fetchUserInfo = async (uid: string) => {
 };
 
 // -------------------------------------------
-export const genarateIndexNumber = async (uid: string, examYear: string) => {
-  const userGenaralInfoDocRef = doc(db, "general", examYear);
-  const userGenaralInfo = await getDoc(userGenaralInfoDocRef);
+// export const generateIndexNumber = async (uid: string, examYear: string) => {
+//   const userGenaralInfoDocRef = doc(db, "general", examYear);
+//   const userGenaralInfo = await getDoc(userGenaralInfoDocRef);
 
-  console.log(userGenaralInfo.data());
+//   console.log(userGenaralInfo.data());
 
-  const isGenerating = userGenaralInfo.data()?.isGenerating;
+//   const isGenerating = userGenaralInfo.data()?.isGenerating;
 
-  let regNo: string;
+//   let regNo: string;
 
-  if (isGenerating) {
-    await updateDoc(userGenaralInfoDocRef, {
-      isGenerating: true,
-    });
+//   if (isGenerating) {
+//     await updateDoc(userGenaralInfoDocRef, {
+//       isGenerating: true,
+//     });
 
-    regNo = examYear + userGenaralInfo.data()?.lastRegNo + 1;
+//     regNo = examYear + userGenaralInfo.data()?.lastRegNo + 1;
 
-    await updateDoc(userGenaralInfoDocRef, {
-      isGenerating: false,
-      lastRegNo: userGenaralInfo.data()?.lastRegNo + 1,
-    });
-  }
+//     await updateDoc(userGenaralInfoDocRef, {
+//       isGenerating: false,
+//       lastRegNo: userGenaralInfo.data()?.lastRegNo + 1,
+//     });
+//   }
 
-  return regNo;
-};
+//   return regNo;
+// };
 
 export const generateIndexNumber = async (uid: string, examYear: string) => {
   const userGeneralInfoDocRef = doc(db, "general", examYear);
@@ -265,5 +265,6 @@ export const deleteExam = async (examId: string) => {
 // -------------------------------------------------
 
 export const fetchExamsData = async (uid: string) => {
-  
+  const userExamCollectionRef = collection(db, "users", uid, "exams");
+  const userExamInfo = await getDoc(userExamCollectionRef);
 };

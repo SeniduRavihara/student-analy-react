@@ -21,19 +21,23 @@ export const description =
   "A scrollable line chart showing average exam scores";
 
 // Sample chart data
-const chartData = [
-  { exam: "Exam 1", avgMark: 78 },
-  { exam: "Exam 2", avgMark: 85 },
-  { exam: "Exam 3", avgMark: 68 },
-  { exam: "Exam 4", avgMark: 74 },
-  { exam: "Exam 5", avgMark: 90 },
-  { exam: "Exam 6", avgMark: 82 },
-  { exam: "Exam 7", avgMark: 76 },
-  { exam: "Exam 8", avgMark: 88 },
-];
+// const chartData = [
+//   { exam: "Exam 1", Mark: 78 },
+//   { exam: "Exam 2", Mark: 85 },
+//   { exam: "Exam 3", Mark: 68 },
+//   { exam: "Exam 4", Mark: 74 },
+//   { exam: "Exam 5", Mark: 90 },
+//   { exam: "Exam 6", Mark: 82 },
+//   { exam: "Exam 7", Mark: 76 },
+//   { exam: "Exam 8", Mark: 88 },
+// ];
 
 // Chart component
-export function MarksChart() {
+export function MarksChart({
+  chartData = [],
+}: {
+  chartData: Array<{ exam: string; Mark: number }>;
+}) {
   const scrollContainerRef = useRef(null);
 
   useEffect(() => {
@@ -88,7 +92,7 @@ export function MarksChart() {
             <Tooltip />
             {/* Line for average marks */}
             <Line
-              dataKey="avgMark"
+              dataKey="Mark"
               type="linear"
               stroke="hsl(210, 70%, 50%)"
               strokeWidth={2}
