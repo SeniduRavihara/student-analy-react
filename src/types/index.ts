@@ -33,6 +33,9 @@ export type UserInfoType = {
   examYear: string;
   media: string;
   stream: string;
+  gurdianName: string;
+  gurdianPhone: string;
+  address: string;
 };
 
 export type StudentTable = {

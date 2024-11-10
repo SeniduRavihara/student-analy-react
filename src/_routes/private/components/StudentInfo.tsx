@@ -32,11 +32,13 @@ const StudentInfo = () => {
   const [nic, setNic] = useState("");
   const [bDate, setBDate] = useState<Date>();
   const [phone, setPhone] = useState("");
-
   const [school, setSchool] = useState("");
   const [examYear, setExamYear] = useState("");
   const [media, setMedia] = useState("");
   const [stream, setStream] = useState("");
+  const [gurdianName, setGurdiandName] = useState("");
+  const [gurdianPhone, setGurdianPhone] = useState("");
+  const [address, setAddress] = useState("");
 
   useEffect(() => {
     if (currentUser) {
@@ -56,6 +58,9 @@ const StudentInfo = () => {
         setExamYear(userInfo.examYear);
         setMedia(userInfo.media);
         setStream(userInfo.stream);
+        setGurdiandName(userInfo.gurdianName);
+        setGurdianPhone(userInfo.gurdianPhone);
+        setAddress(userInfo.address);
       };
 
       fetchData();
@@ -91,7 +96,7 @@ const StudentInfo = () => {
               value={lastName}
               onChange={(e) => setLastName(e.target.value)}
               required
-              placeholder="name"
+              placeholder="Last Name"
               className="focus-visible:ring-blue-500"
             />
           </div>
@@ -142,8 +147,8 @@ const StudentInfo = () => {
           </div>
 
           <div>
-            <Label htmlFor="bdate" className="text-[#787e81]">
-              Birth Day
+            <Label htmlFor="bDate" className="text-[#787e81]">
+              Birth Date
             </Label>
             <Popover>
               <PopoverTrigger asChild>
@@ -185,12 +190,12 @@ const StudentInfo = () => {
           </div>
 
           <div>
-            <Label htmlFor="firstName" className="text-[#787e81]">
+            <Label htmlFor="examYear" className="text-[#787e81]">
               Exam Year
             </Label>
-            <Select onValueChange={setExamYear} defaultValue="2024">
-              <SelectTrigger className="">
-                <SelectValue placeholder="2024 A/L" />
+            <Select onValueChange={setExamYear} value={examYear}>
+              <SelectTrigger>
+                <SelectValue placeholder="Exam Year" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="2024">2024 A/L</SelectItem>
@@ -201,12 +206,12 @@ const StudentInfo = () => {
           </div>
 
           <div>
-            <Label htmlFor="firstName" className="text-[#787e81]">
+            <Label htmlFor="stream" className="text-[#787e81]">
               Stream
             </Label>
-            <Select onValueChange={setStream} defaultValue="maths">
-              <SelectTrigger className="">
-                <SelectValue placeholder="Mathematics" />
+            <Select onValueChange={setStream} value={stream}>
+              <SelectTrigger>
+                <SelectValue placeholder="Stream" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="maths">Mathematics</SelectItem>
@@ -217,12 +222,12 @@ const StudentInfo = () => {
           </div>
 
           <div>
-            <Label htmlFor="firstName" className="text-[#787e81]">
+            <Label htmlFor="media" className="text-[#787e81]">
               Medium
             </Label>
-            <Select onValueChange={setMedia} defaultValue="sinhala">
-              <SelectTrigger className="">
-                <SelectValue placeholder="සිංහල" />
+            <Select onValueChange={setMedia} value={media}>
+              <SelectTrigger>
+                <SelectValue placeholder="Medium" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="sinhala">සිංහල</SelectItem>
@@ -232,12 +237,61 @@ const StudentInfo = () => {
             </Select>
           </div>
 
-          <div className="absolute -bottom-14 right-7">
-            <Button>Save</Button>
+          {/* Added fields for Guardian's Name, Guardian's Phone, and Address */}
+          <div>
+            <Label htmlFor="gurdianName" className="text-[#787e81]">
+              Guardian's Name
+            </Label>
+            <Input
+              type="text"
+              id="gurdianName"
+              value={gurdianName}
+              onChange={(e) => setGurdiandName(e.target.value)}
+              required
+              placeholder="Guardian's Name"
+              className="focus-visible:ring-blue-500"
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="gurdianPhone" className="text-[#787e81]">
+              Guardian's Phone Number
+            </Label>
+            <Input
+              type="text"
+              id="gurdianPhone"
+              value={gurdianPhone}
+              onChange={(e) => setGurdianPhone(e.target.value)}
+              required
+              placeholder="07xxxxxxxx"
+              className="focus-visible:ring-blue-500"
+            />
+          </div>
+
+          <div className="col-span-2">
+            <Label htmlFor="address" className="text-[#787e81]">
+              Address
+            </Label>
+            <Input
+              type="text"
+              id="address"
+              value={address}
+              onChange={(e) => setAddress(e.target.value)}
+              required
+              placeholder="Address"
+              className="focus-visible:ring-blue-500"
+            />
+          </div>
+
+          <div className="absolute -bottom-14 left-0 right-0">
+            <Button className="w-full" type="submit">
+              Submit
+            </Button>
           </div>
         </CardContent>
       </Card>
     </div>
   );
 };
+
 export default StudentInfo;

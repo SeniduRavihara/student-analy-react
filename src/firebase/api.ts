@@ -155,24 +155,7 @@ export const getRegisteredStatus = async (uid: string) => {
 
 // -------------------------------------------------------
 
-export const registerStudent = async (
-  data: {
-    firstName: string;
-    lastName: string;
-    whatsapp: string;
-    nic: string;
-    bDate: Date | undefined;
-    phone: string;
-    school: string;
-    examYear: string;
-    media: string;
-    stream: string;
-    gurdianName: string;
-    gurdianPhone: string;
-    address: string;
-  },
-  uid: string
-) => {
+export const registerStudent = async (data: UserInfoType, uid: string) => {
   const userInfoDocRef = doc(db, "users", uid, "studentInfo", uid);
   const userDocRef = doc(db, "users", uid);
 
@@ -272,11 +255,15 @@ export const createExam = async (examName: string, examDate: Date) => {
     examDate: examDate.toISOString(),
     examStatus: "pending",
   });
-
-  
 };
 
 export const deleteExam = async (examId: string) => {
   const examDocRef = doc(db, "exams", examId);
   await deleteDoc(examDocRef);
+};
+
+// -------------------------------------------------
+
+export const fetchExamsData = async (uid: string) => {
+  
 };
