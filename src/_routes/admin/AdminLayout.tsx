@@ -1,11 +1,32 @@
 import Navbar from "@/components/Navbar";
 import Sidebar from "@/components/sidebar/Sidebar";
+import { db } from "@/firebase/config";
 import { useData } from "@/hooks/useData";
+import { CurrentUserDataType } from "@/types";
+import { collection, onSnapshot } from "firebase/firestore";
+import { useEffect, useState } from "react";
 // import { CircularProgress } from "@chakra-ui/react";
 import { Navigate, Outlet } from "react-router-dom";
 
 const AdminLayout = () => {
   const { currentUserData } = useData();
+  const [usersData, setUsersData] = useState<CurrentUserDataType[] | null>(
+    null
+  );
+
+  useEffect(() => {
+    const collectionRef = collection(db, "users");
+    const unsubscribe = onSnapshot(collectionRef, (QuerySnapshot) => {
+      const usersDataArr = QuerySnapshot.docs.map((doc) => ({
+        ...doc.data(),
+        uid: doc.id,
+      })) as CurrentUserDataType[];
+
+      setUsersData(usersDataArr);
+    });
+
+    return unsubscribe;
+  }, []);
 
   const token = localStorage.getItem("token");
 
@@ -31,7 +52,7 @@ const AdminLayout = () => {
         </div>
         <div className="w-full h-full">
           {/* <div className="w-full h-[2000px]"></div> */}
-          <Outlet />
+          <Outlet context={{ usersData }} />
         </div>
       </div>
     </div>

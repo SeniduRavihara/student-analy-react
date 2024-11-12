@@ -20,6 +20,8 @@ export type CurrentUserDataType = {
   gender: "male" | "female";
   roles: "ADMIN" | "STUDENT";
   registered: boolean;
+  email: string;
+  lastResult: number | null;
 };
 
 export type UserInfoType = {
@@ -49,7 +51,7 @@ export type ExamTable = {
   examId: string;
   examName: string;
   examDate: Date;
-  status: "pending" | "completed";
+  examStatus: "pending" | "completed";
   avgResult: number | null;
 };
 

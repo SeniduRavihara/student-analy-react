@@ -20,25 +20,13 @@ import {
 export const description =
   "A scrollable line chart showing average exam scores";
 
-// Sample chart data
-// const chartData = [
-//   { exam: "Exam 1", Mark: 78 },
-//   { exam: "Exam 2", Mark: 85 },
-//   { exam: "Exam 3", Mark: 68 },
-//   { exam: "Exam 4", Mark: 74 },
-//   { exam: "Exam 5", Mark: 90 },
-//   { exam: "Exam 6", Mark: 82 },
-//   { exam: "Exam 7", Mark: 76 },
-//   { exam: "Exam 8", Mark: 88 },
-// ];
-
 // Chart component
 export function MarksChart({
   chartData = [],
 }: {
   chartData: Array<{ exam: string; Mark: number }>;
 }) {
-  const scrollContainerRef = useRef(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     // Scroll to the end on component mount
@@ -46,7 +34,7 @@ export function MarksChart({
       scrollContainerRef.current.scrollLeft =
         scrollContainerRef.current.scrollWidth;
     }
-  }, []);
+  }, [chartData]);
 
   return (
     <Card className="w-full max-w-[600px]">

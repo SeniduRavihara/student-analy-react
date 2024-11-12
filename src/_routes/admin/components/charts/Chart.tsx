@@ -34,7 +34,7 @@ const chartData = [
 
 // Chart component
 export function Chart() {
-  const scrollContainerRef = useRef(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     // Scroll to the end on component mount

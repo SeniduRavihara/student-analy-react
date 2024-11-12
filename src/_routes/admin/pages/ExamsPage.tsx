@@ -24,6 +24,7 @@ import { format } from "date-fns";
 import { toast } from "@/hooks/use-toast";
 import { collection, onSnapshot } from "firebase/firestore";
 import { db } from "@/firebase/config";
+import { useNavigate } from "react-router-dom";
 
 // const data: ExamTable[] = [
 //   {
@@ -114,6 +115,8 @@ const ExamsPage = () => {
   const [examDate, setExamDate] = useState<Date>();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
+  const navigate = useNavigate();
+
   useEffect(() => {
     const collectionRef = collection(db, "exams");
     const unsubscribe = onSnapshot(collectionRef, (QuerySnapshot) => {
@@ -122,7 +125,7 @@ const ExamsPage = () => {
         examId: doc.id,
       })) as ExamTable[];
 
-      console.log(sexamsDataArr);
+      console.log("EXAM",sexamsDataArr);
       setExamsData(sexamsDataArr);
     });
 
@@ -150,7 +153,7 @@ const ExamsPage = () => {
     <div className="p-5 w-full h-full bg-[#ededed] overflow-auto">
       <Card>
         <CardContent>
-          <DataTable columns={columns} data={examsData} />
+          <DataTable columns={columns(navigate)} data={examsData} />
           <Button className="" onClick={() => setIsDialogOpen(true)}>
             Create New Exam
           </Button>

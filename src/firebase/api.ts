@@ -104,6 +104,7 @@ export const googleSignIn = async () => {
         email: user.email || "",
         roles: "STUDENT",
         registered: false,
+        lastResult: null,
       };
 
       await setDoc(userDocRef, payload);
@@ -215,6 +216,7 @@ export const fetchUserInfo = async (uid: string) => {
 
 export const generateIndexNumber = async (uid: string, examYear: string) => {
   const userGeneralInfoDocRef = doc(db, "general", examYear);
+  console.log(uid);
 
   try {
     const regNo = await runTransaction(db, async (transaction) => {
@@ -254,6 +256,7 @@ export const createExam = async (examName: string, examDate: Date) => {
     examName,
     examDate: examDate.toISOString(),
     examStatus: "pending",
+    avgResult: null,
   });
 };
 
@@ -264,7 +267,7 @@ export const deleteExam = async (examId: string) => {
 
 // -------------------------------------------------
 
-export const fetchExamsData = async (uid: string) => {
-  const userExamCollectionRef = collection(db, "users", uid, "exams");
-  const userExamInfo = await getDoc(userExamCollectionRef);
-};
+// export const fetchExamsData = async (uid: string) => {
+//   const userExamCollectionRef = collection(db, "users", uid, "exams");
+//   const userExamInfo = await getDoc(userExamCollectionRef);
+// };

@@ -12,8 +12,11 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { ExamTable } from "@/types";
 import { deleteExam } from "@/firebase/api";
+import { useNavigate } from "react-router-dom";
 
-export const columns: ColumnDef<ExamTable>[] = [
+export const columns = (
+  navigate: ReturnType<typeof useNavigate>
+): ColumnDef<ExamTable>[] => [
   {
     accessorKey: "examName", // Updated from "name" to "examName"
     header: "Exam Name",
@@ -37,17 +40,19 @@ export const columns: ColumnDef<ExamTable>[] = [
     ),
   },
   {
-    accessorKey: "status",
+    accessorKey: "examStatus",
     header: "Status",
     cell: ({ row }) => (
-      <div className="capitalize">{row.getValue("status")}</div>
+      <div className="capitalize">{row.getValue("examStatus")}</div>
     ),
   },
   {
     accessorKey: "avgResult",
     header: () => <div className="text-right">Average Result</div>,
     cell: ({ row }) => (
-      <div className="text-right font-medium">{row.getValue("avgResult")}</div>
+      <div className="text-right font-medium">
+        {row.getValue("avgResult") || "-"}
+      </div>
     ),
   },
   {
@@ -78,7 +83,9 @@ export const columns: ColumnDef<ExamTable>[] = [
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem
-              onClick={() => navigator.clipboard.writeText(exam.examName)}
+              onClick={() => {
+                navigate(`/admin/exams/${exam.examId}`);
+              }}
             >
               Add Results
             </DropdownMenuItem>

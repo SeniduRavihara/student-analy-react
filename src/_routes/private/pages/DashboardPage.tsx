@@ -8,10 +8,8 @@ import {
   DialogContent,
   DialogDescription,
   DialogHeader,
-  DialogTitle,
-  DialogTrigger,
+  DialogTitle
 } from "@/components/ui/dialog";
-import { set } from "date-fns";
 import { fetchUserInfo, generateIndexNumber } from "@/firebase/api";
 import { doc, updateDoc } from "firebase/firestore";
 import { db } from "@/firebase/config";
