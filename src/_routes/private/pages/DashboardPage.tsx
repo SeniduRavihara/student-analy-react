@@ -8,7 +8,7 @@ import {
   DialogContent,
   DialogDescription,
   DialogHeader,
-  DialogTitle
+  DialogTitle,
 } from "@/components/ui/dialog";
 import { fetchUserInfo, generateIndexNumber } from "@/firebase/api";
 import { doc, updateDoc } from "firebase/firestore";

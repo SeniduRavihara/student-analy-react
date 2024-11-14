@@ -1,4 +1,6 @@
 import * as admin from "firebase-admin";
+import { DocumentSnapshot } from "firebase-admin/firestore";
+import * as functions from "firebase-functions/v1";
 import {
   onDocumentCreated,
   onDocumentDeleted,
@@ -15,24 +17,27 @@ async function updateUserExamCollections(
   action: "create" | "delete" | "update"
 ) {
   const usersSnapshot = await db.collection("users").get();
+  const { examYear } = examData;
 
-  // Collect promises to ensure all paths return a value
-  const promises = usersSnapshot.docs.map((userDoc) => {
-    const userId = userDoc.id;
-    const userExamsRef = db.collection(`users/${userId}/exams`).doc(examId);
+  // Collect promises for paths with matching examYear
+  const promises = usersSnapshot.docs
+    .filter((userDoc) => userDoc.data().examYear === examYear)
+    .map((userDoc) => {
+      const userId = userDoc.id;
+      const userExamsRef = db.collection(`users/${userId}/exams`).doc(examId);
 
-    if (action === "create") {
-      return userExamsRef.set(examData);
-    } else if (action === "delete") {
-      return userExamsRef.delete();
-    } else if (action === "update") {
-      return userExamsRef.update(examData);
-    } else {
-      return null; // Ensures all code paths return a value
-    }
-  });
+      if (action === "create") {
+        return userExamsRef.set(examData);
+      } else if (action === "delete") {
+        return userExamsRef.delete();
+      } else if (action === "update") {
+        return userExamsRef.update(examData);
+      } else {
+        return null;
+      }
+    });
 
-  // Wait for all promises to resolve
+  // Wait for all relevant promises to resolve
   await Promise.all(promises);
 }
 
@@ -71,3 +76,58 @@ export const onExamUpdate = onDocumentUpdated(
     }
   }
 );
+
+// --------------------------------------------------------------
+
+export const deleteUserData = functions.auth.user().onDelete(async (user) => {
+  const uid = user.uid;
+
+  try {
+    await db.collection("users").doc(uid).delete();
+    console.log(`Successfully deleted user data for UID: ${uid}`);
+  } catch (error) {
+    console.error(`Error deleting user data for UID: ${uid}`, error);
+  }
+});
+
+// Cloud Function to handle new user creation
+// export const onUserCreate = functions.firestore
+//   .document("users/{userId}")
+//   .onCreate(async (snapshot: DocumentSnapshot) => {
+//     const userData = snapshot.data();
+
+//     if (userData) {
+//       const examYear = userData.examYear;
+//       const userId = snapshot.id;
+
+//       try {
+//         // Fetch exams from "exams" collection where examYear matches the user's examYear
+//         const examsSnapshot = await db
+//           .collection("exams")
+//           .where("examYear", "==", examYear)
+//           .get();
+
+//         const batch = db.batch();
+
+//         examsSnapshot.docs.forEach((examDoc) => {
+//           const examData = examDoc.data();
+//           const examId = examDoc.id;
+
+//           // Create a new exam document in the user's "exams" sub-collection
+//           const userExamRef = db
+//             .collection("users")
+//             .doc(userId)
+//             .collection("exams")
+//             .doc(examId);
+
+//           batch.set(userExamRef, examData);
+//         });
+
+//         // Commit all writes in a single batch operation
+//         await batch.commit();
+//         console.log(`Exams for year ${examYear} added to user ${userId}`);
+//       } catch (error) {
+//         console.error("Error creating user exams:", error);
+//       }
+//     }
+//   });

@@ -16,11 +16,8 @@ function NavbarRoutes() {
   const { currentUserData } = useData();
   const navigate = useNavigate();
 
-  console.log(currentUserData);
-  
-
   return (
-    <div className="flex gap-x-3 ml-auto items-center border bg-white px-5 rounded-full">
+    <div className="flex gap-x-3 py-2 ml-auto items-center border bg-white px-5 rounded-full">
       <span className="text-[#858796]">
         {currentUser?.displayName || currentUserData?.userName}
       </span>

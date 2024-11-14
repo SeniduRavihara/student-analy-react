@@ -3,7 +3,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { fetchUserInfo } from "@/firebase/api";
 import { useAuth } from "@/hooks/useAuth";
-import { UserInfoType } from "@/types";
 import { useEffect, useState } from "react";
 import {
   Popover,
@@ -22,6 +21,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { UserDataType } from "@/types";
 
 const StudentInfo = () => {
   const { currentUser } = useAuth();
@@ -45,7 +45,7 @@ const StudentInfo = () => {
       const fetchData = async () => {
         const userInfo = (await fetchUserInfo(
           currentUser?.uid
-        )) as UserInfoType;
+        )) as UserDataType;
         console.log(userInfo);
 
         setFirstName(userInfo.firstName);

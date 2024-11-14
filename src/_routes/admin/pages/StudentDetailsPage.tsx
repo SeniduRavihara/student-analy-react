@@ -1,6 +1,6 @@
 // import { DataTable } from "@/_routes/private/components/DataTable";
 import { columns } from "@/_routes/admin/components/student-data/Coloumns";
-import { CurrentUserDataType } from "@/types";
+import { UserDataType } from "@/types";
 import { DataTable } from "../components/student-data/DataTable";
 import { useOutletContext } from "react-router-dom";
 
@@ -68,7 +68,7 @@ import { useOutletContext } from "react-router-dom";
 // ];
 
 type OutletContextType = {
-  usersData: CurrentUserDataType[] | null;
+  usersData: UserDataType[] | null;
 };
 
 const StudentDetailsPage = () => {

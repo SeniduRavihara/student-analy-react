@@ -1,16 +1,16 @@
 import { INITIAL_DATA_CONTEXT } from "@/constants";
-import { CurrentUserDataType, DataContextType } from "@/types";
+import { UserDataType, DataContextType } from "@/types";
 import { createContext, useState } from "react";
 
 // eslint-disable-next-line react-refresh/only-export-components
 export const DataContext = createContext<DataContextType>(INITIAL_DATA_CONTEXT);
 
 const DataContextProvider = ({ children }: { children: React.ReactNode }) => {
-  const [currentUserData, setCurrentUserData] =
-    useState<CurrentUserDataType | null>(null);
+  const [currentUserData, setCurrentUserData] = useState<UserDataType | null>(
+    null
+  );
 
-    // console.log(currentUserData);
-    
+  // console.log(currentUserData);
 
   const value = {
     currentUserData,

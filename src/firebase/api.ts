@@ -12,11 +12,15 @@ import {
   deleteDoc,
   doc,
   getDoc,
+  getDocs,
+  query,
   runTransaction,
   setDoc,
   updateDoc,
+  where,
+  writeBatch,
 } from "firebase/firestore";
-import { CurrentUserDataType, UserInfoType } from "@/types";
+import { UserDataType, UserInfoType } from "@/types";
 
 export const logout = async () => {
   try {
@@ -123,7 +127,7 @@ export const featchCurrentUserData = async (currentUser: User) => {
     const userDataDoc = await getDoc(documentRef);
 
     if (userDataDoc.exists()) {
-      const userData = userDataDoc.data() as CurrentUserDataType;
+      const userData = userDataDoc.data() as UserDataType;
       console.log("Current user data fetched successfully");
       return userData;
     } else {
@@ -157,22 +161,37 @@ export const getRegisteredStatus = async (uid: string) => {
 // -------------------------------------------------------
 
 export const registerStudent = async (data: UserInfoType, uid: string) => {
-  const userInfoDocRef = doc(db, "users", uid, "studentInfo", uid);
-  const userDocRef = doc(db, "users", uid);
-
-  console.log("submit");
+  const userInfoDocRef = doc(db, "users", uid);
 
   try {
-    await setDoc(userInfoDocRef, {
+    await updateDoc(userInfoDocRef, {
       ...data,
-      bDate: data.bDate ? data.bDate.toISOString() : null, // Ensure date is in a string format
-    });
-
-    await updateDoc(userDocRef, {
+      bDate: data.bDate ? data.bDate.toISOString() : null,
       registered: true,
     });
 
     console.log("Student registered successfully:", data);
+
+    // Step 2: Fetch exams relevant to the student's examYear
+    if (data.examYear) {
+      const examsQuery = query(
+        collection(db, "exams"),
+        where("examYear", "==", data.examYear)
+      );
+      const examsSnapshot = await getDocs(examsQuery);
+
+      // Step 3: Batch add the matching exams to the student's exams sub-collection
+      const batch = writeBatch(db); 
+
+      examsSnapshot.docs.forEach((examDoc) => {
+        const examData = examDoc.data();
+        const userExamRef = doc(db, `users/${uid}/exams`, examDoc.id);
+        batch.set(userExamRef, examData);
+      });
+
+      await batch.commit();
+      console.log(`Exams for year ${data.examYear} added to user ${uid}`);
+    }
   } catch (error) {
     console.error("Error registering student:", error);
   }
@@ -181,10 +200,10 @@ export const registerStudent = async (data: UserInfoType, uid: string) => {
 // ----------------------------------------------
 
 export const fetchUserInfo = async (uid: string) => {
-  const userInfoDocRef = doc(db, "users", uid, "studentInfo", uid);
+  const userInfoDocRef = doc(db, "users", uid);
   const userInfo = await getDoc(userInfoDocRef);
 
-  return userInfo.data() as UserInfoType;
+  return userInfo.data() as UserDataType;
 };
 
 // -------------------------------------------
@@ -250,13 +269,18 @@ export const generateIndexNumber = async (uid: string, examYear: string) => {
 
 // ------------------------------------------
 
-export const createExam = async (examName: string, examDate: Date) => {
+export const createExam = async (
+  examName: string,
+  examDate: Date,
+  examYear: string
+) => {
   const examCollectionRef = collection(db, "exams");
   await addDoc(examCollectionRef, {
     examName,
     examDate: examDate.toISOString(),
     examStatus: "pending",
     avgResult: null,
+    examYear,
   });
 };
 
@@ -271,3 +295,46 @@ export const deleteExam = async (examId: string) => {
 //   const userExamCollectionRef = collection(db, "users", uid, "exams");
 //   const userExamInfo = await getDoc(userExamCollectionRef);
 // };
+
+// -------------------------------------------------
+
+export const setExamResults = async (
+  examId: string,
+  examResults: Record<string, number>
+) => {
+  // Calculate average result and round to 2 decimal points
+  const totalMarks = Object.values(examResults).reduce(
+    (sum, mark) => sum + mark,
+    0
+  );
+  const avgResult = parseFloat(
+    (totalMarks / Object.values(examResults).length).toFixed(2)
+  );
+
+  // Sort user IDs based on marks in descending order to determine rank
+  const sortedResults = Object.entries(examResults)
+    .sort(([, markA], [, markB]) => markB - markA) // Sort by marks
+    .map(([userId, mark], index) => ({ userId, mark, rank: index + 1 })); // Assign rank
+
+  // Update each student's record with mark, rank, and avgResult
+  const studentPromises = sortedResults.map(async ({ userId, mark, rank }) => {
+    const userExamRef = doc(db, `users/${userId}/exams`, examId);
+
+    // Update with mark, rank, and avgResult for each student
+    return updateDoc(userExamRef, {
+      examResult: mark,
+      rank: rank,
+      avgResult: avgResult,
+    });
+  });
+
+  // Update the main exam document with avgResult
+  const examRef = doc(db, `exams`, examId);
+  const examPromise = updateDoc(examRef, {
+    avgResult: avgResult,
+  });
+
+  // Wait for all updates to complete
+  await Promise.all([...studentPromises, examPromise]);
+};
+

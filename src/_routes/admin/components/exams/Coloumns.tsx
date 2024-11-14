@@ -84,7 +84,9 @@ export const columns = (
             <DropdownMenuSeparator />
             <DropdownMenuItem
               onClick={() => {
-                navigate(`/admin/exams/${exam.examId}`);
+                navigate(
+                  `/admin/exams/add-results/${exam.examId}-${exam.examName}`
+                );
               }}
             >
               Add Results

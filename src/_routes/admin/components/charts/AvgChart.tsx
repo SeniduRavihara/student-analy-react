@@ -21,19 +21,23 @@ export const description =
   "A scrollable line chart showing average exam scores";
 
 // Sample chart data
-const chartData = [
-  { exam: "Exam 1", avgMark: 78 },
-  { exam: "Exam 2", avgMark: 85 },
-  { exam: "Exam 3", avgMark: 68 },
-  { exam: "Exam 4", avgMark: 74 },
-  { exam: "Exam 5", avgMark: 90 },
-  { exam: "Exam 6", avgMark: 82 },
-  { exam: "Exam 7", avgMark: 76 },
-  { exam: "Exam 8", avgMark: 88 },
-];
+// const chartData = [
+//   { exam: "Exam 1", avgMark: 78 },
+//   { exam: "Exam 2", avgMark: 85 },
+//   { exam: "Exam 3", avgMark: 68 },
+//   { exam: "Exam 4", avgMark: 74 },
+//   { exam: "Exam 5", avgMark: 90 },
+//   { exam: "Exam 6", avgMark: 82 },
+//   { exam: "Exam 7", avgMark: 76 },
+//   { exam: "Exam 8", avgMark: 88 },
+// ];
 
 // Chart component
-export function Chart() {
+export function AvgChart({
+  chartData = [],
+}: {
+  chartData: Array<{ exam: string; avgMark: number }>;
+}) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {

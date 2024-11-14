@@ -19,7 +19,7 @@ const StudentAnalyticsPage = () => {
           ...doc.data(),
         })) as ExamDataType[];
 
-        console.log(examsDataArr);
+        // console.log("Sandali", examsDataArr);
         setExamsData(examsDataArr);
       });
 
@@ -31,9 +31,9 @@ const StudentAnalyticsPage = () => {
     <div className="w-full h-full">
       {examsData && examsData.length > 0 ? (
         <MarksChart
-          chartData={examsData.map(({ examName, result }) => ({
+          chartData={examsData.map(({ examName, examResult }) => ({
             exam: examName,
-            Mark: result,
+            Mark: examResult,
           }))}
         />
       ) : (
