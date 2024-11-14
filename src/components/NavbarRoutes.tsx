@@ -9,14 +9,18 @@ import { HiOutlineUserCircle } from "react-icons/hi2";
 import { LogOut, User } from "lucide-react";
 import { logout } from "@/firebase/api";
 import { useAuth } from "@/hooks/useAuth";
+import { useData } from "@/hooks/useData";
 
 function NavbarRoutes() {
   const { currentUser } = useAuth();
+  const { currentUserData } = useData();
   const navigate = useNavigate();
 
   return (
-    <div className="flex gap-x-2 ml-auto items-center">
-      <span className="text-[#858796]">{currentUser?.displayName}</span>
+    <div className="flex gap-x-3 py-2 ml-auto items-center border bg-white px-5 rounded-full">
+      <span className="text-[#858796]">
+        {currentUser?.displayName || currentUserData?.userName}
+      </span>
       <div className="">
         {!currentUser ? (
           <User />

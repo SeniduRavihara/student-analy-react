@@ -21,6 +21,8 @@ import DashboardPage from "./_routes/private/pages/DashboardPage";
 import AnalyticsPage from "./_routes/admin/pages/AnalyticsPage";
 import StudentAnalyticsPage from "./_routes/private/pages/StudentAnalyticsPage";
 import RegisterAsNewPage from "./_routes/private/pages/RegisterAsNewPage";
+import ExamsPage from "./_routes/admin/pages/ExamsPage";
+import AddResultsPage from "./_routes/admin/pages/AddResultsPage";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -50,6 +52,11 @@ const router = createBrowserRouter(
         <Route index element={<StudentDetailsPage />} />
         <Route path="add-student" element={<AddNewStudentPage />} />
         <Route path="analytics" element={<AnalyticsPage />} />
+        <Route path="exams" element={<ExamsPage />} />
+        <Route
+          path="exams/add-results/:examIdName"
+          element={<AddResultsPage />}
+        />
       </Route>
     </Route>
   )

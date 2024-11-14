@@ -1,11 +1,33 @@
 import Navbar from "@/components/Navbar";
 import Sidebar from "@/components/sidebar/Sidebar";
+import { db } from "@/firebase/config";
 import { useData } from "@/hooks/useData";
+import { UserDataType } from "@/types";
+import { collection, onSnapshot } from "firebase/firestore";
+import { useEffect, useState } from "react";
 // import { CircularProgress } from "@chakra-ui/react";
 import { Navigate, Outlet } from "react-router-dom";
 
 const AdminLayout = () => {
   const { currentUserData } = useData();
+  const [usersData, setUsersData] = useState<UserDataType[] | null>(null);
+  const [selectedYear, setSelectedYear] = useState<string>("2024");
+
+  useEffect(() => {
+    const collectionRef = collection(db, "users");
+    const unsubscribe = onSnapshot(collectionRef, (querySnapshot) => {
+      const usersDataArr = (
+        querySnapshot.docs.map((doc) => ({
+          ...doc.data(),
+          uid: doc.id,
+        })) as UserDataType[]
+      ).filter((user) => user.regNo && user.examYear == selectedYear); // Ensure regNo exists
+
+      setUsersData(usersDataArr);
+    });
+
+    return unsubscribe;
+  }, [selectedYear]);
 
   const token = localStorage.getItem("token");
 
@@ -21,18 +43,20 @@ const AdminLayout = () => {
   }
 
   return currentUserData.roles == "ADMIN" ? (
-    <div className="w-screen h-screen bg-[#E2F1E7]">
-      <div className="w-full h-full flex items-center justify-between">
-        <div className="hidden md:flex h-full w-56 flex-col inset-y-0 z-50">
-          <Sidebar />
+    <div className="">
+      <div className="hidden md:flex h-screen w-56 flex-col inset-y-0 fixed left-0 top-0 bg-red-500 z-50">
+        <Sidebar />
+      </div>
+      <div className="h-full flex flex-col md:ml-56 ">
+        <div className="h-[80px] inset-y-0 w-full">
+          <Navbar
+            selectedYear={selectedYear}
+            setSelectedYear={setSelectedYear}
+          />
         </div>
-        <div className="w-full h-full flex flex-col">
-          <div className="h-[80px] inset-y-0 w-full">
-            <Navbar />
-          </div>
-          <div className="w-full h-full">
-            <Outlet />
-          </div>
+        <div className="w-full h-full">
+          {/* <div className="w-full h-[2000px]"></div> */}
+          <Outlet context={{ usersData, setSelectedYear, selectedYear }} />
         </div>
       </div>
     </div>

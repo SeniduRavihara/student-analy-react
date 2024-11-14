@@ -1,10 +1,44 @@
 import { Outlet } from "react-router-dom";
 import Navbar from "../../../components/Navbar";
 import Sidebar from "@/components/sidebar/Sidebar";
+import { useData } from "@/hooks/useData";
+import { useEffect, useState } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { fetchUserInfo, generateIndexNumber } from "@/firebase/api";
+import { doc, updateDoc } from "firebase/firestore";
+import { db } from "@/firebase/config";
 
 const DashboardPage = () => {
+  const { currentUserData } = useData();
+  const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    const genarateRegNo = async () => {
+      if (!currentUserData?.regNo && currentUserData) {
+        const examYear = (await fetchUserInfo(currentUserData?.uid)).examYear;
+        console.log(examYear);
+        const regNo = await generateIndexNumber(currentUserData?.uid, examYear);
+
+        const userDocRef = doc(db, "users", currentUserData?.uid);
+        await updateDoc(userDocRef, {
+          regNo: regNo,
+        });
+
+        setOpen(true);
+      }
+    };
+
+    genarateRegNo();
+  }, [currentUserData]);
+
   return (
-    <div className="w-full h-full flex items-center justify-between bg-[#E2F1E7]">
+    <div className="w-full h-full flex items-center justify-between bg-[#ffffff]">
       <div className="hidden md:flex h-full w-56 flex-col inset-y-0 z-50">
         <Sidebar />
       </div>
@@ -16,6 +50,17 @@ const DashboardPage = () => {
           <Outlet />
         </div>
       </div>
+
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Are you absolutely sure?</DialogTitle>
+            <DialogDescription>
+              Your Index Number is {currentUserData?.regNo}
+            </DialogDescription>
+          </DialogHeader>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
