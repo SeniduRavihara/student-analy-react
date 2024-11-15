@@ -1,5 +1,6 @@
 import Navbar from "@/components/Navbar";
 import Sidebar from "@/components/sidebar/Sidebar";
+import { EXAM_YEARS } from "@/constants";
 import { db } from "@/firebase/config";
 import { useData } from "@/hooks/useData";
 import { UserDataType } from "@/types";
@@ -11,7 +12,7 @@ import { Navigate, Outlet } from "react-router-dom";
 const AdminLayout = () => {
   const { currentUserData } = useData();
   const [usersData, setUsersData] = useState<UserDataType[] | null>(null);
-  const [selectedYear, setSelectedYear] = useState<string>("2024");
+  const [selectedYear, setSelectedYear] = useState<string>(EXAM_YEARS[0].year);
 
   useEffect(() => {
     const collectionRef = collection(db, "users");

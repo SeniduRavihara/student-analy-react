@@ -1,5 +1,4 @@
 import * as admin from "firebase-admin";
-import { DocumentSnapshot } from "firebase-admin/firestore";
 import * as functions from "firebase-functions/v1";
 import {
   onDocumentCreated,
@@ -59,8 +58,9 @@ export const onExamDelete = onDocumentDeleted(
   "exams/{examId}",
   async (event) => {
     const examId = event.params.examId;
+    const examData = event.data?.data();
 
-    await updateUserExamCollections(examId, {}, "delete");
+    await updateUserExamCollections(examId, examData, "delete");
   }
 );
 

@@ -7,6 +7,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { EXAM_YEARS } from "@/constants";
 
 type ExameDetailsFormProps = {
   school: string;
@@ -46,14 +47,19 @@ const ExameDetailsForm = ({
         />
       </div>
 
-      <Select onValueChange={setExamYear} defaultValue="2024">
+      <Select onValueChange={setExamYear} defaultValue={EXAM_YEARS[0].year}>
         <SelectTrigger className="">
-          <SelectValue placeholder="2024 A/L" />
+          <SelectValue placeholder={EXAM_YEARS[0].year} />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="2024">2024 A/L</SelectItem>
+          {EXAM_YEARS.map((year) => (
+            <SelectItem key={year.year} value={year.year}>
+              {year.label}
+            </SelectItem>
+          ))}
+          {/* <SelectItem value="2024">2024 A/L</SelectItem>
           <SelectItem value="2025">2025 A/L</SelectItem>
-          <SelectItem value="2026">2026 A/L</SelectItem>
+          <SelectItem value="2026">2026 A/L</SelectItem> */}
         </SelectContent>
       </Select>
 

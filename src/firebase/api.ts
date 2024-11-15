@@ -163,11 +163,15 @@ export const getRegisteredStatus = async (uid: string) => {
 export const registerStudent = async (data: UserInfoType, uid: string) => {
   const userInfoDocRef = doc(db, "users", uid);
 
+  const regNo = await generateIndexNumber(uid, data.examYear);
+  console.log("REG_NO", regNo);
+
   try {
     await updateDoc(userInfoDocRef, {
       ...data,
       bDate: data.bDate ? data.bDate.toISOString() : null,
       registered: true,
+      regNo: regNo,
     });
 
     console.log("Student registered successfully:", data);
@@ -181,7 +185,7 @@ export const registerStudent = async (data: UserInfoType, uid: string) => {
       const examsSnapshot = await getDocs(examsQuery);
 
       // Step 3: Batch add the matching exams to the student's exams sub-collection
-      const batch = writeBatch(db); 
+      const batch = writeBatch(db);
 
       examsSnapshot.docs.forEach((examDoc) => {
         const examData = examDoc.data();
@@ -249,7 +253,7 @@ export const generateIndexNumber = async (uid: string, examYear: string) => {
       const lastRegNo = data.lastRegNo || 0;
 
       // Generate new registration number with exam year prefix
-      const newRegNo = examYear + String(lastRegNo + 1).padStart(4, "0");
+      const newRegNo = examYear + String(lastRegNo + 1).padStart(3, "0");
 
       // Update the document with the new last registration number
       transaction.update(userGeneralInfoDocRef, {
@@ -281,6 +285,7 @@ export const createExam = async (
     examStatus: "pending",
     avgResult: null,
     examYear,
+    createdAt: new Date().toISOString(),
   });
 };
 
@@ -337,4 +342,3 @@ export const setExamResults = async (
   // Wait for all updates to complete
   await Promise.all([...studentPromises, examPromise]);
 };
-
