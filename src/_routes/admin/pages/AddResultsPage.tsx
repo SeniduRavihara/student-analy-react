@@ -15,25 +15,28 @@ import { Button } from "@/components/ui/button";
 import { setExamResults } from "@/firebase/api";
 import { onSnapshot, doc } from "firebase/firestore";
 import { db } from "@/firebase/config";
-import { toSquareLettersAndNumbers } from "@/lib/utils";
+// import {
+//   toRoundLettersAndNumbers,
+//   toSquareLettersAndNumbers,
+// } from "@/lib/utils";
 
 type OutletContextType = {
   usersData: UserDataInAdminType[] | null;
 };
 
-// const toFullWidth = (text: string) => {
-//   return text
-//     .split("")
-//     .map((char) => {
-//       const code = char.charCodeAt(0);
-//       // Convert A-Z, a-z, and 0-9 to full-width
-//       if (code >= 33 && code <= 126) {
-//         return String.fromCharCode(code + 65248);
-//       }
-//       return char; // Return other characters (e.g., spaces) as is
-//     })
-//     .join("");
-// };
+const toFullWidth = (text: string) => {
+  return text
+    .split("")
+    .map((char) => {
+      const code = char.charCodeAt(0);
+      // Convert A-Z, a-z, and 0-9 to full-width
+      if (code >= 33 && code <= 126) {
+        return String.fromCharCode(code + 65248);
+      }
+      return char; // Return other characters (e.g., spaces) as is
+    })
+    .join("");
+};
 
 const AddResultsPage = () => {
   const { examIdName } = useParams();
@@ -83,14 +86,13 @@ const AddResultsPage = () => {
 
   return (
     <div className="p-2 md:p-5 flex flex-col gap-3 items-center justify-center">
-      {/* <h1>
-        {toFullWidth(examName)} &nbsp;
-        &#65330;&#65349;&#65363;&#65365;&#65356;&#65364;
+      <h1>{toFullWidth(examName ?? "")}</h1>
+
+      {/* <h1 className="text-[#00A6ED]">
+        {toRoundLettersAndNumbers(`${examName} RESULTS`)}
       </h1> */}
 
-      <h1 className="text-[#00A6ED]">
-        {toSquareLettersAndNumbers(`${examName} RESULTS`)}
-      </h1>
+      {/* <h1>{examName}</h1> */}
       <Card className="p-3">
         <CardContent>
           <Table>

@@ -1,8 +1,7 @@
 import { Outlet } from "react-router-dom";
 import Navbar from "../../../components/Navbar";
 import Sidebar from "@/components/sidebar/Sidebar";
-import { useData } from "@/hooks/useData";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -12,27 +11,18 @@ import {
 } from "@/components/ui/dialog";
 
 const DashboardPage = () => {
-  const { currentUserData } = useData();
   const [open, setOpen] = useState(false);
+  const [regNo, setRegNo] = useState("");
 
-  // useEffect(() => {
-  //   const genarateRegNo = async () => {
-  //     if (!currentUserData?.regNo && currentUserData) {
-  //       const examYear = (await fetchUserInfo(currentUserData?.uid)).examYear;
-  //       console.log(examYear);
-  //       const regNo = await generateIndexNumber(currentUserData?.uid, examYear);
+  useEffect(() => {
+    const regNo = localStorage.getItem("regNo");
 
-  //       const userDocRef = doc(db, "users", currentUserData?.uid);
-  //       await updateDoc(userDocRef, {
-  //         regNo: regNo,
-  //       });
-
-  //       setOpen(true);
-  //     }
-  //   };
-
-  //   genarateRegNo();
-  // }, [currentUserData]);
+    if (regNo) {
+      setOpen(true);
+      setRegNo(regNo);
+      localStorage.removeItem("regNo");
+    }
+  }, []);
 
   return (
     <div className="">
@@ -51,9 +41,10 @@ const DashboardPage = () => {
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Are you absolutely sure?</DialogTitle>
+            <DialogTitle>Important Information</DialogTitle>
             <DialogDescription>
-              Your Index Number is {currentUserData?.regNo}
+              Your Index Number for the exam is <strong>{regNo}</strong>. Please
+              note it down for future reference.
             </DialogDescription>
           </DialogHeader>
         </DialogContent>

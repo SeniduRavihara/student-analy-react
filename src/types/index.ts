@@ -32,6 +32,7 @@ export type UserDataType = {
   registered: boolean;
   email: string;
   lastResult: number | null;
+  lastRank: number;
 };
 
 // export type CurrentUserDataType = {
@@ -94,7 +95,7 @@ export type ExamDataType = {
   examStatus: "pending" | "completed";
   avgResult: number | null;
   examYear: string;
-  examResult: number
+  examResult: number;
 };
 
 // export type ExamDataType = {
