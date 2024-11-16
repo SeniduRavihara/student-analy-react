@@ -1,11 +1,6 @@
 import { useEffect, useState } from "react";
 import { MarksChart } from "../components/charts/MarksChart";
-import {
-  collection,
-  onSnapshot,
-  orderBy,
-  query,
-} from "firebase/firestore";
+import { collection, onSnapshot, orderBy, query } from "firebase/firestore";
 import { db } from "@/firebase/config";
 import { useAuth } from "@/hooks/useAuth";
 import { ExamDataType } from "@/types";
@@ -37,7 +32,7 @@ const StudentAnalyticsPage = () => {
   }, [currentUser]);
 
   return (
-    <div className="w-full h-full">
+    <div className="w-full h-full flex items-center justify-center p-4">
       {examsData && examsData.length > 0 ? (
         <MarksChart
           chartData={examsData.map(({ examName, examResult }) => ({

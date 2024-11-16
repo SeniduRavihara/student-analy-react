@@ -41,7 +41,7 @@ const AnalyticsPage = () => {
   }, [selectedYear]); // Re-fetch only when selectedYear changes
 
   return (
-    <div className="bg-[#ededed] w-full h-full overflow-auto">
+    <div className="bg-[#ededed] w-full h-full overflow-auto items-center justify-center flex">
       {examsData && examsData.length > 0 ? (
         <AvgChart
           chartData={examsData.map(({ examName, avgResult }) => ({

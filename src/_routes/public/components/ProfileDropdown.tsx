@@ -1,5 +1,4 @@
 import { useAuth } from "@/hooks/useAuth";
-import { HiOutlineUserCircle } from "react-icons/hi2";
 import { logout } from "@/firebase/api";
 import { LogOut, SquareMenu, LogIn } from "lucide-react";
 import {
@@ -38,11 +37,14 @@ const ProfileDropdown = () => {
               <div>
                 {currentUser.photoURL ? (
                   <img
-                    src={currentUser.photoURL}
+                    src={currentUser.photoURL ?? ""}
                     className="w-10 h-10 rounded-full cursor-pointer"
                   />
                 ) : (
-                  <HiOutlineUserCircle className="text-3xl cursor-pointer" />
+                  <img
+                    src="/account.png"
+                    className="w-10 h-10 rounded-full cursor-pointer"
+                  />
                 )}
               </div>
             </DropdownMenuTrigger>

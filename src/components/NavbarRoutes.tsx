@@ -5,7 +5,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { HiOutlineUserCircle } from "react-icons/hi2";
 import { LogOut, User } from "lucide-react";
 import { logout } from "@/firebase/api";
 import { useAuth } from "@/hooks/useAuth";
@@ -35,7 +34,10 @@ function NavbarRoutes() {
                       className="w-10 h-10 rounded-full cursor-pointer"
                     />
                   ) : (
-                    <HiOutlineUserCircle className="text-3xl cursor-pointer" />
+                    <img
+                      src="/account.png"
+                      className="w-10 h-10 rounded-full cursor-pointer"
+                    />
                   )}
                 </div>
               </DropdownMenuTrigger>

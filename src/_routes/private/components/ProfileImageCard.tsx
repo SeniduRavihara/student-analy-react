@@ -17,7 +17,7 @@ const ProfileImageCard = () => {
       </CardHeader> */}
       <CardContent className="flex flex-col items-center justify-center text-[#858796]">
         <img
-          src={currentUser?.photoURL || ""}
+          src={currentUser?.photoURL || "/user.png"}
           className="w-36 h-36 rounded-full cursor-pointer"
         />
         <p className="text-center text-nowrap mt-2 text-xl">

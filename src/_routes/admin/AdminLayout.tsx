@@ -45,17 +45,17 @@ const AdminLayout = () => {
 
   return currentUserData.roles == "ADMIN" ? (
     <div className="">
-      <div className="hidden md:flex h-screen w-56 flex-col inset-y-0 fixed left-0 top-0 bg-red-500 z-50">
+      <div className="hidden md:flex h-screen w-56 flex-col inset-y-0 fixed left-0 top-0 z-50">
         <Sidebar />
       </div>
-      <div className="h-full flex flex-col md:ml-56 ">
+      <div className="min-h-screen flex flex-col md:ml-56">
         <div className="h-[80px] inset-y-0 w-full">
           <Navbar
             selectedYear={selectedYear}
             setSelectedYear={setSelectedYear}
           />
         </div>
-        <div className="w-full h-full">
+        <div className="w-full min-h-screen bg-[#ededed]">
           {/* <div className="w-full h-[2000px]"></div> */}
           <Outlet context={{ usersData, setSelectedYear, selectedYear }} />
         </div>

@@ -79,14 +79,42 @@ export const onExamUpdate = onDocumentUpdated(
 
 // --------------------------------------------------------------
 
+// export const deleteUserData = functions.auth.user().onDelete(async (user) => {
+//   const uid = user.uid;
+
+//   try {
+//     await db.collection("users").doc(uid).delete();
+//     console.log(`Successfully deleted user data for UID: ${uid}`);
+//   } catch (error) {
+//     console.error(`Error deleting user data for UID: ${uid}`, error);
+//   }
+// });
+
 export const deleteUserData = functions.auth.user().onDelete(async (user) => {
   const uid = user.uid;
 
   try {
+    // Reference to the 'exams' subcollection under the user
+    const examsCollectionRef = db.collection(`users/${uid}/exams`);
+
+    // Get all documents in the 'exams' subcollection
+    const examsSnapshot = await examsCollectionRef.get();
+
+    // Delete all documents in the 'exams' subcollection
+    const examDeletions = examsSnapshot.docs.map((doc) => doc.ref.delete());
+    await Promise.all(examDeletions);
+
+    // Delete the user's main document
     await db.collection("users").doc(uid).delete();
-    console.log(`Successfully deleted user data for UID: ${uid}`);
+
+    console.log(
+      `Successfully deleted user document and 'exams' subcollection for UID: ${uid}`
+    );
   } catch (error) {
-    console.error(`Error deleting user data for UID: ${uid}`, error);
+    console.error(
+      `Error deleting user data and subcollection for UID: ${uid}`,
+      error
+    );
   }
 });
 
