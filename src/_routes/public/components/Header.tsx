@@ -8,9 +8,9 @@ const Header = () => {
     <ul className="shadow-xl w-[90%] ml-auto mr-auto border-2 rounded-xl bg-[#e2f1e7c5] text-black h-[70px] flex justify-between items-center fixed top-5 backdrop-blur-xl left-0 right-0 z-50">
       <li
         onClick={() => navigate("/")}
-        className="text-2xl font-bold cursor-pointer text-[#243642]"
+        className="text-[40px] font-bold cursor-pointer text-[#243642]"
       >
-        EduAnalytics
+        🇵​​🇭​​🇾​6️⃣​🇱​​🇰​
       </li>
 
       <li>

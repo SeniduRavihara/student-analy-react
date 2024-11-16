@@ -12,6 +12,7 @@ import { registerStudent } from "@/firebase/api";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
+import { EXAM_YEARS } from "@/constants";
 
 const steps = ["Personal Details", "Exame Details", "Parent Details"];
 
@@ -30,7 +31,7 @@ const RegisterAsNewPage = () => {
   const [phone, setPhone] = useState("");
 
   const [school, setSchool] = useState("");
-  const [examYear, setExamYear] = useState("2024");
+  const [examYear, setExamYear] = useState(EXAM_YEARS[0].year);
   const [media, setMedia] = useState("sinhala");
   const [stream, setStream] = useState("maths");
 

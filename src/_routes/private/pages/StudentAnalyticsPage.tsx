@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { MarksChart } from "../components/charts/MarksChart";
-import { collection, onSnapshot } from "firebase/firestore";
+import { collection, onSnapshot, orderBy, query } from "firebase/firestore";
 import { db } from "@/firebase/config";
 import { useAuth } from "@/hooks/useAuth";
 import { ExamDataType } from "@/types";
@@ -13,7 +13,11 @@ const StudentAnalyticsPage = () => {
 
   useEffect(() => {
     if (currentUser) {
-      const collectionRef = collection(db, "users", currentUser?.uid, "exams");
+      const collectionRef = query(
+        collection(db, "users", currentUser?.uid, "exams"),
+        orderBy("createdAt", "asc")
+      );
+      // const collectionRef = collection(db, "users", currentUser?.uid, "exams");
       const unsubscribe = onSnapshot(collectionRef, (QuerySnapshot) => {
         const examsDataArr = QuerySnapshot.docs.map((doc) => ({
           ...doc.data(),
@@ -28,7 +32,7 @@ const StudentAnalyticsPage = () => {
   }, [currentUser]);
 
   return (
-    <div className="w-full h-full">
+    <div className="w-full h-full flex items-center justify-center p-4">
       {examsData && examsData.length > 0 ? (
         <MarksChart
           chartData={examsData.map(({ examName, examResult }) => ({

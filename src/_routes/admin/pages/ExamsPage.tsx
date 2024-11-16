@@ -32,6 +32,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { EXAM_YEARS } from "@/constants";
 
 type OutletContextType = {
   selectedYear: string;
@@ -42,12 +43,16 @@ const ExamsPage = () => {
   const [examsData, setExamsData] = useState<ExamTable[]>([]);
   const [examName, setExamName] = useState("");
   const [examDate, setExamDate] = useState<Date>();
-  const [examYear, setExamYear] = useState("2024");
+  const [examYear, setExamYear] = useState(EXAM_YEARS[0].year);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const { selectedYear } = useOutletContext<OutletContextType>();
 
   const navigate = useNavigate();
+
+  useEffect(() => {
+    console.log(examYear);
+  }, [examYear]);
 
   useEffect(() => {
     const collectionRef = collection(db, "exams");
@@ -67,6 +72,8 @@ const ExamsPage = () => {
   }, [selectedYear]);
 
   const onClickCreateExam = async () => {
+    // console.log(examYear);
+
     if (!examName || !examDate || !examYear) {
       toast({
         title: "Please fill all the fields",
@@ -74,23 +81,26 @@ const ExamsPage = () => {
       });
       return;
     }
+
     await createExam(examName, examDate, examYear);
+
     toast({
       title: "Exam created successfully",
       variant: "default",
     });
+
     setExamName("");
     setExamDate(undefined);
-    setExamYear("");
+    setExamYear(EXAM_YEARS[0].year);
     setIsDialogOpen(false);
   };
 
   return (
-    <div className="p-5 w-full h-full bg-[#ededed] overflow-auto">
+    <div className="p-4 w-full h-full bg-[#ededed] overflow-auto">
       <Card>
         <CardContent>
           <DataTable columns={columns(navigate)} data={examsData} />
-          
+
           <Button className="" onClick={() => setIsDialogOpen(true)}>
             Create New Exam
           </Button>
@@ -112,14 +122,23 @@ const ExamsPage = () => {
               onChange={(e) => setExamName(e.target.value)}
             />
 
-            <Select onValueChange={setExamYear} defaultValue="2024">
+            <Select
+              onValueChange={setExamYear}
+              defaultValue={EXAM_YEARS[0].year}
+              value={examYear}
+            >
               <SelectTrigger className="">
-                <SelectValue placeholder="2024 A/L" />
+                <SelectValue placeholder={EXAM_YEARS[0].year} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="2024">2024 A/L</SelectItem>
+                {EXAM_YEARS.map((year) => (
+                  <SelectItem key={year.year} value={year.year}>
+                    {year.label}
+                  </SelectItem>
+                ))}
+                {/* <SelectItem value="2024">2024 A/L</SelectItem>
                 <SelectItem value="2025">2025 A/L</SelectItem>
-                <SelectItem value="2026">2026 A/L</SelectItem>
+                <SelectItem value="2026">2026 A/L</SelectItem> */}
               </SelectContent>
             </Select>
 

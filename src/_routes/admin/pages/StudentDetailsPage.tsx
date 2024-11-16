@@ -1,71 +1,8 @@
-// import { DataTable } from "@/_routes/private/components/DataTable";
 import { columns } from "@/_routes/admin/components/student-data/Coloumns";
 import { UserDataType } from "@/types";
 import { DataTable } from "../components/student-data/DataTable";
 import { useOutletContext } from "react-router-dom";
-
-// const data: StudentTable[] = [
-//   {
-//     indexNo: "S001",
-//     name: "John Doe",
-//     email: "john.doe@example.com",
-//     lastResult: 85,
-//   },
-//   {
-//     indexNo: "S002",
-//     name: "Jane Smith",
-//     email: "jane.smith@example.com",
-//     lastResult: 90,
-//   },
-//   {
-//     indexNo: "S003",
-//     name: "Michael Brown",
-//     email: "michael.brown@example.com",
-//     lastResult: 78,
-//   },
-//   {
-//     indexNo: "S004",
-//     name: "Emily Davis",
-//     email: "emily.davis@example.com",
-//     lastResult: 92,
-//   },
-//   {
-//     indexNo: "S005",
-//     name: "David Wilson",
-//     email: "david.wilson@example.com",
-//     lastResult: 74,
-//   },
-//   {
-//     indexNo: "S006",
-//     name: "Sophia Johnson",
-//     email: "sophia.johnson@example.com",
-//     lastResult: 88,
-//   },
-//   {
-//     indexNo: "S007",
-//     name: "James Garcia",
-//     email: "james.garcia@example.com",
-//     lastResult: 81,
-//   },
-//   {
-//     indexNo: "S008",
-//     name: "Isabella Martinez",
-//     email: "isabella.martinez@example.com",
-//     lastResult: 95,
-//   },
-//   {
-//     indexNo: "S009",
-//     name: "Benjamin Lee",
-//     email: "benjamin.lee@example.com",
-//     lastResult: 76,
-//   },
-//   {
-//     indexNo: "S010",
-//     name: "Mia White",
-//     email: "mia.white@example.com",
-//     lastResult: 89,
-//   },
-// ];
+import { Card, CardContent } from "@/components/ui/card";
 
 type OutletContextType = {
   usersData: UserDataType[] | null;
@@ -77,19 +14,22 @@ const StudentDetailsPage = () => {
   console.log("users", usersData);
 
   return (
-    <div className="p-5 w-full h-full overflow-auto">
-      {/* <DataTable /> */}
-      {usersData && (
-        <DataTable
-          columns={columns}
-          data={usersData?.map((user) => ({
-            indexNo: user.regNo || "",
-            name: user.userName,
-            email: user.email,
-            lastResult: user.lastResult || 0,
-          }))}
-        />
-      )}
+    <div className="p-4 w-full h-full overflow-auto">
+      <Card>
+        <CardContent>
+          {usersData && (
+            <DataTable
+              columns={columns}
+              data={usersData?.map((user) => ({
+                indexNo: user.regNo || "",
+                name: user.userName,
+                email: user.email,
+                lastResult: user.lastResult || 0,
+              }))}
+            />
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 };

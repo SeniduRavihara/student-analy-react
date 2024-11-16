@@ -1,4 +1,10 @@
-import { collection, onSnapshot } from "firebase/firestore";
+import {
+  collection,
+  onSnapshot,
+  orderBy,
+  query,
+  where,
+} from "firebase/firestore";
 import { AvgChart } from "../components/charts/AvgChart";
 import { useEffect, useState } from "react";
 import { ExamDataType } from "@/types";
@@ -14,23 +20,28 @@ const AnalyticsPage = () => {
   const { selectedYear } = useOutletContext<OutletContextType>();
 
   useEffect(() => {
-    const collectionRef = collection(db, "exams");
-    const unsubscribe = onSnapshot(collectionRef, (QuerySnapshot) => {
-      const examsDataArr = (
-        QuerySnapshot.docs.map((doc) => ({
-          ...doc.data(),
-        })) as ExamDataType[]
-      ).filter((exam) => exam.examYear === selectedYear);
+    if (!selectedYear) return;
 
-      console.log("Sandali", examsDataArr);
+    const collectionRef = query(
+      collection(db, "exams"),
+      where("examYear", "==", selectedYear),
+      orderBy("createdAt", "asc")
+    );
+    const unsubscribe = onSnapshot(collectionRef, (querySnapshot) => {
+      const examsDataArr = querySnapshot.docs.map((doc) => ({
+        ...doc.data(),
+      })) as ExamDataType[];
+
+      console.log(examsDataArr);
+
       setExamsData(examsDataArr);
     });
 
     return unsubscribe;
-  }, [selectedYear]);
+  }, [selectedYear]); // Re-fetch only when selectedYear changes
 
   return (
-    <div className="bg-[#ededed] w-full h-full overflow-auto">
+    <div className="bg-[#ededed] w-full h-full overflow-auto items-center justify-center flex">
       {examsData && examsData.length > 0 ? (
         <AvgChart
           chartData={examsData.map(({ examName, avgResult }) => ({
