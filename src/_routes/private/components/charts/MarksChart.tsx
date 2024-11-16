@@ -7,6 +7,7 @@ import {
   XAxis,
   YAxis,
   Tooltip,
+  TooltipProps,
 } from "recharts";
 import {
   Card,
@@ -20,11 +21,30 @@ import {
 export const description =
   "A scrollable line chart showing average exam scores";
 
+// Custom tooltip component
+const CustomTooltip = ({
+  active,
+  payload,
+  label,
+}: TooltipProps<number, string>) => {
+  if (active && payload && payload.length) {
+    const data = payload[0]?.payload;
+    return (
+      <div className="p-2 bg-white border border-gray-200 rounded shadow-md text-sm">
+        <div className="font-semibold">{label}</div>
+        <div>Mark: {data?.Mark}</div>
+        <div>Average Result: {data?.avgResult}</div>
+      </div>
+    );
+  }
+  return null;
+};
+
 // Chart component
 export function MarksChart({
   chartData = [],
 }: {
-  chartData: Array<{ exam: string; Mark: number }>;
+  chartData: Array<{ exam: string; Mark: number; avgResult: number }>;
 }) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
@@ -77,7 +97,7 @@ export function MarksChart({
               tickMargin={8}
             />
             {/* Tooltip */}
-            <Tooltip />
+            <Tooltip content={<CustomTooltip />} />
             {/* Line for average marks */}
             <Line
               dataKey="Mark"

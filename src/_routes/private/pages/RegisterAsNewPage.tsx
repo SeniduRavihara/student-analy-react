@@ -121,6 +121,7 @@ const RegisterAsNewPage = () => {
         },
         currentUser?.uid
       );
+
       navigate("/dashboard");
       setActiveStep(0);
     }

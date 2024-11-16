@@ -164,7 +164,8 @@ export const registerStudent = async (data: UserInfoType, uid: string) => {
   const userInfoDocRef = doc(db, "users", uid);
 
   const regNo = await generateIndexNumber(uid, data.examYear);
-  console.log("REG_NO", regNo);
+  // console.log("REG_NO", regNo);
+  localStorage.setItem("regNo", regNo);
 
   try {
     await updateDoc(userInfoDocRef, {
@@ -324,13 +325,22 @@ export const setExamResults = async (
   // Update each student's record with mark, rank, and avgResult
   const studentPromises = sortedResults.map(async ({ userId, mark, rank }) => {
     const userExamRef = doc(db, `users/${userId}/exams`, examId);
+    const userRef = doc(db, "users", userId);
 
-    // Update with mark, rank, and avgResult for each student
-    return updateDoc(userExamRef, {
+    // Update the exam sub-collection document
+    const examUpdatePromise = updateDoc(userExamRef, {
       examResult: mark,
       rank: rank,
       avgResult: avgResult,
     });
+
+    // Update the user's main document with last rank and result
+    const userUpdatePromise = updateDoc(userRef, {
+      lastRank: rank,
+      lastResult: mark,
+    });
+
+    return Promise.all([examUpdatePromise, userUpdatePromise]);
   });
 
   // Update the main exam document with avgResult

@@ -7,6 +7,7 @@ import {
   XAxis,
   YAxis,
   Tooltip,
+  TooltipProps,
 } from "recharts";
 import {
   Card,
@@ -20,17 +21,23 @@ import {
 export const description =
   "A scrollable line chart showing average exam scores";
 
-// Sample chart data
-// const chartData = [
-//   { exam: "Exam 1", avgMark: 78 },
-//   { exam: "Exam 2", avgMark: 85 },
-//   { exam: "Exam 3", avgMark: 68 },
-//   { exam: "Exam 4", avgMark: 74 },
-//   { exam: "Exam 5", avgMark: 90 },
-//   { exam: "Exam 6", avgMark: 82 },
-//   { exam: "Exam 7", avgMark: 76 },
-//   { exam: "Exam 8", avgMark: 88 },
-// ];
+// Custom tooltip component
+const CustomTooltip = ({
+  active,
+  payload,
+  label,
+}: TooltipProps<number, string>) => {
+  if (active && payload && payload.length) {
+    const data = payload[0]?.payload;
+    return (
+      <div className="p-2 bg-white border border-gray-200 rounded shadow-md text-sm">
+        <div className="font-semibold">{label}</div>
+        <div>Average Result: {data?.avgMark}</div>
+      </div>
+    );
+  }
+  return null;
+};
 
 // Chart component
 export function AvgChart({
@@ -57,7 +64,12 @@ export function AvgChart({
       <CardContent className="flex">
         {/* Fixed Y-axis container */}
         <div className="flex items-center mr-4">
-          <LineChart width={50} height={300} data={chartData}>
+          <LineChart
+            width={50}
+            height={300}
+            data={chartData}
+            margin={{ top: 10, right: 10, bottom: 80, left: 5 }}
+          >
             <YAxis
               domain={[0, 100]}
               tickLine={false}
@@ -67,6 +79,7 @@ export function AvgChart({
                 value: "Average Mark",
                 angle: -90,
                 position: "insideLeft",
+                dy: 50,
               }}
             />
           </LineChart>
@@ -78,7 +91,7 @@ export function AvgChart({
             width={chartData.length * 100} // Extend width based on data points
             height={300}
             data={chartData}
-            margin={{ top: 10, bottom: 10 }}
+            margin={{ top: 10, bottom: 50 }}
           >
             <CartesianGrid strokeDasharray="3 3" />
             {/* X Axis for exam names */}
@@ -86,10 +99,15 @@ export function AvgChart({
               dataKey="exam"
               tickLine={false}
               axisLine={false}
-              tickMargin={8}
+              tickMargin={1}
+              angle={45} // Rotate the labels by -45 degrees
+              textAnchor="start" // Align labels properly
+              interval={0} // Ensure all labels are shown
+              // height={100}
+              className="text-[12px]"
             />
             {/* Tooltip */}
-            <Tooltip />
+            <Tooltip content={<CustomTooltip />} />
             {/* Line for average marks */}
             <Line
               dataKey="avgMark"
