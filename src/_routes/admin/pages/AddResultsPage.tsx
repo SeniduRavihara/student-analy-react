@@ -82,7 +82,7 @@ const AddResultsPage = () => {
   };
 
   return (
-    <div className="p-3 flex flex-col gap-3 items-center justify-center">
+    <div className="p-2 md:p-5 flex flex-col gap-3 items-center justify-center">
       {/* <h1>
         {toFullWidth(examName)} &nbsp;
         &#65330;&#65349;&#65363;&#65365;&#65356;&#65364;

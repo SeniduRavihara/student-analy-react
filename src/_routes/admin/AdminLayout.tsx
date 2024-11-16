@@ -49,13 +49,13 @@ const AdminLayout = () => {
         <Sidebar />
       </div>
       <div className="min-h-screen flex flex-col md:ml-56">
-        <div className="h-[80px] inset-y-0 w-full">
+        <div className="h-[80px] inset-y-0 w-full  fixed top-0 left-0 z-10">
           <Navbar
             selectedYear={selectedYear}
             setSelectedYear={setSelectedYear}
           />
         </div>
-        <div className="w-full min-h-screen bg-[#ededed]">
+        <div className="w-full min-h-screen bg-[#ededed] mt-[80px]">
           {/* <div className="w-full h-[2000px]"></div> */}
           <Outlet context={{ usersData, setSelectedYear, selectedYear }} />
         </div>

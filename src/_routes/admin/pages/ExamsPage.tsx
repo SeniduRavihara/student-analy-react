@@ -96,7 +96,7 @@ const ExamsPage = () => {
   };
 
   return (
-    <div className="p-4 w-full h-full bg-[#ededed] overflow-auto">
+    <div className="p-2 md:p-5 w-full h-full bg-[#ededed] overflow-auto">
       <Card>
         <CardContent>
           <DataTable columns={columns(navigate)} data={examsData} />

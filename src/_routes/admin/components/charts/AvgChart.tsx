@@ -49,7 +49,7 @@ export function AvgChart({
   }, []);
 
   return (
-    <Card className="w-full max-w-[600px]">
+    <Card className="w-full">
       <CardHeader>
         <CardTitle>Average Marks Per Exam</CardTitle>
         <CardDescription>Scrollable for multiple exams</CardDescription>

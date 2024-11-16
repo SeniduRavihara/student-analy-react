@@ -5,8 +5,8 @@ import "./ProfileSidebar.css";
 
 const ProfileSidebar = () => {
   return (
-    <Card className="w-[280px] h-full flex p-3 justify-center">
-      <CardContent className="flex flex-col items-center justify-between">
+    <Card className="w-full xl:w-[280px] h-full flex p-3 justify-center">
+      <CardContent className="flex flex-col md:flex-row xl:flex-col items-center justify-between">
         <ProfileImageCard />
 
         <div className=" flex items-center justify-between">

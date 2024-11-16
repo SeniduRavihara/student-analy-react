@@ -40,10 +40,10 @@ const DashboardPage = () => {
         <Sidebar />
       </div>
       <div className="min-h-screen flex flex-col md:ml-56">
-        <div className="h-[80px] inset-y-0 w-full">
+        <div className="h-[80px] inset-y-0 w-full fixed top-0 left-0 z-10">
           <Navbar />
         </div>
-        <div className="w-full min-h-screen bg-[#ededed]">
+        <div className="w-full min-h-screen bg-[#ededed] mt-[80px]">
           <Outlet />
         </div>
       </div>
