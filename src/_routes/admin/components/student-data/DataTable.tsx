@@ -29,6 +29,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -46,6 +47,16 @@ export function DataTable<TData, TValue>({
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = React.useState({});
+
+  const isMobile = useMediaQuery("(max-width: 768px)");
+
+  React.useEffect(() => {
+    // Hide specific columns on mobile
+    setColumnVisibility({
+      email: !isMobile,
+      lastResult: !isMobile,
+    });
+  }, [isMobile]);
 
   const table = useReactTable({
     data,
@@ -76,7 +87,7 @@ export function DataTable<TData, TValue>({
           onChange={(event) =>
             table.getColumn("indexNo")?.setFilterValue(event.target.value)
           }
-          className="max-w-sm"
+          className="max-w-sm mr-1"
         />
         <DropdownMenu>
           <DropdownMenuTrigger asChild>

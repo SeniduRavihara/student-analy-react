@@ -16,8 +16,8 @@ function NavbarRoutes() {
   const navigate = useNavigate();
 
   return (
-    <div className="flex gap-x-3 py-2 ml-auto items-center border bg-white px-5 rounded-full">
-      <span className="text-[#858796]">
+    <div className="flex w-10 h-10 md:w-auto md:h-auto md:gap-x-3 md:py-2 md:px-5 ml-auto items-center md:border md:bg-white rounded-full">
+      <span className="text-[#858796] hidden md:block">
         {currentUser?.displayName || currentUserData?.userName}
       </span>
       <div className="">

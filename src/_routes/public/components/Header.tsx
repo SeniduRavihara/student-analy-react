@@ -13,7 +13,7 @@ const Header = () => {
         🇵​​🇭​​🇾​6️⃣​🇱​​🇰​
       </li>
 
-      <li>
+      <li className="hidden md:flex">
         <ul className="flex space-x-5 items-center justify-center h-[70px] text-[#243642]">
           <li className="cursor-pointer hover:bg-accent px-3 py-2 rounded-lg duration-500">
             About

@@ -14,7 +14,7 @@ const StudentDetailsPage = () => {
   console.log("users", usersData);
 
   return (
-    <div className="p-4 w-full h-full overflow-auto">
+    <div className="p-2 md:p-5 w-full h-full overflow-auto">
       <Card>
         <CardContent>
           {usersData && (

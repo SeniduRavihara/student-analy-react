@@ -32,7 +32,7 @@ const StudentAnalyticsPage = () => {
   }, [currentUser]);
 
   return (
-    <div className="w-full h-full flex items-center justify-center p-4">
+    <div className="w-full h-full flex items-center justify-center p-2 md:p-5">
       {examsData && examsData.length > 0 ? (
         <MarksChart
           chartData={examsData.map(({ examName, examResult }) => ({
