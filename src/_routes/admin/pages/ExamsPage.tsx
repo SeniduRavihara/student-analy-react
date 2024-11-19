@@ -173,6 +173,8 @@ const ExamsPage = () => {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* <UpcomingExamCalendar /> */}
     </div>
   );
 };

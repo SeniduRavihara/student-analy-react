@@ -4,12 +4,11 @@ import { collection, onSnapshot, orderBy, query } from "firebase/firestore";
 import { db } from "@/firebase/config";
 import { useAuth } from "@/hooks/useAuth";
 import { ExamDataType } from "@/types";
+import StudentMarksCard from "../components/StudentMarksCard";
 
 const StudentAnalyticsPage = () => {
   const { currentUser } = useAuth();
   const [examsData, setExamsData] = useState<Array<ExamDataType> | null>(null);
-
-  console.log(examsData);
 
   useEffect(() => {
     if (currentUser) {
@@ -17,13 +16,11 @@ const StudentAnalyticsPage = () => {
         collection(db, "users", currentUser?.uid, "exams"),
         orderBy("createdAt", "asc")
       );
-      // const collectionRef = collection(db, "users", currentUser?.uid, "exams");
       const unsubscribe = onSnapshot(collectionRef, (QuerySnapshot) => {
         const examsDataArr = QuerySnapshot.docs.map((doc) => ({
           ...doc.data(),
         })) as ExamDataType[];
 
-        // console.log("Sandali", examsDataArr);
         setExamsData(examsDataArr);
       });
 
@@ -32,19 +29,36 @@ const StudentAnalyticsPage = () => {
   }, [currentUser]);
 
   return (
-    <div className="w-full h-full flex items-center justify-center p-2 md:p-5">
-      {examsData && examsData.length > 0 ? (
-        <MarksChart
-          chartData={examsData.map(({ examName, examResult, avgResult }) => ({
-            exam: examName,
-            Mark: examResult,
-            avgResult: avgResult ?? 0,
-          }))}
-        />
-      ) : (
-        <div>No exam data available</div>
-      )}
+    <div className="w-full h-full flex flex-col lg:flex-row items-center lg:items-start justify-center p-2 lg:p-5">
+      {/* Chart Container */}
+      <div className="w-full lg:w-2/3  p-3 rounded-md">
+        {examsData && examsData.length > 0 ? (
+          <MarksChart
+            chartData={examsData.map(({ examName, examResult, avgResult }) => ({
+              exam: examName,
+              Mark: examResult,
+              avgResult: avgResult ?? 0,
+            }))}
+          />
+        ) : (
+          <div className="text-center text-gray-500">
+            No exam data available
+          </div>
+        )}
+      </div>
+
+      {/* Student Marks Card Container */}
+      <div className="w-full lg:w-1/3 p-3  rounded-md">
+        {examsData ? (
+          <StudentMarksCard examsData={examsData} />
+        ) : (
+          <div className="text-center text-gray-500">
+            Loading student data...
+          </div>
+        )}
+      </div>
     </div>
   );
 };
+
 export default StudentAnalyticsPage;

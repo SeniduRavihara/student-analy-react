@@ -24,6 +24,10 @@ const DashboardPage = () => {
     }
   }, []);
 
+  // if (!currentUserData?.regNo) {
+  //   return <Navigate to="/register-as-new" />;
+  // }
+
   return (
     <div className="">
       <div className="hidden md:flex h-screen w-56 flex-col inset-y-0 fixed left-0 top-0 z-50">
