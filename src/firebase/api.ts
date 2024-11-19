@@ -347,6 +347,7 @@ export const setExamResults = async (
   const examRef = doc(db, `exams`, examId);
   const examPromise = updateDoc(examRef, {
     avgResult: avgResult,
+    examStatus: "completed",
   });
 
   // Wait for all updates to complete

@@ -12,7 +12,6 @@ import {
 import {
   Card,
   CardContent,
-  CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
@@ -55,11 +54,18 @@ export function AvgChart({
     }
   }, []);
 
+  // Add padding data points to fill the chart
+  const paddedChartData = [
+    { exam: "", avgMark: 0 }, // Padding at the beginning
+    ...chartData,
+    { exam: "", avgMark: 0 }, // Padding at the end
+  ];
+
   return (
     <Card className="w-full">
       <CardHeader>
         <CardTitle>Average Marks Per Exam</CardTitle>
-        <CardDescription>Scrollable for multiple exams</CardDescription>
+        {/* <CardDescription>Scrollable for multiple exams</CardDescription> */}
       </CardHeader>
       <CardContent className="flex">
         {/* Fixed Y-axis container */}
@@ -67,7 +73,7 @@ export function AvgChart({
           <LineChart
             width={50}
             height={300}
-            data={chartData}
+            data={paddedChartData}
             margin={{ top: 10, right: 10, bottom: 80, left: 5 }}
           >
             <YAxis
@@ -86,11 +92,11 @@ export function AvgChart({
         </div>
 
         {/* Scrollable chart container */}
-        <div className="overflow-x-auto" ref={scrollContainerRef}>
+        <div className="overflow-x-auto w-full" ref={scrollContainerRef}>
           <LineChart
-            width={chartData.length * 100} // Extend width based on data points
+            width={Math.max(600, chartData.length * 150)} // Ensure minimum width
             height={300}
-            data={chartData}
+            data={paddedChartData}
             margin={{ top: 10, bottom: 50 }}
           >
             <CartesianGrid strokeDasharray="3 3" />
@@ -103,7 +109,6 @@ export function AvgChart({
               angle={45} // Rotate the labels by -45 degrees
               textAnchor="start" // Align labels properly
               interval={0} // Ensure all labels are shown
-              // height={100}
               className="text-[12px]"
             />
             {/* Tooltip */}
