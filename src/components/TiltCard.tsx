@@ -12,19 +12,26 @@ const defaultOptions = {
   easing: "cubic-bezier(.03,.98,.52,.99)", // Easing on enter/exit.
 };
 
-const TiltCard = () => {
+const TiltCard = ({
+  content,
+}: {
+  content: { title: string; content: string };
+}) => {
   return (
     <Tilt
       options={defaultOptions}
       style={{
-        height: 250,
+        height: 350,
         width: 250,
-        boxShadow: "0 0 10px rgba(0, 0, 0, 0.5)",
-        background: "#E2F1E7",
+        boxShadow: "0 0 50px rgba(0, 0, 100, 0.3)",
+        background: "#fff",
         borderRadius: "10px",
       }}
     >
-      <div></div>
+      <div className="p-3 flex flex-col gap-4">
+        <h2 className="text-2xl font-bold text-center text-blue-800/50">{content.title}</h2>
+        <p className="text-md text-[#6C6B75] text-center">{content.content}</p>
+      </div>
     </Tilt>
   );
 };
