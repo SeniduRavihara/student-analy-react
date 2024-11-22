@@ -11,7 +11,7 @@ const Sidebar = () => {
           className="cursor-pointer text-[#E2F1E7] text-[40px]"
           onClick={() => navigate("/")}
         >
-          🇵​​🇭​​🇾​6️⃣​🇱​​🇰​
+          PHY6LK
         </span>
       </div>
 
