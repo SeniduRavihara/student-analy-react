@@ -5,7 +5,7 @@ const Sidebar = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="h-full border-r flex flex-col overflow-auto bg-[#243642] shadow-sm relative">
+    <div className="h-full border-r flex flex-col overflow-auto bg-[#3c3f6b] shadow-sm relative">
       <div className="p-6 h-20 flex items-center justify-center">
         <span
           className="cursor-pointer text-[#E2F1E7] text-[40px]"
