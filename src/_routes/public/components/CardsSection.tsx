@@ -39,9 +39,9 @@ const CardsSection = () => {
           ></path>
         </svg>
       </div> */}
-      <div className=" w-full h-[500px] flex justify-around items-center">
-        {cardContent.map((data) => (
-          <TiltCard content={data} />
+      <div className="w-full min-h-[500px] flex flex-wrap justify-center items-center gap-6 p-4 md:p-8">
+        {cardContent.map((data, index) => (
+          <TiltCard key={index} content={data} />
         ))}
       </div>
     </div>

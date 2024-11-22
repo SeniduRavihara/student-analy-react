@@ -28,8 +28,10 @@ const TiltCard = ({
         borderRadius: "10px",
       }}
     >
-      <div className="p-3 flex flex-col gap-4">
-        <h2 className="text-2xl font-bold text-center text-blue-800/50">{content.title}</h2>
+      <div className="p-3 flex flex-col gap-4 ">
+        <h2 className="text-2xl font-bold text-center text-blue-800/50">
+          {content.title}
+        </h2>
         <p className="text-md text-[#6C6B75] text-center">{content.content}</p>
       </div>
     </Tilt>

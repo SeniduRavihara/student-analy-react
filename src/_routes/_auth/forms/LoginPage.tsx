@@ -1,34 +1,32 @@
-import { loginSchema } from "@/schemas";
-import { z } from "zod";
-import { getRegisteredStatus, getUserRole, login } from "@/firebase/api";
-import { useNavigate } from "react-router-dom";
+
+// import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import Social from "../components/Social";
-import "./background.css";
+
 
 const LoginPage = () => {
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
 
-  // 2. Define a submit handler.
-  async function onSubmit(values: z.infer<typeof loginSchema>) {
-    try {
-      const user = await login(values);
-      const roles = await getUserRole(user.uid);
-      const isRegistered = await getRegisteredStatus(user.uid);
+  // // 2. Define a submit handler.
+  // async function onSubmit(values: z.infer<typeof loginSchema>) {
+  //   try {
+  //     const user = await login(values);
+  //     const roles = await getUserRole(user.uid);
+  //     const isRegistered = await getRegisteredStatus(user.uid);
 
-      if (roles && roles == "ADMIN") {
-        navigate("/admin");
-      } else {
-        if (isRegistered) {
-          navigate("/dashboard");
-        } else {
-          navigate("/register-as-new");
-        }
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  }
+  //     if (roles && roles == "ADMIN") {
+  //       navigate("/admin");
+  //     } else {
+  //       if (isRegistered) {
+  //         navigate("/dashboard");
+  //       } else {
+  //         navigate("/register-as-new");
+  //       }
+  //     }
+  //   } catch (error) {
+  //     console.log(error);
+  //   }
+  // }
 
   return (
     <Card className=" h-[500px] w-[90%] md:w-[900px] p-4">

@@ -5,6 +5,7 @@ import App from "./App.tsx";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { Toaster } from "./components/ui/toaster.tsx";
 // import "./styles/slider.css"
+import "./styles/background.css"
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
