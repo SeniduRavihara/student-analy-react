@@ -1,5 +1,4 @@
-import { FcGoogle } from "react-icons/fc";
-import { FaGithub } from "react-icons/fa";
+import { FaGoogle } from "react-icons/fa";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { getRegisteredStatus, getUserRole, googleSignIn } from "@/firebase/api";
@@ -24,19 +23,15 @@ const Social = () => {
   };
 
   return (
-    <div className="w-full flex justify-center items-center gap-x-2">
-      <Button
-        size="lg"
-        className="w-full"
-        variant="outline"
-        onClick={handleGooglesignin}
-      >
-        <FcGoogle className="h-5 w-5" />
-      </Button>
-      <Button size="lg" className="w-full" variant="outline" onClick={() => {}}>
-        <FaGithub className="h-5 w-5" />
-      </Button>
-    </div>
+    <Button
+      size="lg"
+      className="rounded-full px-5 py-4 bg-blue-500 text-white hover:bg-blue-400 text-lg"
+      variant="outline"
+      onClick={handleGooglesignin}
+    >
+      <FaGoogle className="text-2xl hover:text-muted-foreground" />
+      <div>Login with Google</div>
+    </Button>
   );
 };
 export default Social;
