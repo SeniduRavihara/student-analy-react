@@ -91,7 +91,7 @@ const Background: React.FC = () => {
   }, []);
 
   return (
-    <div className="bouncing-blobs-container w-screen h-screen -z-50 bg-[#E2F1E7]">
+    <div className="bouncing-blobs-container w-screen h-screen z-50">
       <div className="bouncing-blobs-glass"></div>
       <div className="bouncing-blobs">
         {/* Uncomment to add more blobs */}

@@ -1,113 +1,53 @@
-import { useForm } from "react-hook-form";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
 
-import { loginSchema } from "@/schemas";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import CardWrapper from "../components/CardWrapper";
-import { getRegisteredStatus, getUserRole, login } from "@/firebase/api";
-import { useNavigate } from "react-router-dom";
+// import { useNavigate } from "react-router-dom";
+import { Card, CardContent } from "@/components/ui/card";
+import Social from "../components/Social";
+
 
 const LoginPage = () => {
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
 
-  // 1. Define your form.
-  const form = useForm<z.infer<typeof loginSchema>>({
-    resolver: zodResolver(loginSchema),
-    defaultValues: {
-      email: "",
-      password: "",
-    },
-  });
+  // // 2. Define a submit handler.
+  // async function onSubmit(values: z.infer<typeof loginSchema>) {
+  //   try {
+  //     const user = await login(values);
+  //     const roles = await getUserRole(user.uid);
+  //     const isRegistered = await getRegisteredStatus(user.uid);
 
-  // 2. Define a submit handler.
-  async function onSubmit(values: z.infer<typeof loginSchema>) {
-    try {
-      const user = await login(values);
-      const roles = await getUserRole(user.uid);
-      const isRegistered = await getRegisteredStatus(user.uid)
-
-      if (roles && roles == "ADMIN") {
-        navigate("/admin");
-      } else {
-        if (isRegistered) {
-          navigate("/dashboard");
-        } else {
-          navigate("/register-as-new");
-        }
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  }
+  //     if (roles && roles == "ADMIN") {
+  //       navigate("/admin");
+  //     } else {
+  //       if (isRegistered) {
+  //         navigate("/dashboard");
+  //       } else {
+  //         navigate("/register-as-new");
+  //       }
+  //     }
+  //   } catch (error) {
+  //     console.log(error);
+  //   }
+  // }
 
   return (
-    <CardWrapper
-      headerLabel="Welcome back"
-      backButtonLabel="Don't have an account?"
-      backButtonHref="/signup"
-      showSocial
-    >
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          <div className="space-y-4">
-            <FormField
-              control={form.control}
-              name="email"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Email</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="email"
-                      placeholder="john.doe@example.com"
-                      // disabled={isPending}
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+    <Card className=" h-[500px] w-[90%] md:w-[900px] p-4">
+      <CardContent className="flex gap-5 items-center justify-between w-full h-full p-0">
+        <img
+          src="/loginImage.jpg"
+          alt=""
+          className="h-[450px] object-cover rounded-l-xl hidden md:block"
+        />
 
-            <FormField
-              control={form.control}
-              name="password"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Password</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="password"
-                      // disabled={isPending}
-                      placeholder="password"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+        <div className="flex flex-col items-center justify-between w-full h-full">
+          <div className="flex flex-col items-center justify-between">
+            <img src="./pasan.png" alt="" className="w-64" />
+            <img src="/physics_nam_think.png" alt="" className="w-56 mt-4" />
+            <img src="./loginWadana.png" alt="" className="w-64" />
           </div>
-
-          {/* <FormError message={error} />
-          <FormSuccess message={success} /> */}
-
-          <Button type="submit" className="w-full">
-            Login
-          </Button>
-        </form>
-      </Form>
-    </CardWrapper>
+          <Social />
+          <p className="text-sm font-bold">Hotline : 0779556843</p>
+        </div>
+      </CardContent>
+    </Card>
   );
 };
 export default LoginPage;

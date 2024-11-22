@@ -4,7 +4,7 @@ import { collection, onSnapshot, orderBy, query } from "firebase/firestore";
 import { db } from "@/firebase/config";
 import { useAuth } from "@/hooks/useAuth";
 import { ExamDataType } from "@/types";
-import StudentMarksCard from "../components/StudentMarksCard";
+// import StudentMarksCard from "../components/StudentMarksCard";
 
 const StudentAnalyticsPage = () => {
   const { currentUser } = useAuth();
@@ -47,8 +47,8 @@ const StudentAnalyticsPage = () => {
         )}
       </div>
 
-      {/* Student Marks Card Container */}
-      <div className="w-full lg:w-1/3 p-3  rounded-md">
+      {/* TODO: Student Marks Card Container */}
+      {/* <div className="w-full lg:w-1/3 p-3  rounded-md">
         {examsData ? (
           <StudentMarksCard examsData={examsData} />
         ) : (
@@ -56,7 +56,7 @@ const StudentAnalyticsPage = () => {
             Loading student data...
           </div>
         )}
-      </div>
+      </div> */}
     </div>
   );
 };

@@ -13,12 +13,14 @@ import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { EXAM_YEARS } from "@/constants";
+import { CircularProgress } from "@mui/material";
 
 const steps = ["Personal Details", "Exame Details", "Parent Details"];
 
 const RegisterAsNewPage = () => {
   const { currentUser } = useAuth();
   const { toast } = useToast();
+    const [loading, setLoading] = useState(false);
 
   const [activeStep, setActiveStep] = useState(0);
   const [skipped, setSkipped] = useState(new Set<number>());
@@ -27,7 +29,7 @@ const RegisterAsNewPage = () => {
   const [lastName, setLastName] = useState("");
   const [whatsapp, setWhatsapp] = useState("");
   const [nic, setNic] = useState("");
-  const [bDate, setBDate] = useState<Date>();
+  const [bDate, setBDate] = useState<Date>(new Date());
   const [phone, setPhone] = useState("");
 
   const [school, setSchool] = useState("");
@@ -79,6 +81,7 @@ const RegisterAsNewPage = () => {
 
   const handleSubmit = async () => {
     if (currentUser) {
+      setLoading(true);
       console.log(gurdianName, gurdianPhone, address);
 
       if (
@@ -124,12 +127,13 @@ const RegisterAsNewPage = () => {
 
       navigate("/dashboard");
       setActiveStep(0);
+      setLoading(false);
     }
   };
 
   return (
     <div className="w-screen h-screen flex justify-center items-center">
-      <Card className="w-[80%] h-[80%] flex p-3 justify-center bg-[#E2F1E7]">
+      <Card className="w-[80%] h-[80%] flex p-3 justify-center bg-[#ffffff]">
         <CardContent className="w-full">
           <div className="w-full h-full relative">
             <Stepper activeStep={activeStep}>
@@ -229,7 +233,7 @@ const RegisterAsNewPage = () => {
                     {activeStep < steps.length - 1 ? (
                       <Button onClick={handleNext}>Next</Button>
                     ) : (
-                      <Button onClick={handleSubmit}>Submit</Button>
+                       <Button onClick={handleSubmit} disabled={loading}>{loading ? <CircularProgress />: "Submit"}</Button>
                     )}
                   </Box>
                 </Fragment>
@@ -238,6 +242,21 @@ const RegisterAsNewPage = () => {
           </div>
         </CardContent>
       </Card>
+
+      <div className="area">
+        <ul className="circles">
+          <li></li>
+          <li></li>
+          <li></li>
+          <li></li>
+          <li></li>
+          <li></li>
+          <li></li>
+          <li></li>
+          <li></li>
+          <li></li>
+        </ul>
+      </div>
     </div>
   );
 };

@@ -1,29 +1,18 @@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { format } from "date-fns";
-import { Calendar as CalendarIcon } from "lucide-react";
-
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 
 type PersonalDetailsFormProps = {
   firstName: string;
   lastName: string;
   whatsapp: string;
   nic: string;
-  bDate: Date | undefined;
+  bDate: Date;
   phone: string;
   setFirstName: (firstName: string) => void;
   setLastName: (lastName: string) => void;
   setWhatsapp: (whatsapp: string) => void;
   setNic: (nic: string) => void;
-  setBDate: (bDate: Date | undefined) => void;
+  setBDate: (bDate: Date) => void;
   setPhone: (phone: string) => void;
 };
 
@@ -41,6 +30,21 @@ const PersonalDetailsForm = ({
   setBDate,
   setPhone,
 }: PersonalDetailsFormProps) => {
+  // Convert Date object to string in "YYYY-MM-DD" format
+  const formatDate = (date: Date | undefined): string => {
+    if (!date) return "";
+    return date.toISOString().split("T")[0];
+  };
+
+  // Handle date input change and convert it back to a Date object
+  const handleDateChange = (dateString: string) => {
+    if (dateString) {
+      setBDate(new Date(dateString));
+    } else {
+      setBDate(new Date());
+    }
+  };
+
   return (
     <div className="w-[80%] ml-auto mr-auto mt-5 text-[#243642] flex flex-col gap-3 md:grid grid-cols-1 md:grid-cols-2 text-left">
       <div>
@@ -68,7 +72,7 @@ const PersonalDetailsForm = ({
           value={lastName}
           onChange={(e) => setLastName(e.target.value)}
           required
-          placeholder="name"
+          placeholder="Last Name"
           className="focus-visible:ring-blue-500"
         />
       </div>
@@ -119,33 +123,20 @@ const PersonalDetailsForm = ({
       </div>
 
       <div>
-        <Label htmlFor="bdate" className="text-[#787e81]">
-          WhatsApp Number
+        <Label htmlFor="bDate" className="text-[#787e81]">
+          Birth Date
         </Label>
-        <Popover>
-          <PopoverTrigger asChild>
-            <Button
-              variant={"outline"}
-              className={cn(
-                "w-full justify-start text-left font-normal",
-                !bDate && "text-muted-foreground"
-              )}
-            >
-              <CalendarIcon />
-              {bDate ? format(bDate, "PPP") : <span>Pick a date</span>}
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-auto p-0">
-            <Calendar
-              mode="single"
-              selected={bDate}
-              onSelect={setBDate}
-              initialFocus
-            />
-          </PopoverContent>
-        </Popover>
+        <Input
+          type="date"
+          id="bDate"
+          value={formatDate(bDate)} // Convert Date to string
+          onChange={(e) => handleDateChange(e.target.value)} // Convert string back to Date
+          required
+          className="focus-visible:ring-blue-500 text-[#243642] bg-white rounded-md border border-gray-300 shadow-sm"
+        />
       </div>
     </div>
   );
 };
+
 export default PersonalDetailsForm;
