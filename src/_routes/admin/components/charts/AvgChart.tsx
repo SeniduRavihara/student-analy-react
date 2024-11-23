@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { TrendingUp } from "lucide-react";
 import {
   CartesianGrid,
@@ -45,6 +45,7 @@ export function AvgChart({
   chartData: Array<{ exam: string; avgMark: number }>;
 }) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const [widthMultiplier, setWidthMultiplier] = useState(50); // State for chart width multiplier
 
   useEffect(() => {
     // Scroll to the end on component mount
@@ -65,63 +66,80 @@ export function AvgChart({
     <Card className="w-full">
       <CardHeader>
         <CardTitle>Average Marks Per Exam</CardTitle>
-        {/* <CardDescription>Scrollable for multiple exams</CardDescription> */}
       </CardHeader>
-      <CardContent className="flex">
-        {/* Fixed Y-axis container */}
-        <div className="flex items-center mr-4">
-          <LineChart
-            width={50}
-            height={300}
-            data={paddedChartData}
-            margin={{ top: 10, right: 10, bottom: 80, left: 5 }}
-          >
-            <YAxis
-              domain={[0, 100]}
-              tickLine={false}
-              axisLine={false}
-              tickMargin={8}
-              label={{
-                value: "Average Mark",
-                angle: -90,
-                position: "insideLeft",
-                dy: 50,
-              }}
-            />
-          </LineChart>
+      <CardContent className="flex flex-col gap-4">
+        {/* Slider to adjust width */}
+        <div className="flex items-center gap-2">
+          <label htmlFor="chart-slider" className="text-sm">
+            Adjust Chart Width
+          </label>
+          <input
+            id="chart-slider"
+            type="range"
+            min={100} // Minimum width per data point
+            max={300} // Maximum width per data point
+            value={widthMultiplier}
+            onChange={(e) => setWidthMultiplier(Number(e.target.value))}
+            className="w-full"
+          />
         </div>
 
-        {/* Scrollable chart container */}
-        <div className="overflow-x-auto w-full" ref={scrollContainerRef}>
-          <LineChart
-            width={Math.max(600, chartData.length * 150)} // Ensure minimum width
-            height={300}
-            data={paddedChartData}
-            margin={{ top: 10, bottom: 50 }}
-          >
-            <CartesianGrid strokeDasharray="3 3" />
-            {/* X Axis for exam names */}
-            <XAxis
-              dataKey="exam"
-              tickLine={false}
-              axisLine={false}
-              tickMargin={1}
-              angle={45} // Rotate the labels by -45 degrees
-              textAnchor="start" // Align labels properly
-              interval={0} // Ensure all labels are shown
-              className="text-[12px]"
-            />
-            {/* Tooltip */}
-            <Tooltip content={<CustomTooltip />} />
-            {/* Line for average marks */}
-            <Line
-              dataKey="avgMark"
-              type="linear"
-              stroke="hsl(210, 70%, 50%)"
-              strokeWidth={2}
-              dot={false}
-            />
-          </LineChart>
+        <div className="flex">
+          {/* Fixed Y-axis container */}
+          <div className="flex items-center mr-4">
+            <LineChart
+              width={50}
+              height={300}
+              data={paddedChartData}
+              margin={{ top: 10, right: 10, bottom: 80, left: 5 }}
+            >
+              <YAxis
+                domain={[0, 100]}
+                tickLine={false}
+                axisLine={false}
+                tickMargin={8}
+                label={{
+                  value: "Average Mark",
+                  angle: -90,
+                  position: "insideLeft",
+                  dy: 50,
+                }}
+              />
+            </LineChart>
+          </div>
+
+          {/* Scrollable chart container */}
+          <div className="overflow-x-auto w-full" ref={scrollContainerRef}>
+            <LineChart
+              width={Math.max(
+                widthMultiplier,
+                chartData.length * widthMultiplier
+              )} // Dynamic width
+              height={300}
+              data={paddedChartData}
+              margin={{ top: 10, bottom: 50 }}
+            >
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis
+                dataKey="exam"
+                tickLine={false}
+                axisLine={false}
+                tickMargin={1}
+                angle={45}
+                textAnchor="start"
+                interval={0}
+                className="text-[12px]"
+              />
+              <Tooltip content={<CustomTooltip />} />
+              <Line
+                dataKey="avgMark"
+                type="linear"
+                stroke="hsl(210, 70%, 50%)"
+                strokeWidth={2}
+                dot={false}
+              />
+            </LineChart>
+          </div>
         </div>
       </CardContent>
       <CardFooter className="flex-col items-start gap-2 text-sm">
