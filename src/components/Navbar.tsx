@@ -27,7 +27,9 @@ function Navbar({ selectedYear, setSelectedYear }: NavbarProps) {
     <div className="p-4 md:ml-56 border-b h-full flex items-center bg-[#ededed] shadow-sm">
       <MobileSidebar />
 
-      <h1 className="text-[#00A6ED]">{toRoundLettersAndNumbers(headerText?? "")}</h1>
+      <h1 className="text-[#00A6ED]">
+        {toRoundLettersAndNumbers(headerText ?? "")}
+      </h1>
 
       {currentUserData?.roles == "ADMIN" && selectedYear && setSelectedYear ? (
         <div className="ml-5 md:flex items-center gap-x-2">

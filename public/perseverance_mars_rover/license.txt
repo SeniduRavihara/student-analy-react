@@ -1,0 +1,11 @@
+Model Information:
+* title:	Perseverance Mars rover
+* source:	https://sketchfab.com/3d-models/perseverance-mars-rover-53034dff0df04f698f2a5d532366adc4
+* author:	Cybertron B-127 (https://sketchfab.com/robo-reboot)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Perseverance Mars rover" (https://sketchfab.com/3d-models/perseverance-mars-rover-53034dff0df04f698f2a5d532366adc4) by Cybertron B-127 (https://sketchfab.com/robo-reboot) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
