@@ -33,6 +33,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { EXAM_YEARS } from "@/constants";
+import UpcomingExamCalendar from "@/components/UpcomingExamCalendar";
 
 type OutletContextType = {
   selectedYear: string;
@@ -96,7 +97,7 @@ const ExamsPage = () => {
   };
 
   return (
-    <div className="p-2 md:p-5 w-full h-full bg-[#ededed] overflow-auto">
+    <div className="p-2 md:p-5 w-full h-full bg-[#ededed] overflow-auto flex flex-col gap-5 mb-10">
       <Card>
         <CardContent>
           <DataTable columns={columns(navigate)} data={examsData} />
@@ -174,7 +175,7 @@ const ExamsPage = () => {
         </DialogContent>
       </Dialog>
 
-      {/* <UpcomingExamCalendar /> */}
+      <UpcomingExamCalendar />
     </div>
   );
 };
