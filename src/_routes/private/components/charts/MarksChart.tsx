@@ -94,7 +94,11 @@ export function MarksChart({
               dataKey="exam"
               tickLine={false}
               axisLine={false}
-              tickMargin={8}
+              tickMargin={1}
+              angle={45}
+              textAnchor="start"
+              interval={0}
+              className="text-[12px]"
             />
             {/* Tooltip */}
             <Tooltip content={<CustomTooltip />} />

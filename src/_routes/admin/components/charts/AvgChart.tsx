@@ -45,7 +45,10 @@ export function AvgChart({
   chartData: Array<{ exam: string; avgMark: number }>;
 }) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const [widthMultiplier, setWidthMultiplier] = useState(50); // State for chart width multiplier
+  const [screenWidth] = useState(window.innerWidth);
+  const [widthMultiplier, setWidthMultiplier] = useState(screenWidth/4 + 10); // State for chart width multiplier
+
+  console.log(widthMultiplier, screenWidth);
 
   useEffect(() => {
     // Scroll to the end on component mount

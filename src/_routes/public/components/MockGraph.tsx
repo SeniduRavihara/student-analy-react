@@ -4,7 +4,6 @@ import {
   LineChart,
   XAxis,
   YAxis,
-  Tooltip,
 } from "recharts";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { useEffect, useState } from "react";
@@ -75,10 +74,14 @@ export default function MockGraph() {
             dataKey="exam"
             tickLine={false}
             axisLine={false}
-            tickMargin={8}
+            tickMargin={1}
+            angle={45}
+            textAnchor="start"
+            interval={0}
+            className="text-[12px]"
           />
           {/* Tooltip */}
-          <Tooltip />
+          {/* <Tooltip /> */}
           {/* Line for average marks */}
           <Line
             dataKey="Mark"
