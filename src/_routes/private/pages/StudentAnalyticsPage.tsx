@@ -4,6 +4,7 @@ import { collection, onSnapshot, orderBy, query } from "firebase/firestore";
 import { db } from "@/firebase/config";
 import { useAuth } from "@/hooks/useAuth";
 import { ExamDataType } from "@/types";
+import UpcomingExamCalendar from "@/components/UpcomingExamCalendar";
 // import StudentMarksCard from "../components/StudentMarksCard";
 
 const StudentAnalyticsPage = () => {
@@ -57,6 +58,8 @@ const StudentAnalyticsPage = () => {
           </div>
         )}
       </div> */}
+
+      <UpcomingExamCalendar />
     </div>
   );
 };
