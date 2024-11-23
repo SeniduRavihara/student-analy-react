@@ -1,4 +1,5 @@
 import TiltCard from "@/components/TiltCard";
+import { forwardRef } from "react";
 
 const cardContent = [
   {
@@ -23,9 +24,9 @@ const cardContent = [
   },
 ];
 
-const CardsSection = () => {
+const CardsSection = forwardRef<HTMLDivElement>((_props, ref) => {
   return (
-    <div className="w-full h-full">
+    <div className="w-full h-full" ref={ref}>
       {/* <div>
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -46,5 +47,5 @@ const CardsSection = () => {
       </div>
     </div>
   );
-};
+});
 export default CardsSection;

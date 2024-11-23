@@ -3,25 +3,33 @@ import Header from "../components/Header";
 import HeroSection from "../components/HeroSection";
 import CardsSection from "../components/CardsSection";
 import Footer from "../components/Footer";
-import { EarthCanvas, StarsCanvas } from "@/components/canvas";
+// import { EarthCanvas, StarsCanvas } from "@/components/canvas";
+import GraphAnalysisSection from "../components/GraphAnalysisSection";
+import { useRef } from "react";
 // import BlogSlider from "../components/BlogSlider";
 
 const HomePage = () => {
+  const footerRef = useRef<HTMLDivElement>(null);
+  const cardsRef = useRef<HTMLDivElement>(null);
+
   return (
     <div className="w-full bg-[#ffffff]">
-      <Header />
+      <Header footerRef={footerRef} cardsRef={cardsRef} />
       <HeroSection />
-      <CardsSection />
+      <CardsSection ref={cardsRef} />
       {/* <BlogSlider /> */}
       {/* <Background /> */}
 
       {/* <ComputerCanvas /> */}
-      <EarthCanvas />
+      {/* <EarthCanvas /> */}
       {/* <RoverCanvas /> */}
       {/* <BallCanvas /> */}
-      <StarsCanvas />
 
-      <Footer />
+      <GraphAnalysisSection />
+
+      {/* <StarsCanvas /> */}
+
+      <Footer ref={footerRef} />
     </div>
   );
 };

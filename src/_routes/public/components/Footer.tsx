@@ -1,6 +1,8 @@
-const Footer = () => {
+import { forwardRef } from "react";
+
+const Footer = forwardRef<HTMLDivElement>((_props, ref) => {
   return (
-    <footer className="bg-[#1e2935] text-white py-4 mt-auto">
+    <footer ref={ref} className="bg-[#1e2935] text-white py-4 mt-auto">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Top Section */}
         <div className="flex flex-col md:flex-row justify-between items-center gap-4">
@@ -8,17 +10,17 @@ const Footer = () => {
           <div className="text-xl font-semibold">SmartPhy6lk</div>
 
           {/* Links Section */}
-          <div className="flex flex-wrap justify-center md:justify-end gap-2 md:gap-6 text-sm">
-            <a href="#" className="hover:text-gray-400 transition">
+          <div className="flex flex-wrap justify-center md:justify-end gap-2 md:gap-6 text-sm ">
+            <a href="#" className="hover:text-gray-400 transition text-white">
               About Us
             </a>
-            <a href="#" className="hover:text-gray-400 transition">
+            <a href="#" className="hover:text-gray-400 transition text-white">
               Services
             </a>
-            <a href="#" className="hover:text-gray-400 transition">
+            <a href="#" className="hover:text-gray-400 transition text-white">
               Blog
             </a>
-            <a href="#" className="hover:text-gray-400 transition">
+            <a href="#" className="hover:text-gray-400 transition text-white">
               Contact
             </a>
           </div>
@@ -33,6 +35,6 @@ const Footer = () => {
       </div>
     </footer>
   );
-};
+});
 
 export default Footer;
