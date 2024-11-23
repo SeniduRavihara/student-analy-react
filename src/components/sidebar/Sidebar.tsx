@@ -11,7 +11,7 @@ const Sidebar = () => {
           className="cursor-pointer text-[#E2F1E7] text-[40px]"
           onClick={() => navigate("/")}
         >
-          PHY6LK
+          <img src="/PHY6LK2.png" alt="" className="w-[200px] h-[80px]" />
         </span>
       </div>
 

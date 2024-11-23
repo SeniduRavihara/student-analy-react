@@ -26,7 +26,7 @@ const Header = ({
         onClick={() => navigate("/")}
         className="text-[30px] sm:text-[45px] font-bold cursor-pointer text-[#243642]"
       >
-        PHY6LK
+        <img src="/PHY6LK.png" alt="" className="w-[150px] h-[50px] md:w-[200px] md:h-[80px]" />
       </li>
 
       <li className="hidden md:flex text-white">
