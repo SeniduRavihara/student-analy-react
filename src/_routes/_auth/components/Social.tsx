@@ -11,6 +11,8 @@ const Social = () => {
     const roles = await getUserRole(user.uid);
     const isRegistered = await getRegisteredStatus(user.uid);
 
+    console.log("REGISTERED", isRegistered);
+
     if (roles && roles == "ADMIN") {
       navigate("/admin");
     } else {
