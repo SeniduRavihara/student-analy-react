@@ -54,10 +54,15 @@ const ProfileDropdown = () => {
                   <SquareMenu className="mr-2 h-4 w-4 text-[#15238f79]" />
                   <span className="text-[#65656d]">Admin Dashboard</span>
                 </DropdownMenuItem>
-              ) : (
+              ) : currentUserData?.registered ? (
                 <DropdownMenuItem onClick={() => navigate("/dashboard")}>
                   <SquareMenu className="mr-2 h-4 w-4 text-[#d1d3e2]" />
                   <span className="text-[#65656d]">Dashboard</span>
+                </DropdownMenuItem>
+              ) : (
+                <DropdownMenuItem onClick={() => navigate("/register-as-new")}>
+                  <SquareMenu className="mr-2 h-4 w-4 text-[#d1d3e2]" />
+                  <span className="text-[#65656d]">Register</span>
                 </DropdownMenuItem>
               )}
               <DropdownMenuSeparator className="bg-[#d1d3e2]" />

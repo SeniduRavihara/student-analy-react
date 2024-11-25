@@ -8,10 +8,11 @@ const Sidebar = () => {
     <div className="h-full border-r flex flex-col overflow-auto shadow-sm relative">
       <div className="p-6 h-20 flex items-center justify-center">
         <span
-          className="cursor-pointer text-[#E2F1E7] text-[40px]"
+          className="cursor-pointer text-[#E2F1E7] text-[40px] font-extrabold"
           onClick={() => navigate("/")}
         >
-          <img src="/PHY6LK2.png" alt="" className="w-[200px] h-[80px]" />
+          PHY6LK
+          {/* <img src="/PHY6LK2.png" alt="" className="w-[200px] h-[80px]" /> */}
         </span>
       </div>
 

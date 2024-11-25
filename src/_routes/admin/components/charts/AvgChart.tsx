@@ -46,9 +46,9 @@ export function AvgChart({
 }) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [screenWidth] = useState(window.innerWidth);
-  const [widthMultiplier, setWidthMultiplier] = useState(screenWidth/4 + 10); // State for chart width multiplier
+  const [widthMultiplier, setWidthMultiplier] = useState(screenWidth / 4 + 10); // State for chart width multiplier
 
-  console.log(widthMultiplier, screenWidth);
+  // console.log(widthMultiplier, screenWidth);
 
   useEffect(() => {
     // Scroll to the end on component mount
@@ -92,9 +92,10 @@ export function AvgChart({
           <div className="flex items-center mr-4">
             <LineChart
               width={50}
-              height={300}
+              height={400}
               data={paddedChartData}
-              margin={{ top: 10, right: 10, bottom: 80, left: 5 }}
+              margin={{ top: 1, right: 10, bottom: 120, left: 5 }}
+              // className="gap-10"
             >
               <YAxis
                 domain={[0, 100]}
@@ -118,9 +119,9 @@ export function AvgChart({
                 widthMultiplier,
                 chartData.length * widthMultiplier
               )} // Dynamic width
-              height={300}
+              height={400}
               data={paddedChartData}
-              margin={{ top: 10, bottom: 50 }}
+              margin={{ top: 10, bottom: 100 }}
             >
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis

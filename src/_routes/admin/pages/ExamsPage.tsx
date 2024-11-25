@@ -22,7 +22,7 @@ import { CalendarIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { toast } from "@/hooks/use-toast";
-import { collection, onSnapshot } from "firebase/firestore";
+import { collection, onSnapshot, orderBy, query } from "firebase/firestore";
 import { db } from "@/firebase/config";
 import { useNavigate, useOutletContext } from "react-router-dom";
 import {
@@ -47,17 +47,23 @@ const ExamsPage = () => {
   const [examYear, setExamYear] = useState(EXAM_YEARS[0].year);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
+  // const [loading, setLoading] = useState(false);
+
   const { selectedYear } = useOutletContext<OutletContextType>();
 
   const navigate = useNavigate();
 
-  useEffect(() => {
-    console.log(examYear);
-  }, [examYear]);
+  // useEffect(() => {
+  //   console.log(examYear);
+  // }, [examYear]);
 
   useEffect(() => {
     const collectionRef = collection(db, "exams");
-    const unsubscribe = onSnapshot(collectionRef, (QuerySnapshot) => {
+
+    // Add query to sort by `createdAt` in ascending order
+    const q = query(collectionRef, orderBy("createdAt", "desc"));
+
+    const unsubscribe = onSnapshot(q, (QuerySnapshot) => {
       const examsDataArr = (
         QuerySnapshot.docs.map((doc) => ({
           ...doc.data(),

@@ -30,7 +30,7 @@ const AnalyticsPage = () => {
     const collectionRef = query(
       collection(db, "exams"),
       where("examYear", "==", selectedYear),
-      orderBy("createdAt", "asc")
+      orderBy("examDate", "asc")
     );
     const unsubscribe = onSnapshot(
       collectionRef,
@@ -40,6 +40,8 @@ const AnalyticsPage = () => {
         })) as ExamDataType[];
 
         setExamsData(examsDataArr);
+        console.log(examsDataArr);
+        
         setLoading(false); // Data fetched
       },
       (error) => {

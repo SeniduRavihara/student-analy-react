@@ -15,10 +15,7 @@ import { Button } from "@/components/ui/button";
 import { setExamResults } from "@/firebase/api";
 import { onSnapshot, doc } from "firebase/firestore";
 import { db } from "@/firebase/config";
-// import {
-//   toRoundLettersAndNumbers,
-//   toSquareLettersAndNumbers,
-// } from "@/lib/utils";
+import { Switch } from "@/components/ui/switch";
 
 type OutletContextType = {
   usersData: UserDataInAdminType[] | null;
@@ -29,11 +26,10 @@ const toFullWidth = (text: string) => {
     .split("")
     .map((char) => {
       const code = char.charCodeAt(0);
-      // Convert A-Z, a-z, and 0-9 to full-width
       if (code >= 33 && code <= 126) {
         return String.fromCharCode(code + 65248);
       }
-      return char; // Return other characters (e.g., spaces) as is
+      return char;
     })
     .join("");
 };
@@ -42,7 +38,7 @@ const AddResultsPage = () => {
   const { examIdName } = useParams();
   const { usersData } = useOutletContext<OutletContextType>();
   const [marks, setMarks] = useState<Record<string, number>>({});
-
+  const [absentStatus, setAbsentStatus] = useState<Record<string, boolean>>({});
   const navigate = useNavigate();
 
   const examId = examIdName?.split("-")[0];
@@ -51,11 +47,9 @@ const AddResultsPage = () => {
   useEffect(() => {
     if (!examId || !usersData) return;
 
-    // Subscribe to changes for each user's exam record in real time
     const unsubscribes = usersData.map(({ uid }) => {
       const userExamDocRef = doc(db, `users/${uid}/exams`, examId);
 
-      // Listen for changes in each user's exam document
       return onSnapshot(userExamDocRef, (docSnapshot) => {
         if (docSnapshot.exists()) {
           const data = docSnapshot.data();
@@ -63,11 +57,14 @@ const AddResultsPage = () => {
             ...prevMarks,
             [uid]: data.examResult || 0,
           }));
+          setAbsentStatus((prevStatus) => ({
+            ...prevStatus,
+            [uid]: data.isAbsent || false,
+          }));
         }
       });
     });
 
-    // Cleanup on unmount
     return () => unsubscribes.forEach((unsubscribe) => unsubscribe());
   }, [examId, usersData]);
 
@@ -78,9 +75,33 @@ const AddResultsPage = () => {
     }));
   };
 
+  const handleAbsentToggle = (uid: string) => {
+    setAbsentStatus((prev) => {
+      const isAbsent = !prev[uid];
+      return {
+        ...prev,
+        [uid]: isAbsent,
+      };
+    });
+
+    setMarks((prev) => ({
+      ...prev,
+      [uid]: 0, // Reset marks to 0 if absent
+    }));
+  };
+
   const handleSubmitMarks = async () => {
     if (!examId || !examName) return;
-    await setExamResults(examId, marks);
+    const results = Object.keys(marks).reduce((acc, uid) => {
+      acc[uid] = {
+        examResult: absentStatus[uid] ? 0 : marks[uid], // Mark 0 if absent
+        isAbsent: absentStatus[uid],
+      };
+      return acc;
+    }, {} as Record<string, { examResult: number; isAbsent: boolean }>);
+    // console.log(results);
+    
+    await setExamResults(examId, results);
     navigate("/admin/exams");
   };
 
@@ -88,11 +109,6 @@ const AddResultsPage = () => {
     <div className="p-2 md:p-5 flex flex-col gap-3 items-center justify-center">
       <h1>{toFullWidth(examName ?? "")}</h1>
 
-      {/* <h1 className="text-[#00A6ED]">
-        {toRoundLettersAndNumbers(`${examName} RESULTS`)}
-      </h1> */}
-
-      {/* <h1>{examName}</h1> */}
       <Card className="p-3">
         <CardContent>
           <Table>
@@ -100,6 +116,7 @@ const AddResultsPage = () => {
               <TableRow>
                 <TableHead className="w-[100px]">RegNo</TableHead>
                 <TableHead>Name</TableHead>
+                <TableHead>Absent</TableHead>
                 <TableHead>Marks</TableHead>
               </TableRow>
             </TableHeader>
@@ -110,9 +127,16 @@ const AddResultsPage = () => {
                     <TableCell className="font-medium">{regNo}</TableCell>
                     <TableCell>{userName}</TableCell>
                     <TableCell>
+                      <Switch
+                        checked={absentStatus[uid] || false}
+                        onCheckedChange={() => handleAbsentToggle(uid)}
+                      />
+                    </TableCell>
+                    <TableCell>
                       <Input
                         value={marks[uid] || ""}
                         onChange={(e) => handleMarkChange(uid, e.target.value)}
+                        disabled={absentStatus[uid] || false} // Disable if marked absent
                       />
                     </TableCell>
                   </TableRow>
