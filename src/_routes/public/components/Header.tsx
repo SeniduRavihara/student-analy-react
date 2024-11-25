@@ -24,9 +24,10 @@ const Header = ({
     <ul className="border ml-auto mr-auto text-white bg-[#ffffff] h-[70px] flex justify-between items-center fixed top-0 backdrop-blur-xl left-0 right-0 z-50">
       <li
         onClick={() => navigate("/")}
-        className="text-[30px] sm:text-[45px] font-bold cursor-pointer text-[#243642]"
+        className="text-[30px] sm:text-[45px] font-extrabold cursor-pointer text-[#243642]"
       >
-        <img src="/PHY6LK.png" alt="" className="w-[150px] h-[50px] md:w-[200px] md:h-[80px]" />
+        PHY6LK
+        {/* <img src="/PHY6LK.png" alt="" className="w-[150px] h-[50px] md:w-[200px] md:h-[80px]" /> */}
       </li>
 
       <li className="hidden md:flex text-white">

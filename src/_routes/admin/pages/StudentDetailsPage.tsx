@@ -11,7 +11,7 @@ type OutletContextType = {
 const StudentDetailsPage = () => {
   const { usersData } = useOutletContext<OutletContextType>();
 
-  console.log("users", usersData);
+  // console.log("users", usersData);
 
   return (
     <div className="p-2 md:p-5 w-full h-full overflow-auto">

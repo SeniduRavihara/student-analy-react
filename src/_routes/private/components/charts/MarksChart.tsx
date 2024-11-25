@@ -65,7 +65,12 @@ export function MarksChart({
       <CardContent className="flex">
         {/* Fixed Y-axis container */}
         <div className="flex items-center mr-4">
-          <LineChart width={50} height={300} data={chartData}>
+          <LineChart
+            width={50}
+            height={400}
+            data={chartData}
+            margin={{ top: 1, right: 10, bottom: 120, left: 5 }}
+          >
             <YAxis
               domain={[0, 100]}
               tickLine={false}
@@ -84,9 +89,9 @@ export function MarksChart({
         <div className="overflow-x-auto" ref={scrollContainerRef}>
           <LineChart
             width={chartData.length * 100} // Extend width based on data points
-            height={300}
+            height={400}
             data={chartData}
-            margin={{ top: 10, bottom: 10 }}
+            margin={{ top: 10, bottom: 100 }}
           >
             <CartesianGrid strokeDasharray="3 3" />
             {/* X Axis for exam names */}

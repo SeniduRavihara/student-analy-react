@@ -46,7 +46,7 @@ const StudentInfo = () => {
         const userInfo = (await fetchUserInfo(
           currentUser?.uid
         )) as UserDataType;
-        console.log(userInfo);
+        // console.log(userInfo);
 
         setFirstName(userInfo.firstName);
         setLastName(userInfo.lastName);

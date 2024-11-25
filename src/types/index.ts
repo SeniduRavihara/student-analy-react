@@ -96,6 +96,7 @@ export type ExamDataType = {
   avgResult: number | null;
   examYear: string;
   examResult: number;
+  
 };
 
 // export type ExamDataType = {

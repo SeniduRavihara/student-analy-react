@@ -15,6 +15,7 @@ import {
   getDocs,
   query,
   runTransaction,
+  serverTimestamp,
   setDoc,
   updateDoc,
   where,
@@ -286,7 +287,7 @@ export const createExam = async (
     examStatus: "pending",
     avgResult: null,
     examYear,
-    createdAt: new Date().toISOString(),
+    createdAt: serverTimestamp(),
   });
 };
 
@@ -304,49 +305,119 @@ export const deleteExam = async (examId: string) => {
 
 // -------------------------------------------------
 
+// export const setExamResults2 = async (
+//   examId: string,
+//   examResults: Record<string, number>
+// ) => {
+//   // Calculate average result and round to 2 decimal points
+//   const totalMarks = Object.values(examResults).reduce(
+//     (sum, mark) => sum + mark,
+//     0
+//   );
+//   const avgResult = parseFloat(
+//     (totalMarks / Object.values(examResults).length).toFixed(2)
+//   );
+
+//   // Sort user IDs based on marks in descending order to determine rank
+//   const sortedResults = Object.entries(examResults)
+//     .sort(([, markA], [, markB]) => markB - markA) // Sort by marks
+//     .map(([userId, mark], index) => ({ userId, mark, rank: index + 1 })); // Assign rank
+
+//   // Update each student's record with mark, rank, and avgResult
+//   const studentPromises = sortedResults.map(async ({ userId, mark, rank }) => {
+//     const userExamRef = doc(db, `users/${userId}/exams`, examId);
+//     const userRef = doc(db, "users", userId);
+
+//     // Update the exam sub-collection document
+//     const examUpdatePromise = updateDoc(userExamRef, {
+//       examResult: mark,
+//       rank: rank,
+//       avgResult: avgResult,
+//     });
+
+//     // Update the user's main document with last rank and result
+//     const userUpdatePromise = updateDoc(userRef, {
+//       lastRank: rank,
+//       lastResult: mark,
+//     });
+
+//     return Promise.all([examUpdatePromise, userUpdatePromise]);
+//   });
+
+//   // Update the main exam document with avgResult
+//   const examRef = doc(db, `exams`, examId);
+//   const examPromise = updateDoc(examRef, {
+//     avgResult: avgResult,
+//     examStatus: "completed",
+//   });
+
+//   // Wait for all updates to complete
+//   await Promise.all([...studentPromises, examPromise]);
+// };
+
 export const setExamResults = async (
   examId: string,
-  examResults: Record<string, number>
+  examResults: Record<string, { examResult: number; isAbsent: boolean }>
 ) => {
-  // Calculate average result and round to 2 decimal points
-  const totalMarks = Object.values(examResults).reduce(
-    (sum, mark) => sum + mark,
+  // Filter out absent students for rank and average calculations
+  const presentResults = Object.entries(examResults).filter(
+    ([, result]) => !result.isAbsent
+  );
+
+  // Calculate average result for present students and round to 2 decimal points
+  const totalMarks = presentResults.reduce(
+    (sum, [, { examResult }]) => sum + examResult,
     0
   );
   const avgResult = parseFloat(
-    (totalMarks / Object.values(examResults).length).toFixed(2)
+    (presentResults.length > 0
+      ? totalMarks / presentResults.length
+      : 0
+    ).toFixed(2)
   );
 
-  // Sort user IDs based on marks in descending order to determine rank
-  const sortedResults = Object.entries(examResults)
-    .sort(([, markA], [, markB]) => markB - markA) // Sort by marks
-    .map(([userId, mark], index) => ({ userId, mark, rank: index + 1 })); // Assign rank
+  // Sort present students based on marks in descending order to determine rank
+  const sortedResults = presentResults
+    .sort(([, a], [, b]) => b.examResult - a.examResult) // Sort by marks
+    .map(([userId, result], index) => ({
+      userId,
+      result,
+      rank: index + 1,
+    })); // Assign rank
 
-  // Update each student's record with mark, rank, and avgResult
-  const studentPromises = sortedResults.map(async ({ userId, mark, rank }) => {
-    const userExamRef = doc(db, `users/${userId}/exams`, examId);
-    const userRef = doc(db, "users", userId);
+  // Update each student's record with mark, rank, isAbsent, and avgResult
+  const studentPromises = Object.entries(examResults).map(
+    async ([userId, { examResult, isAbsent }]) => {
+      const userExamRef = doc(db, `users/${userId}/exams`, examId);
+      const userRef = doc(db, "users", userId);
 
-    // Update the exam sub-collection document
-    const examUpdatePromise = updateDoc(userExamRef, {
-      examResult: mark,
-      rank: rank,
-      avgResult: avgResult,
-    });
+      // If the student is absent, set rank to null and keep marks as 0
+      const rank = isAbsent
+        ? null
+        : sortedResults.find((res) => res.userId === userId)?.rank;
 
-    // Update the user's main document with last rank and result
-    const userUpdatePromise = updateDoc(userRef, {
-      lastRank: rank,
-      lastResult: mark,
-    });
+      // Update the exam sub-collection document
+      const examUpdatePromise = updateDoc(userExamRef, {
+        examResult: isAbsent ? 0 : examResult,
+        isAbsent,
+        rank,
+        avgResult,
+      });
 
-    return Promise.all([examUpdatePromise, userUpdatePromise]);
-  });
+      // Update the user's main document with last rank and result
+      const userUpdatePromise = updateDoc(userRef, {
+        lastRank: rank,
+        lastResult: isAbsent ? 0 : examResult,
+      });
 
-  // Update the main exam document with avgResult
+      return Promise.all([examUpdatePromise, userUpdatePromise]);
+    }
+  );
+
+  // Update the main exam document with avgResult and mark it as completed
   const examRef = doc(db, `exams`, examId);
   const examPromise = updateDoc(examRef, {
-    avgResult: avgResult,
+    avgResult,
     examStatus: "completed",
   });
 
