@@ -41,7 +41,7 @@ const AnalyticsPage = () => {
 
         setExamsData(examsDataArr);
         console.log(examsDataArr);
-        
+
         setLoading(false); // Data fetched
       },
       (error) => {
@@ -80,10 +80,12 @@ const AnalyticsPage = () => {
           <div className="text-gray-500">Loading exam data...</div>
         ) : examsData && examsData.length > 0 ? (
           <AvgChart
-            chartData={examsData.map(({ examName, avgResult }) => ({
-              exam: examName,
-              avgMark: avgResult ?? 0,
-            }))}
+            chartData={examsData
+              .filter((exam) => exam.examStatus === "completed")
+              .map(({ examName, avgResult }) => ({
+                exam: examName,
+                avgMark: avgResult ?? 0,
+              }))}
           />
         ) : (
           <div className="text-gray-500">No exam data available</div>

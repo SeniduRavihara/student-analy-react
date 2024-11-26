@@ -60,9 +60,9 @@ export function AvgChart({
 
   // Add padding data points to fill the chart
   const paddedChartData = [
-    { exam: "", avgMark: 0 }, // Padding at the beginning
+    // { exam: "", avgMark: 0 }, 
     ...chartData,
-    { exam: "", avgMark: 0 }, // Padding at the end
+    { exam: "", avgMark: null }, 
   ];
 
   return (
