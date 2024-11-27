@@ -13,7 +13,7 @@ const StudentDetailsPage = () => {
   const { usersData } = useOutletContext<OutletContextType>();
   const [openDetailsPopup, setOpenDetailsPopup] = useState(false);
 
-  // console.log("users", usersData);
+  console.log(openDetailsPopup);
 
   return (
     <div className="p-2 md:p-5 w-full h-full overflow-auto">
@@ -28,6 +28,7 @@ const StudentDetailsPage = () => {
                 email: user.email,
                 lastResult: user.lastResult || 0,
               }))}
+              setOpenDetailsPopup={setOpenDetailsPopup}
             />
           )}
         </CardContent>

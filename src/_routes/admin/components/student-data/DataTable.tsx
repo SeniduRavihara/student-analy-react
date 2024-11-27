@@ -80,6 +80,8 @@ export function DataTable<TData, TValue>({
     initialState: { pagination: { pageSize: 5 } }, // Set the page size to 5 rows
   });
 
+  setOpenDetailsPopup(false);
+
   return (
     <div className="w-full">
       <div className="flex items-center py-4">
