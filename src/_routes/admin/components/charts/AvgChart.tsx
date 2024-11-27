@@ -60,9 +60,9 @@ export function AvgChart({
 
   // Add padding data points to fill the chart
   const paddedChartData = [
-    // { exam: "", avgMark: 0 }, 
+    // { exam: "", avgMark: 0 },
     ...chartData,
-    { exam: "", avgMark: null }, 
+    { exam: "", avgMark: null },
   ];
 
   return (
@@ -89,12 +89,13 @@ export function AvgChart({
 
         <div className="flex">
           {/* Fixed Y-axis container */}
-          <div className="flex items-center mr-4">
+          {/* <div className="flex items-center mr-4">
             <LineChart
               width={50}
               height={400}
               data={paddedChartData}
               margin={{ top: 1, right: 10, bottom: 120, left: 5 }}
+
               // className="gap-10"
             >
               <YAxis
@@ -110,7 +111,7 @@ export function AvgChart({
                 }}
               />
             </LineChart>
-          </div>
+          </div> */}
 
           {/* Scrollable chart container */}
           <div className="overflow-x-auto w-full" ref={scrollContainerRef}>
@@ -141,6 +142,19 @@ export function AvgChart({
                 stroke="hsl(210, 70%, 50%)"
                 strokeWidth={2}
                 dot={false}
+              />
+
+              <YAxis
+                domain={[0, 100]}
+                tickLine={false}
+                axisLine={false}
+                tickMargin={8}
+                label={{
+                  value: "Average Mark",
+                  angle: -90,
+                  position: "insideLeft",
+                  dy: 50,
+                }}
               />
             </LineChart>
           </div>

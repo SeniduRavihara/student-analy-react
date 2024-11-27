@@ -70,7 +70,7 @@ export function MarksChart({
       </CardHeader>
       <CardContent className="flex">
         {/* Fixed Y-axis container */}
-        <div className="flex items-center mr-4">
+        {/* <div className="flex items-center mr-4">
           <LineChart
             width={50}
             height={400}
@@ -89,7 +89,7 @@ export function MarksChart({
               }}
             />
           </LineChart>
-        </div>
+        </div> */}
 
         {/* Scrollable chart container */}
         <div className="overflow-x-auto" ref={scrollContainerRef}>
@@ -110,6 +110,17 @@ export function MarksChart({
               textAnchor="start"
               interval={0}
               className="text-[12px]"
+            />
+            <YAxis
+              domain={[0, 100]}
+              tickLine={false}
+              axisLine={false}
+              tickMargin={8}
+              label={{
+                value: "Average Mark",
+                angle: -90,
+                position: "insideLeft",
+              }}
             />
             {/* Tooltip */}
             <Tooltip content={<CustomTooltip />} />

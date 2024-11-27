@@ -1,6 +1,4 @@
-import {
-  ColumnDef,
-} from "@tanstack/react-table";
+import { ColumnDef } from "@tanstack/react-table";
 import { ArrowUpDown, MoreHorizontal } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -66,7 +64,9 @@ export const columns: ColumnDef<StudentTable>[] = [
               Copy Index No
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>View Details</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => console.log("Details")}>
+              View Details
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       );

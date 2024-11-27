@@ -3,6 +3,7 @@ import { UserDataType } from "@/types";
 import { DataTable } from "../components/student-data/DataTable";
 import { useOutletContext } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
+import { useState } from "react";
 
 type OutletContextType = {
   usersData: UserDataType[] | null;
@@ -10,6 +11,7 @@ type OutletContextType = {
 
 const StudentDetailsPage = () => {
   const { usersData } = useOutletContext<OutletContextType>();
+  const [openDetailsPopup, setOpenDetailsPopup] = useState(false);
 
   // console.log("users", usersData);
 

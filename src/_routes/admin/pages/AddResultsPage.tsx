@@ -40,6 +40,7 @@ const AddResultsPage = () => {
   const [marks, setMarks] = useState<Record<string, number>>({});
   const [absentStatus, setAbsentStatus] = useState<Record<string, boolean>>({});
   const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(false);
 
   const examId = examIdName?.split("-")[0];
   const examName = examIdName?.split("-")[1];
@@ -91,6 +92,7 @@ const AddResultsPage = () => {
   };
 
   const handleSubmitMarks = async () => {
+    setIsLoading(true);
     if (!examId || !examName) return;
     const results = Object.keys(marks).reduce((acc, uid) => {
       acc[uid] = {
@@ -100,8 +102,9 @@ const AddResultsPage = () => {
       return acc;
     }, {} as Record<string, { examResult: number; isAbsent: boolean }>);
     // console.log(results);
-    
+
     await setExamResults(examId, results);
+    setIsLoading(false);
     navigate("/admin/exams");
   };
 
@@ -145,7 +148,9 @@ const AddResultsPage = () => {
           </Table>
         </CardContent>
 
-        <Button onClick={handleSubmitMarks}>Submit</Button>
+        <Button onClick={handleSubmitMarks} disabled={isLoading}>
+          {isLoading ? "Submitting..." : "Submit"}
+        </Button>
       </Card>
     </div>
   );

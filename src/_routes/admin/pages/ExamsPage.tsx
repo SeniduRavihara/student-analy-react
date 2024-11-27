@@ -18,7 +18,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { CalendarIcon } from "lucide-react";
+import { CalendarIcon, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { toast } from "@/hooks/use-toast";
@@ -47,7 +47,7 @@ const ExamsPage = () => {
   const [examYear, setExamYear] = useState(EXAM_YEARS[0].year);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-  // const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const { selectedYear } = useOutletContext<OutletContextType>();
 
@@ -80,6 +80,7 @@ const ExamsPage = () => {
 
   const onClickCreateExam = async () => {
     // console.log(examYear);
+    setLoading(true);
 
     if (!examName || !examDate || !examYear) {
       toast({
@@ -100,6 +101,7 @@ const ExamsPage = () => {
     setExamDate(undefined);
     setExamYear(EXAM_YEARS[0].year);
     setIsDialogOpen(false);
+    setLoading(false);
   };
 
   return (
@@ -176,7 +178,10 @@ const ExamsPage = () => {
               </PopoverContent>
             </Popover>
 
-            <Button onClick={onClickCreateExam}>Submit</Button>
+            <Button onClick={onClickCreateExam} disabled={loading}>
+              {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Submit
+            </Button>
           </div>
         </DialogContent>
       </Dialog>
