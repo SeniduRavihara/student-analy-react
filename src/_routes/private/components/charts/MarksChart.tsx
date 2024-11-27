@@ -56,6 +56,12 @@ export function MarksChart({
     }
   }, [chartData]);
 
+  const paddedChartData = [
+    // { exam: "", avgMark: 0 },
+    ...chartData,
+    { exam: "", avgMark: null }, // Padding at the end
+  ];
+
   return (
     <Card className="w-full">
       <CardHeader>
@@ -64,11 +70,11 @@ export function MarksChart({
       </CardHeader>
       <CardContent className="flex">
         {/* Fixed Y-axis container */}
-        <div className="flex items-center mr-4">
+        {/* <div className="flex items-center mr-4">
           <LineChart
             width={50}
             height={400}
-            data={chartData}
+            data={paddedChartData}
             margin={{ top: 1, right: 10, bottom: 120, left: 5 }}
           >
             <YAxis
@@ -83,14 +89,14 @@ export function MarksChart({
               }}
             />
           </LineChart>
-        </div>
+        </div> */}
 
         {/* Scrollable chart container */}
         <div className="overflow-x-auto" ref={scrollContainerRef}>
           <LineChart
-            width={chartData.length * 100} // Extend width based on data points
+            width={paddedChartData.length * 100} // Extend width based on data points
             height={400}
-            data={chartData}
+            data={paddedChartData}
             margin={{ top: 10, bottom: 100 }}
           >
             <CartesianGrid strokeDasharray="3 3" />
@@ -104,6 +110,17 @@ export function MarksChart({
               textAnchor="start"
               interval={0}
               className="text-[12px]"
+            />
+            <YAxis
+              domain={[0, 100]}
+              tickLine={false}
+              axisLine={false}
+              tickMargin={8}
+              label={{
+                value: "Average Mark",
+                angle: -90,
+                position: "insideLeft",
+              }}
             />
             {/* Tooltip */}
             <Tooltip content={<CustomTooltip />} />

@@ -15,7 +15,7 @@ const StudentAnalyticsPage = () => {
     if (currentUser) {
       const collectionRef = query(
         collection(db, "users", currentUser?.uid, "exams"),
-        orderBy("createdAt", "asc")
+        orderBy("examDate", "asc")
       );
       const unsubscribe = onSnapshot(collectionRef, (QuerySnapshot) => {
         const examsDataArr = QuerySnapshot.docs.map((doc) => ({
@@ -35,11 +35,13 @@ const StudentAnalyticsPage = () => {
       <div className="w-full lg:w-2/3  p-3 rounded-md">
         {examsData && examsData.length > 0 ? (
           <MarksChart
-            chartData={examsData.map(({ examName, examResult, avgResult }) => ({
-              exam: examName,
-              Mark: examResult,
-              avgResult: avgResult ?? 0,
-            }))}
+            chartData={examsData
+              .filter((exam) => exam.examStatus === "completed")
+              .map(({ examName, examResult, avgResult }) => ({
+                exam: examName,
+                Mark: examResult,
+                avgResult: avgResult ?? 0,
+              }))}
           />
         ) : (
           <div className="text-center text-gray-500">
