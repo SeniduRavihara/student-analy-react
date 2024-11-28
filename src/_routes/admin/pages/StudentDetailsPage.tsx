@@ -48,7 +48,7 @@ const StudentDetailsPage = () => {
     {
       label: "Info",
       value: "info",
-      content: <InfoTab />,
+      content: <InfoTab userInfo={selectedUser} />,
     },
   ];
 
