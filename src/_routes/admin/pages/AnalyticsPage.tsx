@@ -10,7 +10,6 @@ import { useEffect, useState } from "react";
 import { ExamDataType, UserDataType } from "@/types";
 import { db } from "@/firebase/config";
 import { useOutletContext } from "react-router-dom";
-import RankingCard from "../components/RankingCard";
 
 type OutletContextType = {
   selectedYear: string;
@@ -20,7 +19,7 @@ type OutletContextType = {
 const AnalyticsPage = () => {
   const [examsData, setExamsData] = useState<Array<ExamDataType> | null>(null);
   const [loading, setLoading] = useState(true); // Loader state
-  const { selectedYear, usersData } = useOutletContext<OutletContextType>();
+  const { selectedYear } = useOutletContext<OutletContextType>();
 
   useEffect(() => {
     if (!selectedYear) return;
@@ -54,23 +53,23 @@ const AnalyticsPage = () => {
   }, [selectedYear]);
 
   // Filter, validate, and sort usersData
-  const filteredUsersData = usersData
-    ? usersData
-        .filter(
-          (student) =>
-            student.lastResult !== null &&
-            student.lastResult !== undefined &&
-            student.lastRank !== null &&
-            student.lastRank !== undefined &&
-            student.regNo !== null // Ensure regNo is not null
-        )
-        .map((student) => ({
-          ...student,
-          marks: student.lastResult ?? 0, // Default to 0 if marks are null
-          regNo: student.regNo as string, // Cast regNo to string since nulls are filtered out
-        }))
-        .sort((a, b) => a.lastRank - b.lastRank)
-    : [];
+  // const filteredUsersData = usersData
+  //   ? usersData
+  //       .filter(
+  //         (student) =>
+  //           student.lastResult !== null &&
+  //           student.lastResult !== undefined &&
+  //           student.lastRank !== null &&
+  //           student.lastRank !== undefined &&
+  //           student.regNo !== null // Ensure regNo is not null
+  //       )
+  //       .map((student) => ({
+  //         ...student,
+  //         marks: student.lastResult ?? 0, // Default to 0 if marks are null
+  //         regNo: student.regNo as string, // Cast regNo to string since nulls are filtered out
+  //       }))
+  //       .sort((a, b) => a.lastRank - b.lastRank)
+  //   : [];
 
   return (
     <div className="p-2 md:p-5 bg-[#ededed] w-full h-full overflow-auto flex flex-col gap-5">
