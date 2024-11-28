@@ -138,7 +138,8 @@ export function AvgChart({
               <Tooltip content={<CustomTooltip />} />
               <Line
                 dataKey="avgMark"
-                type="linear"
+                // type="linear"
+                type="natural"
                 stroke="hsl(210, 70%, 50%)"
                 strokeWidth={2}
                 dot={false}

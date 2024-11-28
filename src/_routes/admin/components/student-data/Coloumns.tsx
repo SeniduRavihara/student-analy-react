@@ -10,9 +10,13 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { StudentTable } from "@/types";
+import { StudentTable, UserDataType } from "@/types";
 
-export const columns: ColumnDef<StudentTable>[] = [
+export const columns: (
+  setOpenDetailsPopup: React.Dispatch<React.SetStateAction<boolean>>,
+  setSelectedUser: React.Dispatch<React.SetStateAction<UserDataType | null>>,
+  usersData: UserDataType[] | null
+) => ColumnDef<StudentTable>[] = (setOpenDetailsPopup, setSelectedUser, usersData) => [
   {
     accessorKey: "indexNo",
     header: "Index No",
@@ -64,7 +68,17 @@ export const columns: ColumnDef<StudentTable>[] = [
               Copy Index No
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => console.log("Details")}>
+            <DropdownMenuItem
+              onClick={() => {
+                setOpenDetailsPopup(true); // Update the state
+                setSelectedUser(
+                  usersData?.find(
+                    (user) => (user as UserDataType).regNo === student.indexNo
+                  ) || null
+                );
+                console.log("Details for:", student);
+              }}
+            >
               View Details
             </DropdownMenuItem>
           </DropdownMenuContent>

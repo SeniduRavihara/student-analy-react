@@ -127,7 +127,8 @@ export function MarksChart({
             {/* Line for average marks */}
             <Line
               dataKey="Mark"
-              type="linear"
+              // type="linear"
+              type="natural"
               stroke="hsl(210, 70%, 50%)"
               strokeWidth={2}
               dot={false}
