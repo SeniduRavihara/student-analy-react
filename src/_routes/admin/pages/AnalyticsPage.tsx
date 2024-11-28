@@ -93,7 +93,7 @@ const AnalyticsPage = () => {
       </div>
 
       {/* Ranking Section */}
-      <div className="flex justify-center items-center">
+      {/* <div className="flex justify-center items-center">
         {filteredUsersData && filteredUsersData.length > 0 ? (
           <RankingCard
             usersMarksData={filteredUsersData.map((data) => ({
@@ -106,7 +106,7 @@ const AnalyticsPage = () => {
         ) : (
           <div className="text-gray-500">No ranking data available</div>
         )}
-      </div>
+      </div> */}
     </div>
   );
 };
