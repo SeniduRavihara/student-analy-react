@@ -3,7 +3,7 @@ import { ExamDataType } from "@/types";
 
 const MarksTab = ({ examsData }: { examsData: Array<ExamDataType> | null }) => {
   return (
-    <div>
+    <div className="overflow-y-auto w-full h-[1000px]">
       {examsData && examsData.length > 0 ? (
         <MarksChart
           chartData={examsData

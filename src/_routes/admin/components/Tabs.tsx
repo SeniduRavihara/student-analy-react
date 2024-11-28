@@ -5,7 +5,6 @@ import {
   TabsTrigger,
   TabsContent,
 } from "@/components/ui/tabs";
-import { UserDataType } from "@/types";
 
 type Tab = {
   label: string;
@@ -16,14 +15,13 @@ type Tab = {
 type TabsProps = {
   tabs: Tab[];
   defaultValue?: string;
-  selectedUser: UserDataType | null;
 };
 
-export const Tabs: React.FC<TabsProps> = ({ tabs, defaultValue, selectedUser }) => {
+export const Tabs: React.FC<TabsProps> = ({ tabs, defaultValue }) => {
   return (
     <UITabs
       defaultValue={defaultValue || tabs[0]?.value}
-      className="w- h-full flex flex-col justify-cent mx-auto"
+      className="w-full h-full flex flex-col justify-cent mx-auto"
     >
       <TabsList>
         {tabs.map((tab) => (
@@ -33,7 +31,7 @@ export const Tabs: React.FC<TabsProps> = ({ tabs, defaultValue, selectedUser }) 
         ))}
       </TabsList>
       {tabs.map((tab) => (
-        <TabsContent key={tab.value} value={tab.value}>
+        <TabsContent key={tab.value} value={tab.value} className="" >
           {tab.content}
         </TabsContent>
       ))}

@@ -71,8 +71,8 @@ const StudentDetailsPage = () => {
       </Card>
 
       <Drawer open={openDetailsPopup} onOpenChange={setOpenDetailsPopup}>
-        <DrawerContent className="w-full h-[80%] p-10">
-          <Tabs tabs={tabs} selectedUser={selectedUser} />
+        <DrawerContent className="w-full h-[90%] p-10 overflow-aut">
+          <Tabs tabs={tabs} />
         </DrawerContent>
       </Drawer>
     </div>
