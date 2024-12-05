@@ -101,7 +101,7 @@ const AddResultsPage = () => {
       };
       return acc;
     }, {} as Record<string, { examResult: number; isAbsent: boolean }>);
-    // console.log(results);
+    console.log(results);
 
     await setExamResults(examId, results);
     setIsLoading(false);

@@ -96,7 +96,8 @@ export type ExamDataType = {
   avgResult: number | null;
   examYear: string;
   examResult: number;
-  
+  isAbsent: boolean;
+  // createdAt: Date;
 };
 
 // export type ExamDataType = {
