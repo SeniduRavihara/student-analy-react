@@ -8,7 +8,6 @@ import {
   YAxis,
   Tooltip,
   TooltipProps,
-  ReferenceLine,
 } from "recharts";
 import {
   Card,
