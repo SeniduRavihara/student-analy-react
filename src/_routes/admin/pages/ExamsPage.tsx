@@ -4,7 +4,7 @@ import { ExamDataType, ExamTable } from "@/types";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
-import { createExam } from "@/firebase/api";
+import { createExam, deleteExam } from "@/firebase/api";
 import {
   Dialog,
   DialogContent,
@@ -34,6 +34,7 @@ import {
 } from "@/components/ui/select";
 import { EXAM_YEARS } from "@/constants";
 import UpcomingExamCalendar from "@/components/UpcomingExamCalendar";
+import { ConfirmDialog } from "../components/ConfirmDialog";
 
 type OutletContextType = {
   selectedYear: string;
@@ -46,6 +47,10 @@ const ExamsPage = () => {
   const [examDate, setExamDate] = useState<Date>();
   const [examYear, setExamYear] = useState(EXAM_YEARS[0].year);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [confirmDialog, setConfirmDialog] = useState({
+    isOpen: false,
+    examId: "",
+  });
 
   const [loading, setLoading] = useState(false);
 
@@ -108,7 +113,10 @@ const ExamsPage = () => {
     <div className="p-2 md:p-5 w-full h-full bg-[#ededed] overflow-auto flex flex-col gap-5 mb-10">
       <Card>
         <CardContent>
-          <DataTable columns={columns(navigate)} data={examsData} />
+          <DataTable
+            columns={columns(navigate, setConfirmDialog)}
+            data={examsData}
+          />
 
           <Button className="" onClick={() => setIsDialogOpen(true)}>
             Create New Exam
@@ -187,6 +195,18 @@ const ExamsPage = () => {
       </Dialog>
 
       <UpcomingExamCalendar />
+
+      {/* Confirmation Dialog */}
+      <ConfirmDialog
+        isOpen={confirmDialog.isOpen}
+        title="Confirm Delete"
+        message="Are you sure you want to delete this exam? This action cannot be undone."
+        onConfirm={() => {
+          deleteExam(confirmDialog.examId);
+          setConfirmDialog({ isOpen: false, examId: "" });
+        }}
+        onCancel={() => setConfirmDialog({ isOpen: false, examId: "" })}
+      />
     </div>
   );
 };

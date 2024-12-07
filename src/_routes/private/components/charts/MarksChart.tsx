@@ -8,6 +8,7 @@ import {
   YAxis,
   Tooltip,
   TooltipProps,
+  ReferenceLine,
 } from "recharts";
 import {
   Card,
@@ -44,7 +45,12 @@ const CustomTooltip = ({
 export function MarksChart({
   chartData = [],
 }: {
-  chartData: Array<{ exam: string; Mark: number; avgResult: number }>;
+  chartData: Array<{
+    exam: string;
+    Mark: number;
+    avgResult: number;
+    isAbsent: boolean;
+  }>;
 }) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
@@ -56,10 +62,16 @@ export function MarksChart({
     }
   }, [chartData]);
 
+  // Filter out absent students from the chart data
+  const filteredChartData = chartData.map((data) =>
+    data.isAbsent
+      ? { ...data, Mark: null, avgResult: null } // Replace absent data with null
+      : data
+  );
+
   const paddedChartData = [
-    // { exam: "", avgMark: 0 },
-    ...chartData,
-    { exam: "", avgMark: null }, // Padding at the end
+    ...filteredChartData,
+    { exam: "", Mark: null, avgResult: null }, // Padding at the end
   ];
 
   return (
@@ -69,28 +81,6 @@ export function MarksChart({
         <CardDescription>Scrollable for multiple exams</CardDescription>
       </CardHeader>
       <CardContent className="flex">
-        {/* Fixed Y-axis container */}
-        {/* <div className="flex items-center mr-4">
-          <LineChart
-            width={50}
-            height={400}
-            data={paddedChartData}
-            margin={{ top: 1, right: 10, bottom: 120, left: 5 }}
-          >
-            <YAxis
-              domain={[0, 100]}
-              tickLine={false}
-              axisLine={false}
-              tickMargin={8}
-              label={{
-                value: "Average Mark",
-                angle: -90,
-                position: "insideLeft",
-              }}
-            />
-          </LineChart>
-        </div> */}
-
         {/* Scrollable chart container */}
         <div className="overflow-x-auto" ref={scrollContainerRef}>
           <LineChart
@@ -124,14 +114,20 @@ export function MarksChart({
             />
             {/* Tooltip */}
             <Tooltip content={<CustomTooltip />} />
+
             {/* Line for average marks */}
             <Line
               dataKey="Mark"
-              // type="linear"
               type="natural"
               stroke="hsl(210, 70%, 50%)"
               strokeWidth={2}
-              dot={false}
+              dot={true}
+              activeDot={{
+                r: 4, // radius
+                stroke: "blue", // border color
+                strokeWidth: 2, // border width
+                fill: "white", // fill color
+              }}
             />
           </LineChart>
         </div>
