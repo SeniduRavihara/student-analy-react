@@ -8,10 +8,11 @@ const MarksTab = ({ examsData }: { examsData: Array<ExamDataType> | null }) => {
         <MarksChart
           chartData={examsData
             .filter((exam) => exam.examStatus === "completed")
-            .map(({ examName, examResult, avgResult }) => ({
+            .map(({ examName, examResult, avgResult, isAbsent }) => ({
               exam: examName,
               Mark: examResult,
               avgResult: avgResult ?? 0,
+              isAbsent,
             }))}
         />
       ) : (
