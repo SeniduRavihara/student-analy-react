@@ -8,6 +8,7 @@ import {
   YAxis,
   Tooltip,
   TooltipProps,
+  ReferenceLine,
 } from "recharts";
 import {
   Card,
@@ -113,13 +114,20 @@ export function MarksChart({
             />
             {/* Tooltip */}
             <Tooltip content={<CustomTooltip />} />
+
             {/* Line for average marks */}
             <Line
               dataKey="Mark"
               type="natural"
               stroke="hsl(210, 70%, 50%)"
               strokeWidth={2}
-              dot={false}
+              dot={true}
+              activeDot={{
+                r: 4, // radius
+                stroke: "blue", // border color
+                strokeWidth: 2, // border width
+                fill: "white", // fill color
+              }}
             />
           </LineChart>
         </div>
@@ -135,4 +143,3 @@ export function MarksChart({
     </Card>
   );
 }
-
