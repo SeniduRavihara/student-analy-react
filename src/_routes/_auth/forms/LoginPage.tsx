@@ -32,7 +32,7 @@ const LoginPage = () => {
     <Card className=" h-[500px] w-[90%] md:w-[900px] p-4">
       <CardContent className="flex gap-5 items-center justify-between w-full h-full p-0">
         <img
-          src="/loginImage.jpg"
+          src="/loginImage2.jpg"
           alt=""
           className="h-[450px] object-cover rounded-l-xl hidden md:block"
         />
