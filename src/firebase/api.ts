@@ -182,7 +182,8 @@ export const registerStudent = async (data: UserInfoType, uid: string) => {
     if (data.examYear) {
       const examsQuery = query(
         collection(db, "exams"),
-        where("examYear", "==", data.examYear)
+        where("examYear", "==", data.examYear),
+        where("classType", "in", data.classes)
       );
       const examsSnapshot = await getDocs(examsQuery);
 
@@ -211,6 +212,81 @@ export const fetchUserInfo = async (uid: string) => {
 
   return userInfo.data() as UserDataType;
 };
+
+// ----------------------------------------------
+
+export const updateUserInfo = async (
+  uid: string,
+  updatedData: UserInfoType
+) => {
+  const userDocRef = doc(db, "users", uid);
+
+  try {
+    // Update the user document with the new data
+    await updateDoc(userDocRef, {
+      ...updatedData,
+      bDate: updatedData.bDate ? updatedData.bDate.toISOString() : null,
+    });
+
+    console.log("User information updated successfully.");
+  } catch (error) {
+    console.error("Error updating user information:", error);
+    throw error; // Optionally, you could handle the error here, depending on your use case
+  }
+};
+
+
+// // This function is used to update all the users 
+// export const addDefaultClassesToUsers = async () => {
+//   const usersCollectionRef = collection(db, "users");
+
+//   try {
+//     const usersSnapshot = await getDocs(usersCollectionRef);
+//     const updatePromises = usersSnapshot.docs.map(async (userDoc) => {
+//       const userData = userDoc.data();
+
+//       // Only update users who do not have the 'classes' attribute
+//       if (!userData.classes || !Array.isArray(userData.classes)) {
+//         const userDocRef = doc(db, "users", userDoc.id);
+//         await updateDoc(userDocRef, { classes: ["THEORY"] });
+//         console.log(`Updated user ${userDoc.id} with default classes.`);
+//       }
+//     });
+
+//     await Promise.all(updatePromises);
+//     console.log("All applicable users have been updated.");
+//   } catch (error) {
+//     console.error("Error updating users:", error);
+//     throw error;
+//   }
+// };
+
+// export const updateAllExamCollection = async () => {
+//   const examsCollectionRef = collection(db, "exams");
+
+//   try {
+//     const examsSnapshot = await getDocs(examsCollectionRef);
+//     const batch = writeBatch(db);
+
+//     examsSnapshot.docs.forEach((exam) => {
+//       const examData = exam.data();
+
+//       // Only update exams that do not have the 'classType' attribute
+//       if (!examData.classType) {
+//         const examRef = doc(db, "exams", exam.id);
+//         batch.update(examRef, { classType: "THEORY" });
+//         console.log(`Updated exam ${exam.id} with default classType.`);
+//       }
+//     });
+
+//     await batch.commit();
+//     console.log("All applicable exams have been updated.");
+//   } catch (error) {
+//     console.error("Error updating exams:", error);
+//     throw error;
+//   }
+// };
+
 
 // -------------------------------------------
 // export const generateIndexNumber = async (uid: string, examYear: string) => {
@@ -278,7 +354,8 @@ export const generateIndexNumber = async (uid: string, examYear: string) => {
 export const createExam = async (
   examName: string,
   examDate: Date,
-  examYear: string
+  examYear: string,
+  classType: string
 ) => {
   const examCollectionRef = collection(db, "exams");
   await addDoc(examCollectionRef, {
@@ -288,6 +365,7 @@ export const createExam = async (
     avgResult: null,
     examYear,
     createdAt: serverTimestamp(),
+    classType,
   });
 };
 

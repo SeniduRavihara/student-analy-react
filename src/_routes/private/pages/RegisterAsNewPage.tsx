@@ -4,7 +4,7 @@ import Stepper from "@mui/material/Stepper";
 import Step from "@mui/material/Step";
 import StepLabel from "@mui/material/StepLabel";
 import Button from "@mui/material/Button";
-import { Fragment, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import PersonalDetailsForm from "../components/PersonalDetailsForm";
 import ExameDetailsForm from "../components/ExameDetailsForm";
 import ParentDetailsForm from "../components/ParentDetailsForm";
@@ -12,7 +12,7 @@ import { registerStudent } from "@/firebase/api";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
-import { EXAM_YEARS } from "@/constants";
+import { CLASSES, EXAM_YEARS } from "@/constants";
 import { CircularProgress } from "@mui/material";
 
 const steps = ["Personal Details", "Exame Details", "Parent Details"];
@@ -20,7 +20,7 @@ const steps = ["Personal Details", "Exame Details", "Parent Details"];
 const RegisterAsNewPage = () => {
   const { currentUser } = useAuth();
   const { toast } = useToast();
-    const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const [activeStep, setActiveStep] = useState(0);
   const [skipped, setSkipped] = useState(new Set<number>());
@@ -36,6 +36,7 @@ const RegisterAsNewPage = () => {
   const [examYear, setExamYear] = useState(EXAM_YEARS[0].year);
   const [media, setMedia] = useState("sinhala");
   const [stream, setStream] = useState("maths");
+  const [classes, setClasses] = useState<(typeof CLASSES)[number][]>([]);
 
   const [gurdianName, setGurdiandName] = useState("");
   const [gurdianPhone, setGurdianPhone] = useState("");
@@ -46,6 +47,13 @@ const RegisterAsNewPage = () => {
   // const isStepOptional = (step: number) => {
   //   return step === 1;
   // };
+
+  console.log(classes);
+
+  // clear the saved class when the exam year changed
+  useEffect(() => {
+    setClasses([]);
+  }, [examYear]);
 
   const isStepSkipped = (step: number) => {
     return skipped.has(step);
@@ -96,6 +104,7 @@ const RegisterAsNewPage = () => {
         !phone ||
         !school ||
         !examYear ||
+        !classes ||
         !media ||
         !stream
       ) {
@@ -103,6 +112,7 @@ const RegisterAsNewPage = () => {
           title: "Please fill all the fields",
           variant: "destructive",
         });
+        setLoading(false);
         return;
       }
 
@@ -121,6 +131,7 @@ const RegisterAsNewPage = () => {
           gurdianName,
           gurdianPhone,
           address,
+          classes
         },
         currentUser?.uid
       );
@@ -188,6 +199,8 @@ const RegisterAsNewPage = () => {
                     setExamYear={setExamYear}
                     setMedia={setMedia}
                     setStream={setStream}
+                    classes={classes}
+                    setClasses={setClasses}
                   />
                 )}
               </div>
@@ -233,7 +246,9 @@ const RegisterAsNewPage = () => {
                     {activeStep < steps.length - 1 ? (
                       <Button onClick={handleNext}>Next</Button>
                     ) : (
-                       <Button onClick={handleSubmit} disabled={loading}>{loading ? <CircularProgress />: "Submit"}</Button>
+                      <Button onClick={handleSubmit} disabled={loading}>
+                        {loading ? <CircularProgress /> : "Submit"}
+                      </Button>
                     )}
                   </Box>
                 </Fragment>

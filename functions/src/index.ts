@@ -16,11 +16,15 @@ async function updateUserExamCollections(
   action: "create" | "delete" | "update"
 ) {
   const usersSnapshot = await db.collection("users").get();
-  const { examYear } = examData;
+  const { examYear, classType } = examData;
 
   // Collect promises for paths with matching examYear
   const promises = usersSnapshot.docs
-    .filter((userDoc) => userDoc.data().examYear === examYear)
+    .filter(
+      (userDoc) =>
+        userDoc.data().examYear === examYear &&
+        userDoc.data().classes.includes(classType)
+    )
     .map((userDoc) => {
       const userId = userDoc.id;
       const userExamsRef = db.collection(`users/${userId}/exams`).doc(examId);

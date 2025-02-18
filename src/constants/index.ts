@@ -12,3 +12,14 @@ export const EXAM_YEARS = [
   { year: "2025", label: "2025 A/L" },
   { year: "2026", label: "2026 A/L" },
 ];
+
+// If you want to add new class catogary, add it to following array
+export const CLASSES = ["THEORY", "REVISION"] ;
+export type ClassesType = "THEORY" | "REVISION";
+
+export const CLASSES_TO_YEARS = {
+  "2025": ["THEORY", "REVISION"],
+  "2026": ["THEORY"],
+};
+
+// Extract the valid years from EXAM_YEARS

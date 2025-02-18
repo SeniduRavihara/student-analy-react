@@ -10,7 +10,7 @@ const DataContextProvider = ({ children }: { children: React.ReactNode }) => {
     null
   );
 
-  // console.log(currentUserData);
+  console.log(currentUserData);
 
   const value = {
     currentUserData,
