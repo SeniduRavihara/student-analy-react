@@ -1,19 +1,13 @@
+import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { fetchUserInfo } from "@/firebase/api";
-import { useAuth } from "@/hooks/useAuth";
-import { useEffect, useState } from "react";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Button } from "@/components/ui/button";
-import { CalendarIcon } from "lucide-react";
-import { Calendar } from "@/components/ui/calendar";
-import { format } from "date-fns";
-import { cn } from "@/lib/utils";
 import {
   Select,
   SelectContent,
@@ -21,7 +15,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { CLASSES, CLASSES_TO_YEARS, EXAM_YEARS } from "@/constants";
+import { fetchUserInfo, updateUserInfo } from "@/firebase/api";
+import { useAuth } from "@/hooks/useAuth";
+import { cn } from "@/lib/utils";
 import { UserDataType } from "@/types";
+import { format } from "date-fns";
+import { CalendarIcon, SquareCheck } from "lucide-react";
+import { useEffect, useState } from "react";
+
+type ClassDataType = (typeof CLASSES)[number]; // This will be 'THEORY' | 'REVISION'
+
 
 const StudentInfo = () => {
   const { currentUser } = useAuth();
@@ -33,12 +37,17 @@ const StudentInfo = () => {
   const [bDate, setBDate] = useState<Date>();
   const [phone, setPhone] = useState("");
   const [school, setSchool] = useState("");
-  const [examYear, setExamYear] = useState("");
+  const [examYear, setExamYear] = useState(EXAM_YEARS[0].year);
+  const [classes, setClasses] = useState<(typeof CLASSES)[number][]>([]);
+
   const [media, setMedia] = useState("");
   const [stream, setStream] = useState("");
   const [gurdianName, setGurdiandName] = useState("");
   const [gurdianPhone, setGurdianPhone] = useState("");
   const [address, setAddress] = useState("");
+
+  const [loading, setLoading] = useState(false);
+
 
   useEffect(() => {
     if (currentUser) {
@@ -61,11 +70,53 @@ const StudentInfo = () => {
         setGurdiandName(userInfo.gurdianName);
         setGurdianPhone(userInfo.gurdianPhone);
         setAddress(userInfo.address);
+        setClasses(userInfo.classes || []);
       };
 
       fetchData();
     }
   }, [currentUser]);
+
+  const updateInfo = async () => {
+    if (!currentUser) return;
+    setLoading(true);
+
+    try {
+      const userInfo = {
+        firstName,
+        lastName,
+        whatsapp,
+        nic,
+        bDate,
+        phone,
+        school,
+        examYear,
+        media,
+        stream,
+        gurdianName,
+        gurdianPhone,
+        address,
+        classes,
+      };
+
+      console.log(userInfo.bDate);
+
+      await updateUserInfo(currentUser.uid, userInfo);
+      setLoading(false);
+    } catch (error) {
+      console.log(error);
+      setLoading(false);
+    }
+  };
+
+    const toggleClass = (classType: ClassDataType) => {
+      setClasses(
+        (prevClasses) =>
+          prevClasses.includes(classType)
+            ? prevClasses.filter((c) => c !== classType) // Remove if exists
+            : [...prevClasses, classType] // Add if not exists
+      );
+    };
 
   return (
     <Card className="w-full h-full mb-5">
@@ -197,11 +248,39 @@ const StudentInfo = () => {
               <SelectValue placeholder="Exam Year" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="2024">2024 A/L</SelectItem>
-              <SelectItem value="2025">2025 A/L</SelectItem>
-              <SelectItem value="2026">2026 A/L</SelectItem>
+              {EXAM_YEARS.map((year) => (
+                <SelectItem key={year.year} value={year.year}>
+                  {year.label}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
+        </div>
+
+        <div className="col-span-2 flex justify-between gap-5 my-2">
+          {CLASSES_TO_YEARS[examYear as keyof typeof CLASSES_TO_YEARS].map(
+            (classItem) => (
+              <Card
+                key={classItem}
+                onClick={() => toggleClass(classItem)}
+                className={cn(
+                  "py-2 px-3 text-center relative text-[#787e81] hover:bg-blue-300  duration-200 cursor-pointer w-full",
+                  classes.includes(classItem)
+                    ? "bg-blue-400 text-white hover:bg-blue-300"
+                    : "bg-white text-[#787e81] hover:bg-blue-300"
+                )}
+              >
+                <div>{classItem}</div>
+
+                <SquareCheck
+                  className={cn(
+                    "absolute top-2 right-2",
+                    classes.includes(classItem) ? "block" : "hidden"
+                  )}
+                />
+              </Card>
+            )
+          )}
         </div>
 
         <div>
@@ -283,8 +362,8 @@ const StudentInfo = () => {
         </div>
 
         <div className="absolute -bottom-14 left-0 right-0">
-          <Button className="w-full" type="submit">
-            Submit
+          <Button className="w-full" onClick={updateInfo} disabled={loading}>
+            {loading ? "Updating..." : "Update"}
           </Button>
         </div>
       </CardContent>

@@ -1,10 +1,6 @@
-import { DataTable } from "../components/exams/DataTable";
-import { columns } from "../components/exams/Coloumns";
-import { ExamDataType, ExamTable } from "@/types";
-import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { useEffect, useState } from "react";
-import { createExam, deleteExam } from "@/firebase/api";
+import { Calendar } from "@/components/ui/calendar";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -12,19 +8,11 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Calendar } from "@/components/ui/calendar";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { CalendarIcon, Loader2 } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { format } from "date-fns";
-import { toast } from "@/hooks/use-toast";
-import { collection, onSnapshot, orderBy, query } from "firebase/firestore";
-import { db } from "@/firebase/config";
-import { useNavigate, useOutletContext } from "react-router-dom";
 import {
   Select,
   SelectContent,
@@ -32,9 +20,25 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { EXAM_YEARS } from "@/constants";
 import UpcomingExamCalendar from "@/components/UpcomingExamCalendar";
+import {
+  CLASSES_TO_YEARS,
+  ClassesType as ClassesDataType,
+  EXAM_YEARS,
+} from "@/constants";
+import { createExam, deleteExam } from "@/firebase/api";
+import { db } from "@/firebase/config";
+import { toast } from "@/hooks/use-toast";
+import { cn } from "@/lib/utils";
+import { ExamDataType, ExamTable } from "@/types";
+import { format } from "date-fns";
+import { collection, onSnapshot, orderBy, query } from "firebase/firestore";
+import { CalendarIcon, Loader2 } from "lucide-react";
+import { useEffect, useState } from "react";
+import { useNavigate, useOutletContext } from "react-router-dom";
 import { ConfirmDialog } from "../components/ConfirmDialog";
+import { columns } from "../components/exams/Coloumns";
+import { DataTable } from "../components/exams/DataTable";
 
 type OutletContextType = {
   selectedYear: string;
@@ -46,6 +50,7 @@ const ExamsPage = () => {
   const [examName, setExamName] = useState("");
   const [examDate, setExamDate] = useState<Date>();
   const [examYear, setExamYear] = useState(EXAM_YEARS[0].year);
+  const [classType, setClassType] = useState<ClassesDataType>("THEORY");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [confirmDialog, setConfirmDialog] = useState({
     isOpen: false,
@@ -57,6 +62,11 @@ const ExamsPage = () => {
   const { selectedYear } = useOutletContext<OutletContextType>();
 
   const navigate = useNavigate();
+
+  // const handleUpdateUsers = async () => {
+  //   await addDefaultClassesToUsers();
+  //   alert("Users updated successfully!");
+  // };
 
   // useEffect(() => {
   //   console.log(examYear);
@@ -87,15 +97,16 @@ const ExamsPage = () => {
     // console.log(examYear);
     setLoading(true);
 
-    if (!examName || !examDate || !examYear) {
+    if (!examName || !examDate || !examYear || !classType) {
       toast({
         title: "Please fill all the fields",
         variant: "destructive",
       });
+      setLoading(false);
       return;
     }
 
-    await createExam(examName, examDate, examYear);
+    await createExam(examName, examDate, examYear, classType);
 
     toast({
       title: "Exam created successfully",
@@ -159,6 +170,25 @@ const ExamsPage = () => {
               </SelectContent>
             </Select>
 
+            <Select
+              onValueChange={(value) => setClassType(value as ClassesDataType)}
+              // defaultValue={EXAM_YEARS[0].year}
+              value={classType}
+            >
+              <SelectTrigger className="">
+                <SelectValue placeholder={EXAM_YEARS[0].year} />
+              </SelectTrigger>
+              <SelectContent>
+                {CLASSES_TO_YEARS[
+                  examYear as keyof typeof CLASSES_TO_YEARS
+                ].map((item) => (
+                  <SelectItem key={item} value={item}>
+                    {item}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
             <Popover>
               <PopoverTrigger asChild>
                 <Button
@@ -193,6 +223,8 @@ const ExamsPage = () => {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* <Button onClick={updateAllExamCollection}>Fix User Classes</Button> */}
 
       <UpcomingExamCalendar />
 

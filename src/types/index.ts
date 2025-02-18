@@ -33,6 +33,7 @@ export type UserDataType = {
   email: string;
   lastResult: number | null;
   lastRank: number;
+  classes: string[];
 };
 
 // export type CurrentUserDataType = {
@@ -71,6 +72,7 @@ export type UserInfoType = {
   gurdianName: string;
   gurdianPhone: string;
   address: string;
+  classes: string[];
 };
 
 export type StudentTable = {
