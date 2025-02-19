@@ -1,6 +1,6 @@
 import Navbar from "@/components/Navbar";
 import Sidebar from "@/components/sidebar/Sidebar";
-import { EXAM_YEARS } from "@/constants";
+import { ClassesType as ClassesDataType, EXAM_YEARS } from "@/constants";
 import { db } from "@/firebase/config";
 import { useData } from "@/hooks/useData";
 import { UserDataType } from "@/types";
@@ -13,6 +13,7 @@ const AdminLayout = () => {
   const { currentUserData } = useData();
   const [usersData, setUsersData] = useState<UserDataType[] | null>(null);
   const [selectedYear, setSelectedYear] = useState<string>(EXAM_YEARS[0].year);
+  const [selectedClass, setSecectedClass] = useState<ClassesDataType>("THEORY");
 
   useEffect(() => {
     const collectionRef = collection(db, "users");
@@ -22,13 +23,13 @@ const AdminLayout = () => {
           ...doc.data(),
           uid: doc.id,
         })) as UserDataType[]
-      ).filter((user) => user.regNo && user.examYear == selectedYear); // Ensure regNo exists
+      ).filter((user) => user.regNo && user.examYear == selectedYear && user.classes.includes(selectedClass)); // Ensure regNo exists
 
       setUsersData(usersDataArr);
     });
 
     return unsubscribe;
-  }, [selectedYear]);
+  }, [selectedClass, selectedYear]);
 
   const token = localStorage.getItem("token");
 
@@ -53,11 +54,13 @@ const AdminLayout = () => {
           <Navbar
             selectedYear={selectedYear}
             setSelectedYear={setSelectedYear}
+            selectedClass={selectedClass}
+            setSelectedClass={setSecectedClass}
           />
         </div>
         <div className="w-full min-h-screen bg-[#ededed] mt-[80px]">
           {/* <div className="w-full h-[2000px]"></div> */}
-          <Outlet context={{ usersData, setSelectedYear, selectedYear }} />
+          <Outlet context={{ usersData, setSelectedYear, selectedYear, selectedClass }} />
         </div>
       </div>
     </div>

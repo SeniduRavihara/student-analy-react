@@ -1,3 +1,5 @@
+import { db } from "@/firebase/config";
+import { ExamDataType, UserDataType } from "@/types";
 import {
   collection,
   onSnapshot,
@@ -5,21 +7,20 @@ import {
   query,
   where,
 } from "firebase/firestore";
-import { AvgChart } from "../components/charts/AvgChart";
 import { useEffect, useState } from "react";
-import { ExamDataType, UserDataType } from "@/types";
-import { db } from "@/firebase/config";
 import { useOutletContext } from "react-router-dom";
+import { AvgChart } from "../components/charts/AvgChart";
 
 type OutletContextType = {
   selectedYear: string;
   usersData: UserDataType[] | null;
+  selectedClass: string;
 };
 
 const AnalyticsPage = () => {
   const [examsData, setExamsData] = useState<Array<ExamDataType> | null>(null);
   const [loading, setLoading] = useState(true); // Loader state
-  const { selectedYear } = useOutletContext<OutletContextType>();
+  const { selectedYear, selectedClass } = useOutletContext<OutletContextType>();
 
   useEffect(() => {
     if (!selectedYear) return;
@@ -29,6 +30,7 @@ const AnalyticsPage = () => {
     const collectionRef = query(
       collection(db, "exams"),
       where("examYear", "==", selectedYear),
+      where("classType", "==", selectedClass),
       orderBy("examDate", "asc")
     );
     const unsubscribe = onSnapshot(
@@ -50,7 +52,7 @@ const AnalyticsPage = () => {
     );
 
     return unsubscribe;
-  }, [selectedYear]);
+  }, [selectedClass, selectedYear]);
 
   // Filter, validate, and sort usersData
   // const filteredUsersData = usersData
