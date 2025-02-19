@@ -1,16 +1,25 @@
+import ClassSelect from "@/_routes/admin/components/ClassSelect";
 import YearSelect from "@/_routes/admin/components/YearSelect";
-import NavbarRoutes from "./NavbarRoutes";
-import MobileSidebar from "./sidebar/MobileSidebar";
 import { useData } from "@/hooks/useData";
 import { toRoundLettersAndNumbers } from "@/lib/utils";
 import { useLocation } from "react-router-dom";
+import NavbarRoutes from "./NavbarRoutes";
+import MobileSidebar from "./sidebar/MobileSidebar";
+import { ClassesType as ClassesDataType } from "@/constants";
 
 type NavbarProps = {
   selectedYear?: string;
   setSelectedYear?: (year: string) => void;
+  selectedClass?: ClassesDataType;
+  setSelectedClass?: React.Dispatch<React.SetStateAction<ClassesDataType>>;
 };
 
-function Navbar({ selectedYear, setSelectedYear }: NavbarProps) {
+function Navbar({
+  selectedYear,
+  setSelectedYear,
+  selectedClass,
+  setSelectedClass,
+}: NavbarProps) {
   const { currentUserData } = useData();
   const location = useLocation();
 
@@ -31,11 +40,20 @@ function Navbar({ selectedYear, setSelectedYear }: NavbarProps) {
         {toRoundLettersAndNumbers(headerText ?? "")}
       </h1>
 
-      {currentUserData?.roles == "ADMIN" && selectedYear && setSelectedYear ? (
+      {currentUserData?.roles == "ADMIN" &&
+      selectedYear &&
+      setSelectedYear &&
+      selectedClass &&
+      setSelectedClass ? (
         <div className="ml-5 md:flex items-center gap-x-2">
           <YearSelect
             selectedYear={selectedYear}
             setSelectedYear={setSelectedYear}
+          />
+          <ClassSelect
+            selectedYear={selectedYear}
+            selectedClass={selectedClass}
+            setSelectedClass={setSelectedClass}
           />
         </div>
       ) : null}

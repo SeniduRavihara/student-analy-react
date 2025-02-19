@@ -99,6 +99,7 @@ export type ExamDataType = {
   examYear: string;
   examResult: number;
   isAbsent: boolean;
+  classType: string;
   // createdAt: Date;
 };
 

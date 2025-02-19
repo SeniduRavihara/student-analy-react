@@ -43,6 +43,7 @@ import { DataTable } from "../components/exams/DataTable";
 type OutletContextType = {
   selectedYear: string;
   setSelectedYear: (year: string) => void;
+  selectedClass: ClassesDataType;
 };
 
 const ExamsPage = () => {
@@ -59,7 +60,7 @@ const ExamsPage = () => {
 
   const [loading, setLoading] = useState(false);
 
-  const { selectedYear } = useOutletContext<OutletContextType>();
+  const { selectedYear, selectedClass } = useOutletContext<OutletContextType>();
 
   const navigate = useNavigate();
 
@@ -84,14 +85,14 @@ const ExamsPage = () => {
           ...doc.data(),
           examId: doc.id,
         })) as ExamDataType[]
-      ).filter((exam) => exam.examYear === selectedYear);
+      ).filter((exam) => exam.examYear === selectedYear && exam.classType === selectedClass);
 
       console.log("EXAM", examsDataArr);
       setExamsData(examsDataArr);
     });
 
     return unsubscribe;
-  }, [selectedYear]);
+  }, [selectedClass, selectedYear]);
 
   const onClickCreateExam = async () => {
     // console.log(examYear);
