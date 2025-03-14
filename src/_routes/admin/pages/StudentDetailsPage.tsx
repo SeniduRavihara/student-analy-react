@@ -1,15 +1,15 @@
 import { columns } from "@/_routes/admin/components/student-data/Coloumns";
-import { ExamDataType, UserDataType } from "@/types";
-import { DataTable } from "../components/student-data/DataTable";
-import { useOutletContext } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
-import { useEffect, useState } from "react";
 import { Drawer, DrawerContent } from "@/components/ui/drawer";
-import { Tabs } from "../components/Tabs";
-import MarksTab from "../components/tabs/MarksTab";
-import InfoTab from "../components/tabs/InfoTab";
-import { collection, onSnapshot, orderBy, query } from "firebase/firestore";
 import { db } from "@/firebase/config";
+import { ExamDataType, UserDataType } from "@/types";
+import { collection, onSnapshot, orderBy, query } from "firebase/firestore";
+import { useEffect, useState } from "react";
+import { useOutletContext } from "react-router-dom";
+import { DataTable } from "../components/student-data/DataTable";
+import { Tabs } from "../components/Tabs";
+import InfoTab from "../components/tabs/InfoTab";
+import MarksTab from "../components/tabs/MarksTab";
 
 type OutletContextType = {
   usersData: UserDataType[] | null;

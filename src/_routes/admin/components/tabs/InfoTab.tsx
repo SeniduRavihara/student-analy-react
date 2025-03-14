@@ -3,6 +3,8 @@ import { Label } from "@/components/ui/label";
 import { UserDataType } from "@/types";
 
 const InfoTab = ({ userInfo }: { userInfo: UserDataType | null }) => {
+  console.log(userInfo);
+
   return (
     <Card className="w-full h-full mb-5">
       {/* Add max height and scroll */}
@@ -60,6 +62,13 @@ const InfoTab = ({ userInfo }: { userInfo: UserDataType | null }) => {
             <div>
               <Label className="text-[#787e81]">Guardian's Phone</Label>
               <p>{userInfo.gurdianPhone || "N/A"}</p>
+            </div>
+            <div>
+              <Label className="text-[#787e81]">Classes</Label>
+              {userInfo.classes.map((name) => (
+                <p>{name || "N/A"}</p>
+              ))}
+              {/* <p>{userInfo.classes[0] || "N/A"}</p> */}
             </div>
             <div className="md:col-span-2">
               <Label className="text-[#787e81]">Address</Label>

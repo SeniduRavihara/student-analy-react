@@ -1,5 +1,7 @@
-import { UserDataInAdminType } from "@/types";
-import { useNavigate, useOutletContext, useParams } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch";
 import {
   Table,
   TableBody,
@@ -8,17 +10,16 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { useEffect, useState } from "react";
-import { Button } from "@/components/ui/button";
 import { setExamResults } from "@/firebase/api";
-import { onSnapshot, doc } from "firebase/firestore";
 import { db } from "@/firebase/config";
-import { Switch } from "@/components/ui/switch";
+import { UserDataInAdminType } from "@/types";
+import { doc, onSnapshot } from "firebase/firestore";
+import { useEffect, useState } from "react";
+import { useNavigate, useOutletContext, useParams } from "react-router-dom";
 
 type OutletContextType = {
   usersData: UserDataInAdminType[] | null;
+  selectedClass: string;
 };
 
 const toFullWidth = (text: string) => {
