@@ -25,8 +25,10 @@ const mockData = [
 ];
 
 // Animated MockGraph component
+type GraphData = { month: string; marks: number; average: number };
+
 const MockGraph = () => {
-  const [data, setData] = useState([]);
+  const [data, setData] = useState<GraphData[]>([]);
   const [showData, setShowData] = useState(false);
   const [currentRank, setCurrentRank] = useState("--");
   const [improvement, setImprovement] = useState("--");
