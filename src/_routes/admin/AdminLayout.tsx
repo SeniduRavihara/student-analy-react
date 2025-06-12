@@ -4,6 +4,7 @@ import { ClassesType as ClassesDataType, EXAM_YEARS } from "@/constants";
 import { db } from "@/firebase/config";
 import { useData } from "@/hooks/useData";
 import { UserDataType } from "@/types";
+import { CircularProgress } from "@mui/material";
 import { collection, onSnapshot } from "firebase/firestore";
 import { useEffect, useState } from "react";
 // import { CircularProgress } from "@chakra-ui/react";
@@ -38,8 +39,8 @@ const AdminLayout = () => {
   if (!currentUserData) {
     return (
       <div className="w-full h-screen flex items-center justify-center">
-        Loading...
-        {/* <CircularProgress size="60px" isIndeterminate color="green.300" /> */}
+        {/* Loading... */}
+        <CircularProgress size="60px" color="success" />
       </div>
     );
   }

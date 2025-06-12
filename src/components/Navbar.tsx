@@ -1,11 +1,11 @@
 import ClassSelect from "@/_routes/admin/components/ClassSelect";
 import YearSelect from "@/_routes/admin/components/YearSelect";
+import { ClassesType as ClassesDataType } from "@/constants";
 import { useData } from "@/hooks/useData";
 import { toRoundLettersAndNumbers } from "@/lib/utils";
 import { useLocation } from "react-router-dom";
 import NavbarRoutes from "./NavbarRoutes";
 import MobileSidebar from "./sidebar/MobileSidebar";
-import { ClassesType as ClassesDataType } from "@/constants";
 
 type NavbarProps = {
   selectedYear?: string;

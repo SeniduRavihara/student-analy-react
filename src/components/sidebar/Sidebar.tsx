@@ -1,5 +1,4 @@
-import { useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 // Custom icons using SVGs for physics theme
 const PhysicsIcons = {
@@ -225,7 +224,7 @@ const Sidebar = () => {
         {routes.map((route) => {
           const isActive =
             location.pathname === route.href ||
-            location.pathname.startsWith(`${route.href}/`);
+            location.pathname === route.href;
 
           return (
             <button
