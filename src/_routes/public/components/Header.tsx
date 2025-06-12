@@ -1,5 +1,8 @@
+import { logout } from "@/firebase/api";
+import { useAuth } from "@/hooks/useAuth";
+import { useData } from "@/hooks/useData";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useState, useEffect, useRef } from "react";
 
 const Header = ({
   footerRef,
@@ -8,17 +11,30 @@ const Header = ({
   footerRef: React.RefObject<HTMLDivElement>;
   cardsRef: React.RefObject<HTMLDivElement>;
 }) => {
+  const { currentUser } = useAuth();
+  const { currentUserData } = useData();
   const navigate = useNavigate();
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false); // Replace with your auth logic
   const [isHovered, setIsHovered] = useState(false);
+  const [isSigningOut, setIsSigningOut] = useState(false); // Add loading state
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const isMountedRef = useRef(true); // Track if component is mounted
+  const [imgError, setImgError] = useState(false);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
 
   // Handle scroll effects
   useEffect(() => {
     const handleScroll = () => {
+      if (!isMountedRef.current) return; // Check if component is still mounted
+
       const isScrolled = window.scrollY > 10;
       if (isScrolled !== scrolled) {
         setScrolled(isScrolled);
@@ -34,6 +50,8 @@ const Header = ({
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
+      if (!isMountedRef.current) return; // Check if component is still mounted
+
       if (
         dropdownRef.current &&
         !dropdownRef.current.contains(event.target as Node)
@@ -59,21 +77,40 @@ const Header = ({
     }
   };
 
-  // Mock user data - replace with your actual user data
-  const user = {
-    name: "Student Name",
-    email: "student@example.com",
-    avatar: "/api/placeholder/32/32",
-  };
-
   const handleSignIn = () => {
     navigate("/login");
+    setMobileMenuOpen(false); // Close mobile menu
   };
 
-  const handleSignOut = () => {
-    // Your sign out logic here
-    setIsLoggedIn(false);
+  const handleSignOut = async () => {
+    if (isSigningOut) return; // Prevent multiple simultaneous sign-out attempts
+
+    try {
+      setIsSigningOut(true);
+      setIsOpen(false); // Close dropdown immediately
+      setMobileMenuOpen(false); // Close mobile menu
+
+      await logout();
+    } catch (error) {
+      console.error("Error signing out:", error);
+      if (isMountedRef.current) {
+        setIsSigningOut(false); // Reset loading state on error
+      }
+    }
   };
+
+  const handleMobileNavigation = (path: string) => {
+    navigate(path);
+    setMobileMenuOpen(false);
+  };
+
+  // Get first letter of name for avatar fallback
+  const getInitials = (name: string | null | undefined): string => {
+    if (!name) return "U";
+    return name.charAt(0).toUpperCase();
+  };
+
+  const isLoggedIn = !!currentUser;
 
   return (
     <div
@@ -99,9 +136,12 @@ const Header = ({
 
         {/* Desktop Navigation */}
         <nav className="hidden md:flex space-x-1">
-          <button className="text-gray-700 hover:text-blue-600 px-4 py-2 rounded-lg hover:bg-blue-50 transition-colors text-sm font-medium">
+          <a
+            href="#about"
+            className="text-gray-700 no-underline hover:text-blue-600 px-4 py-2 rounded-lg hover:bg-blue-50 transition-colors text-sm font-medium"
+          >
             About
-          </button>
+          </a>
           <button
             onClick={() => handleScrollToRef(cardsRef)}
             className="text-gray-700 hover:text-blue-600 px-4 py-2 rounded-lg hover:bg-blue-50 transition-colors text-sm font-medium"
@@ -116,8 +156,9 @@ const Header = ({
           </button>
         </nav>
 
-        {/* Mobile Menu Button and Profile */}
+        {/* Desktop Profile and Mobile Menu Button */}
         <div className="flex items-center space-x-3">
+          {/* Mobile Menu Button - Only show hamburger */}
           <div className="block md:hidden">
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -157,8 +198,8 @@ const Header = ({
             </button>
           </div>
 
-          {/* Enhanced Profile Dropdown */}
-          <div className="relative" ref={dropdownRef}>
+          {/* Desktop Profile Dropdown - Hidden on mobile */}
+          <div className="hidden md:block relative" ref={dropdownRef}>
             {isLoggedIn ? (
               // Logged in state
               <button
@@ -166,16 +207,26 @@ const Header = ({
                 className="flex items-center space-x-2 focus:outline-none group"
                 aria-expanded={isOpen}
                 aria-haspopup="true"
+                disabled={isSigningOut} // Disable while signing out
               >
-                <div className="w-8 h-8 rounded-full overflow-hidden border-2 border-blue-100 group-hover:border-blue-300 transition-all">
-                  <img
-                    src={user.avatar}
-                    alt="Profile"
-                    className="w-full h-full object-cover"
-                  />
+                <div className="w-8 h-8 rounded-full overflow-hidden border-2 border-blue-100 group-hover:border-blue-300 transition-all flex items-center justify-center bg-blue-100">
+                  {currentUser?.photoURL && !imgError ? (
+                    <img
+                      src={currentUser.photoURL}
+                      alt="Profile"
+                      className="w-full h-full object-cover"
+                      onError={() => setImgError(true)}
+                    />
+                  ) : (
+                    <span className="text-blue-600 font-medium text-sm">
+                      {getInitials(currentUser?.displayName)}
+                    </span>
+                  )}
                 </div>
-                <span className="hidden md:block text-gray-700 font-medium group-hover:text-blue-600 transition-colors">
-                  {user.name}
+                <span className="text-gray-700 font-medium group-hover:text-blue-600 transition-colors">
+                  {isSigningOut
+                    ? "Signing out..."
+                    : currentUser?.displayName || "User"}
                 </span>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -237,91 +288,103 @@ const Header = ({
               </button>
             )}
 
-            {/* Dropdown menu */}
-            {isOpen && isLoggedIn && (
+            {/* Desktop Dropdown menu */}
+            {isOpen && isLoggedIn && !isSigningOut && (
               <div className="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-lg overflow-hidden border border-gray-100 py-1 z-50">
                 <div className="px-4 py-3 border-b border-gray-100 bg-gradient-to-r from-blue-50 to-white">
                   <p className="text-sm font-medium text-gray-900">
-                    {user.name}
+                    {currentUser?.displayName || "User"}
                   </p>
-                  <p className="text-xs text-gray-500 truncate">{user.email}</p>
+                  <p className="text-xs text-gray-500 truncate">
+                    {currentUser?.email || "No email"}
+                  </p>
                 </div>
 
                 <div className="py-1">
-                  <button
-                    className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 flex items-center group transition-colors"
-                    onClick={() => navigate("/profile")}
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-4 w-4 mr-2 text-gray-400 group-hover:text-blue-500 transition-colors"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
+                  {currentUserData?.roles.includes("ADMIN") ? (
+                    <button
+                      className="w-full gap-3 text-left px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 flex items-center group transition-colors"
+                      onClick={() => {
+                        setIsOpen(false);
+                        navigate("/admin");
+                      }}
                     >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                      />
-                    </svg>
-                    Profile
-                  </button>
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="24"
+                        height="24"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        className="lucide lucide-shield-user-icon lucide-shield-user"
+                      >
+                        <path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z" />
+                        <path d="M6.376 18.91a6 6 0 0 1 11.249.003" />
+                        <circle cx="12" cy="11" r="4" />
+                      </svg>
+                      Admin Dashboard
+                    </button>
+                  ) : (
+                    <>
+                      <button
+                        className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 flex items-center group transition-colors"
+                        onClick={() => {
+                          setIsOpen(false);
+                          navigate("/dashboard/profile");
+                        }}
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="h-4 w-4 mr-2 text-gray-400 group-hover:text-blue-500 transition-colors"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                          />
+                        </svg>
+                        Profile
+                      </button>
 
-                  <button
-                    className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 flex items-center group transition-colors"
-                    onClick={() => navigate("/dashboard")}
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-4 w-4 mr-2 text-gray-400 group-hover:text-blue-500 transition-colors"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
-                      />
-                    </svg>
-                    Dashboard
-                  </button>
-
-                  <button
-                    className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 flex items-center group transition-colors"
-                    onClick={() => navigate("/settings")}
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-4 w-4 mr-2 text-gray-400 group-hover:text-blue-500 transition-colors"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
-                      />
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                      />
-                    </svg>
-                    Settings
-                  </button>
+                      <button
+                        className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 flex items-center group transition-colors"
+                        onClick={() => {
+                          setIsOpen(false);
+                          navigate("/dashboard");
+                        }}
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="h-4 w-4 mr-2 text-gray-400 group-hover:text-blue-500 transition-colors"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
+                          />
+                        </svg>
+                        Dashboard
+                      </button>
+                    </>
+                  )}
                 </div>
 
                 <div className="py-1 border-t border-gray-100">
                   <button
                     className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center group transition-colors"
                     onClick={handleSignOut}
+                    disabled={isSigningOut}
                   >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -337,7 +400,7 @@ const Header = ({
                         d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
                       />
                     </svg>
-                    Sign Out
+                    {isSigningOut ? "Signing out..." : "Sign Out"}
                   </button>
                 </div>
               </div>
@@ -346,28 +409,155 @@ const Header = ({
         </div>
       </div>
 
-      {/* Mobile Menu */}
+      {/* Enhanced Mobile Menu with Authentication */}
       <div
         className={`block md:hidden bg-white border-t border-gray-100 ${
-          mobileMenuOpen ? "max-h-40" : "max-h-0"
+          mobileMenuOpen ? "max-h-[600px]" : "max-h-0"
         } overflow-hidden transition-all duration-300`}
       >
         <div className="flex flex-col px-4 pb-4">
-          <button className="text-gray-700 py-3 border-b border-gray-100 text-left font-medium">
+          {/* User Info Section (if logged in) */}
+          {isLoggedIn && (
+            <div className="flex items-center space-x-3 py-3 border-b border-gray-100 bg-gradient-to-r from-blue-50 to-transparent rounded-lg px-3 my-2">
+              <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-blue-100 flex items-center justify-center bg-blue-100">
+                {currentUser?.photoURL && !imgError ? (
+                  <img
+                    src={currentUser.photoURL}
+                    alt="Profile"
+                    className="w-full h-full object-cover"
+                    onError={() => setImgError(true)}
+                  />
+                ) : (
+                  <span className="text-blue-600 font-medium text-sm">
+                    {getInitials(currentUser?.displayName)}
+                  </span>
+                )}
+              </div>
+              <div className="flex-1">
+                <p className="text-sm font-medium text-gray-900">
+                  {currentUser?.displayName || "User"}
+                </p>
+                <p className="text-xs text-gray-500 truncate">
+                  {currentUser?.email || "No email"}
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* Navigation Links */}
+          <a
+            href="#about"
+            className="text-gray-700 no-underline py-3 border-b border-gray-100 text-left font-medium hover:text-blue-600 hover:bg-blue-50 px-2 rounded transition-colors"
+          >
             About
-          </button>
+          </a>
+
           <button
             onClick={() => handleScrollToRef(cardsRef)}
-            className="text-gray-700 py-3 border-b border-gray-100 text-left font-medium"
+            className="text-gray-700 py-3 border-b border-gray-100 text-left font-medium hover:text-blue-600 hover:bg-blue-50 px-2 rounded transition-colors"
           >
             Classes
           </button>
+
           <button
             onClick={() => handleScrollToRef(footerRef)}
-            className="text-gray-700 py-3 text-left font-medium"
+            className="text-gray-700 py-3 border-b border-gray-100 text-left font-medium hover:text-blue-600 hover:bg-blue-50 px-2 rounded transition-colors"
           >
             Contact
           </button>
+
+          {/* Authentication Section */}
+          {isLoggedIn ? (
+            <>
+              {/* Profile Options */}
+              <button
+                onClick={() => handleMobileNavigation("/dashboard/profile")}
+                className="text-gray-700 py-3 border-b border-gray-100 text-left font-medium hover:text-blue-600 hover:bg-blue-50 px-2 rounded transition-colors flex items-center"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-4 w-4 mr-2 text-gray-400"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                  />
+                </svg>
+                Profile
+              </button>
+
+              <button
+                onClick={() => handleMobileNavigation("/dashboard")}
+                className="text-gray-700 py-3 border-b border-gray-100 text-left font-medium hover:text-blue-600 hover:bg-blue-50 px-2 rounded transition-colors flex items-center"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-4 w-4 mr-2 text-gray-400"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
+                  />
+                </svg>
+                Dashboard
+              </button>
+
+              {/* Sign Out Button */}
+              <button
+                onClick={handleSignOut}
+                disabled={isSigningOut}
+                className="text-red-600 py-3 text-left font-medium hover:bg-red-50 px-2 rounded transition-colors flex items-center mt-2"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-4 w-4 mr-2 text-red-400"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+                  />
+                </svg>
+                {isSigningOut ? "Signing out..." : "Sign Out"}
+              </button>
+            </>
+          ) : (
+            // Sign In Button for Mobile
+            <button
+              onClick={handleSignIn}
+              className="bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white py-3 px-4 rounded-lg font-medium transition-all duration-300 shadow-md hover:shadow-lg mt-3 flex items-center justify-center"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-4 w-4 mr-2"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"
+                />
+              </svg>
+              Sign In
+            </button>
+          )}
         </div>
       </div>
     </div>

@@ -1,5 +1,4 @@
 import { forwardRef, useState } from "react";
-import { BookOpen, FileText, FilePlus, BrainCircuit } from "lucide-react";
 
 const cardContent = [
   {
@@ -136,7 +135,7 @@ const FormulasSVG = () => (
   </svg>
 );
 
-const WavesSVG = ({ isAnimating }) => {
+const WavesSVG = ({ isAnimating }: { isAnimating: boolean }) => {
   return (
     <svg viewBox="0 0 200 80" className="w-full h-16 mt-4">
       <path
@@ -151,7 +150,7 @@ const WavesSVG = ({ isAnimating }) => {
           animation: isAnimating ? "dash 3s linear infinite" : "none",
         }}
       />
-      <style jsx>{`
+      <style>{`
         @keyframes dash {
           to {
             stroke-dashoffset: 0;
@@ -162,7 +161,13 @@ const WavesSVG = ({ isAnimating }) => {
   );
 };
 
-const PhysicsClassCard = ({ title, content, index }) => {
+interface PhysicsClassCardProps {
+  title: string;
+  content: string;
+  index: number;
+}
+
+const PhysicsClassCard = ({ title, content, index }: PhysicsClassCardProps) => {
   const [isHovered, setIsHovered] = useState(false);
   const bgColors = [
     "from-blue-50 to-cyan-50 text-blue-900",
@@ -253,10 +258,11 @@ const PhysicsClassCard = ({ title, content, index }) => {
   );
 };
 
-const CardsSection = forwardRef((_props, ref) => {
+const CardsSection = forwardRef<HTMLDivElement, object>((_props, ref) => {
   return (
     <div
       ref={ref}
+      id="card-section"
       className="py-16 px-4 bg-gradient-to-br from-blue-50 to-white overflow-hidden"
     >
       <div className="max-w-6xl mx-auto relative">

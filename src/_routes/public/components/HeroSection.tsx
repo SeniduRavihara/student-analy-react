@@ -11,6 +11,7 @@ const HeroSection = () => {
 
   return (
     <div
+    id="about"
       className={`w-full mt-20 bg-gradient-to-r from-blue-50 to-indigo-50 transition-opacity duration-700 ${
         isLoaded ? "opacity-100" : "opacity-0"
       }`}
@@ -38,16 +39,16 @@ const HeroSection = () => {
             </p>
 
             <div className="flex flex-wrap gap-3 justify-center md:justify-start">
-              <button className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-all shadow-md hover:shadow-lg">
+              {/* <button className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-all shadow-md hover:shadow-lg">
                 Join Class
-              </button>
-              <button className="bg-white hover:bg-gray-50 text-blue-600 border border-blue-200 px-6 py-3 rounded-lg font-medium transition-all shadow-sm hover:shadow-md">
-                View Syllabus
-              </button>
+              </button> */}
+              <a href="#card-section"  className="bg-white no-underline hover:bg-gray-50 text-blue-600 border border-blue-200 px-6 py-3 rounded-lg font-medium transition-all shadow-sm hover:shadow-md">
+                View Class Programs
+              </a>
             </div>
 
             {/* Class Info Cards */}
-            <div className="mt-8 flex flex-wrap gap-4 justify-center md:justify-start">
+            {/* <div className="mt-8 flex flex-wrap gap-4 justify-center md:justify-start">
               <div className="bg-white p-3 rounded-lg shadow-sm flex items-center gap-2">
                 <div className="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600">
                   <svg
@@ -89,7 +90,7 @@ const HeroSection = () => {
                 </div>
                 <span className="text-sm text-gray-700">Room 301</span>
               </div>
-            </div>
+            </div> */}
           </div>
 
           {/* Right Content - Teacher Image */}
@@ -105,7 +106,7 @@ const HeroSection = () => {
                 <div className="aspect-[4/3] rounded-lg overflow-hidden relative">
                   {/* This is a placeholder - replace with your actual teacher image */}
                   <img
-                    src="/api/placeholder/500/400"
+                    src="/pasan-image.jpg"
                     alt="Physics Teacher"
                     className="w-full h-full object-cover"
                   />
@@ -113,11 +114,11 @@ const HeroSection = () => {
                   {/* Teacher info overlay */}
                   <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-gray-900/70 to-transparent p-4">
                     <h3 className="text-white font-bold text-lg">
-                      Dr. Sarah Johnson
+                      Pasan Udayanga
                     </h3>
-                    <p className="text-gray-200 text-sm">
+                    {/* <p className="text-gray-200 text-sm">
                       PhD in Theoretical Physics
-                    </p>
+                    </p> */}
                   </div>
                 </div>
               </div>
@@ -126,11 +127,11 @@ const HeroSection = () => {
               <div className="absolute bottom-4 -left-4 bg-white shadow-md rounded-lg px-4 py-2 z-20">
                 <div className="flex gap-3">
                   <div className="text-center">
-                    <p className="text-blue-600 font-bold text-xl">15+</p>
+                    <p className="text-blue-600 font-bold text-xl">3+</p>
                     <p className="text-xs text-gray-500">Years Experience</p>
                   </div>
                   <div className="text-center border-l border-gray-200 pl-3">
-                    <p className="text-blue-600 font-bold text-xl">96%</p>
+                    <p className="text-blue-600 font-bold text-xl">98%</p>
                     <p className="text-xs text-gray-500">Student Success</p>
                   </div>
                 </div>

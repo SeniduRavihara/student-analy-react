@@ -10,6 +10,7 @@ import {
   Area,
 } from "recharts";
 import { TrendingUp, Award, Users, Activity } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 // Mock data for the chart
 const mockData = [
@@ -195,6 +196,8 @@ const WaveSVG = () => (
 
 // Main GraphAnalysisSection component
 const GraphAnalysisSection = () => {
+   const navigate = useNavigate();
+
   return (
     <div className="py-16 bg-gradient-to-br from-blue-50 via-white to-indigo-50 relative overflow-hidden">
       <WaveSVG />
@@ -255,7 +258,7 @@ const GraphAnalysisSection = () => {
               </div>
             </div>
 
-            <button className="mt-8 bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-6 rounded-lg transition duration-300 ease-in-out transform hover:scale-105 flex items-center justify-center">
+            <button onClick={()=> navigate("/dashboard")} className="mt-8 bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-6 rounded-lg transition duration-300 ease-in-out transform hover:scale-105 flex items-center justify-center">
               <span>Explore Your Analytics</span>
               <svg
                 xmlns="http://www.w3.org/2000/svg"

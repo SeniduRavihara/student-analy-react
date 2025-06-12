@@ -6,7 +6,7 @@ import Footer from "../components/Footer";
 // import { EarthCanvas, StarsCanvas } from "@/components/canvas";
 import GraphAnalysisSection from "../components/GraphAnalysisSection";
 import { useRef } from "react";
-import { StarsCanvas } from "@/components/canvas";
+// import { StarsCanvas } from "@/components/canvas";
 // import BlogSlider from "../components/BlogSlider";
 
 const HomePage = () => {
