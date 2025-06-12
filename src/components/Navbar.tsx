@@ -2,8 +2,6 @@ import ClassSelect from "@/_routes/admin/components/ClassSelect";
 import YearSelect from "@/_routes/admin/components/YearSelect";
 import { ClassesType as ClassesDataType } from "@/constants";
 import { useData } from "@/hooks/useData";
-import { toRoundLettersAndNumbers } from "@/lib/utils";
-import { useLocation } from "react-router-dom";
 import NavbarRoutes from "./NavbarRoutes";
 import MobileSidebar from "./sidebar/MobileSidebar";
 
@@ -21,24 +19,24 @@ function Navbar({
   setSelectedClass,
 }: NavbarProps) {
   const { currentUserData } = useData();
-  const location = useLocation();
+  // const location = useLocation();
 
-  const locationtext = location.pathname;
-  let headerText;
+  // const locationtext = location.pathname;
+  // let headerText;
 
-  if (locationtext.includes("/profile")) {
-    headerText = "PROFILE";
-  } else if (locationtext.includes("/dashboard")) {
-    headerText = "DASHBOARD";
-  }
+  // if (locationtext.includes("/profile")) {
+  //   headerText = "PROFILE";
+  // } else if (locationtext.includes("/dashboard")) {
+  //   headerText = "DASHBOARD";
+  // }
 
   return (
-    <div className="p-4 md:ml-56 border-b h-full flex items-center bg-[#ededed] shadow-sm">
+    <div className="p-4 md:ml-56 border-b h-full flex items-center bg-[#ededed] ">
       <MobileSidebar />
 
-      <h1 className="text-[#00A6ED]">
+      {/* <h1 className="text-[#00A6ED]">
         {toRoundLettersAndNumbers(headerText ?? "")}
-      </h1>
+      </h1> */}
 
       {currentUserData?.roles == "ADMIN" &&
       selectedYear &&
