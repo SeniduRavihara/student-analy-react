@@ -1,14 +1,15 @@
-import { useEffect, useState } from "react";
-import { Calendar, momentLocalizer } from "react-big-calendar";
-import moment from "moment";
-import "react-big-calendar/lib/css/react-big-calendar.css";
-import { Card, CardContent } from "./ui/card";
-import { Button } from "./ui/button";
-import { collection, onSnapshot, orderBy, query } from "firebase/firestore";
 import { db } from "@/firebase/config";
 import { useAuth } from "@/hooks/useAuth";
+import "@/styles/Calendar.css";
 import { ExamDataType } from "@/types";
+import { collection, onSnapshot, orderBy, query } from "firebase/firestore";
+import moment from "moment";
+import { useEffect, useState } from "react";
+import { Calendar, momentLocalizer } from "react-big-calendar";
+import "react-big-calendar/lib/css/react-big-calendar.css";
 import { MdNavigateBefore, MdNavigateNext } from "react-icons/md";
+import { Button } from "./ui/button";
+import { Card, CardContent } from "./ui/card";
 
 // Initialize moment localizer for react-big-calendar
 const localizer = momentLocalizer(moment);
@@ -17,8 +18,11 @@ const CustomToolbar = ({
   date,
   onNavigate,
 }: {
-  date: any;
-  onNavigate: any;
+  date: Date;
+  onNavigate: (
+    navigate: "PREV" | "NEXT" | "TODAY" | "DATE",
+    date?: Date
+  ) => void;
 }) => {
   const goToBack = () => {
     onNavigate("PREV");

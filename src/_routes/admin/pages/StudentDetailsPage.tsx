@@ -1,5 +1,11 @@
 import { columns } from "@/_routes/admin/components/student-data/Coloumns";
-import { Card, CardContent } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Drawer, DrawerContent } from "@/components/ui/drawer";
 import { db } from "@/firebase/config";
 import { ExamDataType, UserDataType } from "@/types";
@@ -55,6 +61,13 @@ const StudentDetailsPage = () => {
   return (
     <div className="p-2 md:p-5 w-full h-full overflow-auto">
       <Card>
+        <CardHeader>
+          <CardTitle>Student Details</CardTitle>
+          <CardDescription>
+            A comprehensive list of all students. Click on a row to view
+            detailed information.
+          </CardDescription>
+        </CardHeader>
         <CardContent>
           {usersData && (
             <DataTable
@@ -71,7 +84,7 @@ const StudentDetailsPage = () => {
       </Card>
 
       <Drawer open={openDetailsPopup} onOpenChange={setOpenDetailsPopup}>
-        <DrawerContent className="w-full h-[90%] p-10 overflow-aut">
+        <DrawerContent className="w-full h-[90%] p-10 overflow-auto">
           <Tabs tabs={tabs} />
         </DrawerContent>
       </Drawer>

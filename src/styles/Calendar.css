@@ -1,0 +1,135 @@
+/* Modern Styles for React Big Calendar */
+
+/* General container */
+.rbc-calendar {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+/* Toolbar */
+.rbc-toolbar {
+  padding: 1rem;
+  border-bottom: 1px solid var(--border);
+  background-color: var(--card);
+}
+
+.rbc-toolbar .rbc-toolbar-label {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--card-foreground);
+}
+
+/* We use a custom toolbar, so these buttons are not visible, but good to have */
+.rbc-btn-group button {
+  background-color: transparent;
+  color: var(--foreground);
+  border: 1px solid var(--border);
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.rbc-btn-group button:hover,
+.rbc-btn-group button.rbc-active {
+  background-color: var(--primary);
+  color: var(--primary-foreground);
+  border-color: var(--primary);
+}
+
+/* Month View */
+.rbc-month-view {
+  border: none;
+}
+
+/* Header cells (Sun, Mon, etc.) */
+.rbc-header {
+  padding: 0.75rem 0;
+  text-align: center;
+  font-weight: 500;
+  color: var(--muted-foreground);
+  border-bottom: 1px solid var(--border);
+  background-color: var(--card);
+}
+
+/* Date cells */
+.rbc-month-row {
+  border: none;
+}
+
+.rbc-day-bg {
+  border-left: 1px solid var(--border);
+}
+
+.rbc-month-row:first-child .rbc-day-bg {
+  border-top: none;
+}
+
+.rbc-day-bg:first-child {
+  border-left: none;
+}
+
+/* Date number */
+.rbc-date-cell {
+  color: var(--foreground);
+  padding: 4px;
+  text-align: center;
+}
+
+/* Today's date */
+.rbc-today {
+  background-color: var(--accent);
+}
+
+/* Off-range dates (from previous/next month) */
+.rbc-off-range-bg {
+  background-color: var(--muted);
+  opacity: 0.5;
+}
+.rbc-off-range .rbc-date-cell {
+  color: var(--muted-foreground);
+}
+
+/* Events */
+.rbc-event {
+  background-color: var(--primary);
+  color: var(--primary-foreground);
+  border: none;
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-size: 0.85em;
+  font-weight: 500; /* Make text bolder */
+  transition: all 0.2s ease-in-out;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15); /* Add shadow to highlight */
+  cursor: pointer;
+}
+
+.rbc-event:hover {
+  filter: brightness(1.05);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Enhance shadow on hover */
+}
+
+.rbc-event.rbc-selected {
+  background-color: var(--destructive);
+}
+
+/* Agenda View */
+.rbc-agenda-view {
+  border-top: 1px solid var(--border);
+}
+
+.rbc-agenda-view table {
+  border: none;
+}
+
+.rbc-agenda-date-cell {
+  font-weight: 600;
+  color: var(--primary);
+}
+
+.rbc-agenda-time-cell {
+  color: var(--muted-foreground);
+}
+
+.rbc-agenda-event-cell {
+  padding: 0.5rem 0;
+}

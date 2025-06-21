@@ -3,20 +3,22 @@ import { ExamDataType } from "@/types";
 
 const MarksTab = ({ examsData }: { examsData: Array<ExamDataType> | null }) => {
   return (
-    <div className="overflow-y-auto w-full h-[1000px]">
+    <div className="w-full">
       {examsData && examsData.length > 0 ? (
         <MarksChart
           chartData={examsData
             .filter((exam) => exam.examStatus === "completed")
             .map(({ examName, examResult, avgResult, isAbsent }) => ({
               exam: examName,
-              Mark: examResult,
-              avgResult: avgResult ?? 0,
+              Mark: isAbsent ? null : examResult ?? null,
+              avgResult: avgResult ?? null,
               isAbsent,
             }))}
         />
       ) : (
-        <div className="text-center text-gray-500">No exam data available</div>
+        <div className="text-center text-gray-500 py-10">
+          No exam data available
+        </div>
       )}
     </div>
   );

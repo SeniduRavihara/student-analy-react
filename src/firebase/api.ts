@@ -1,3 +1,4 @@
+import { UserDataType, UserInfoType } from "@/types";
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
@@ -5,7 +6,6 @@ import {
   signOut,
   User,
 } from "firebase/auth";
-import { auth, db, provider } from "./config";
 import {
   addDoc,
   collection,
@@ -21,7 +21,7 @@ import {
   where,
   writeBatch,
 } from "firebase/firestore";
-import { UserDataType, UserInfoType } from "@/types";
+import { auth, db, provider } from "./config";
 
 export const logout = async () => {
   try {
@@ -222,9 +222,11 @@ export const updateUserInfo = async (
   const userDocRef = doc(db, "users", uid);
 
   try {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { bDate, ...restOfData } = updatedData;
     // Update the user document with the new data
     await updateDoc(userDocRef, {
-      ...updatedData,
+      ...restOfData,
       bDate: updatedData.bDate ? updatedData.bDate.toISOString() : null,
     });
 
@@ -235,8 +237,7 @@ export const updateUserInfo = async (
   }
 };
 
-
-// // This function is used to update all the users 
+// // This function is used to update all the users
 // export const addDefaultClassesToUsers = async () => {
 //   const usersCollectionRef = collection(db, "users");
 
@@ -286,7 +287,6 @@ export const updateUserInfo = async (
 //     throw error;
 //   }
 // };
-
 
 // -------------------------------------------
 // export const generateIndexNumber = async (uid: string, examYear: string) => {

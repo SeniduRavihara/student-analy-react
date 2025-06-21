@@ -1,14 +1,3 @@
-import { useEffect, useRef } from "react";
-import { TrendingUp } from "lucide-react";
-import {
-  CartesianGrid,
-  Line,
-  LineChart,
-  XAxis,
-  YAxis,
-  Tooltip,
-  TooltipProps,
-} from "recharts";
 import {
   Card,
   CardContent,
@@ -17,126 +6,145 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import {
+  CategoryScale,
+  Chart as ChartJS,
+  Filler,
+  Legend,
+  LinearScale,
+  LineElement,
+  PointElement,
+  Title,
+  Tooltip,
+  TooltipItem,
+} from "chart.js";
+import { TrendingUp } from "lucide-react";
+import { Line } from "react-chartjs-2";
 
-export const description =
-  "A scrollable line chart showing average exam scores";
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
+  Filler
+);
 
-// Custom tooltip component
-const CustomTooltip = ({
-  active,
-  payload,
-  label,
-}: TooltipProps<number, string>) => {
-  if (active && payload && payload.length) {
-    const data = payload[0]?.payload;
-    return (
-      <div className="p-2 bg-white border border-gray-200 rounded shadow-md text-sm">
-        <div className="font-semibold">{label}</div>
-        <div>Mark: {data?.Mark}</div>
-        <div>Average Result: {data?.avgResult}</div>
-      </div>
-    );
-  }
-  return null;
-};
-
-// Chart component
 export function MarksChart({
   chartData = [],
 }: {
   chartData: Array<{
     exam: string;
-    Mark: number;
-    avgResult: number;
+    Mark: number | null;
+    avgResult: number | null;
     isAbsent: boolean;
   }>;
 }) {
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const options = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        position: "top" as const,
+      },
+      title: {
+        display: false,
+      },
+      tooltip: {
+        callbacks: {
+          label: function (context: TooltipItem<"line">) {
+            let label = context.dataset.label || "";
 
-  useEffect(() => {
-    // Scroll to the end on component mount
-    if (scrollContainerRef.current) {
-      scrollContainerRef.current.scrollLeft =
-        scrollContainerRef.current.scrollWidth;
-    }
-  }, [chartData]);
+            if (label) {
+              label += ": ";
+            }
+            if (context.parsed.y !== null) {
+              label += `${context.parsed.y}`;
+            }
+            return label;
+          },
+        },
+      },
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
+        max: 100,
+        title: {
+          display: true,
+          text: "Marks",
+        },
+      },
+      x: {
+        title: {
+          display: false,
+        },
+        grid: {
+          display: false,
+        },
+      },
+    },
+    elements: {
+      line: {
+        tension: 0.4, // smooth lines
+      },
+    },
+  };
 
-  // Filter out absent students from the chart data
-  const filteredChartData = chartData.map((data) =>
-    data.isAbsent
-      ? { ...data, Mark: null, avgResult: null } // Replace absent data with null
-      : data
-  );
+  const labels = chartData.map((data) => data.exam);
 
-  const paddedChartData = [
-    ...filteredChartData,
-    { exam: "", Mark: null, avgResult: null }, // Padding at the end
-  ];
+  const data = {
+    labels,
+    datasets: [
+      {
+        label: "Your Mark",
+        data: chartData.map((data) => data.Mark),
+        borderColor: "hsl(210, 70%, 50%)",
+        backgroundColor: "hsla(210, 70%, 50%, 0.2)",
+        fill: true,
+      },
+      {
+        label: "Average Mark",
+        data: chartData.map((data) => data.avgResult),
+        borderColor: "hsl(140, 70%, 50%)",
+        backgroundColor: "hsla(140, 70%, 50%, 0.2)",
+        fill: true,
+      },
+    ],
+  };
+
+  const dataPointWidth = 80; // pixels per data point
+  const chartWidth = Math.max(400, labels.length * dataPointWidth);
 
   return (
     <Card className="w-full">
       <CardHeader>
-        <CardTitle>Average Marks Per Exam</CardTitle>
-        <CardDescription>Scrollable for multiple exams</CardDescription>
+        <CardTitle>Your Marks vs Average Marks</CardTitle>
+        <CardDescription>
+          A comparison of your marks against the class average for each exam.
+        </CardDescription>
       </CardHeader>
-      <CardContent className="flex">
-        {/* Scrollable chart container */}
-        <div className="overflow-x-auto" ref={scrollContainerRef}>
-          <LineChart
-            width={paddedChartData.length * 100} // Extend width based on data points
-            height={400}
-            data={paddedChartData}
-            margin={{ top: 10, bottom: 100 }}
+      <CardContent>
+        <div className="overflow-x-auto">
+          <div
+            style={{
+              position: "relative",
+              height: "400px",
+              width: `${chartWidth}px`,
+            }}
           >
-            <CartesianGrid strokeDasharray="3 3" />
-            {/* X Axis for exam names */}
-            <XAxis
-              dataKey="exam"
-              tickLine={false}
-              axisLine={false}
-              tickMargin={1}
-              angle={45}
-              textAnchor="start"
-              interval={0}
-              className="text-[12px]"
-            />
-            <YAxis
-              domain={[0, 100]}
-              tickLine={false}
-              axisLine={false}
-              tickMargin={8}
-              label={{
-                value: "Average Mark",
-                angle: -90,
-                position: "insideLeft",
-              }}
-            />
-            {/* Tooltip */}
-            <Tooltip content={<CustomTooltip />} />
-
-            {/* Line for average marks */}
-            <Line
-              dataKey="Mark"
-              type="natural"
-              stroke="hsl(210, 70%, 50%)"
-              strokeWidth={2}
-              dot={true}
-              activeDot={{
-                r: 4, // radius
-                stroke: "blue", // border color
-                strokeWidth: 2, // border width
-                fill: "white", // fill color
-              }}
-            />
-          </LineChart>
+            <Line options={options} data={data} />
+          </div>
         </div>
       </CardContent>
       <CardFooter className="flex-col items-start gap-2 text-sm">
         <div className="flex gap-2 font-medium leading-none">
-          Latest exam trend <TrendingUp className="h-4 w-4" />
+          Exam performance trend <TrendingUp className="h-4 w-4" />
         </div>
         <div className="leading-none text-muted-foreground">
-          Displaying average marks for recent exams
+          Displaying your marks for recent exams.
         </div>
       </CardFooter>
     </Card>

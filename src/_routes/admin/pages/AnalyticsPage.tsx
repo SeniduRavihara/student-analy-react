@@ -85,7 +85,7 @@ const AnalyticsPage = () => {
               .filter((exam) => exam.examStatus === "completed")
               .map(({ examName, avgResult }) => ({
                 exam: examName,
-                avgMark: avgResult ?? 0,
+                avgMark: avgResult ?? null,
               }))}
           />
         ) : (

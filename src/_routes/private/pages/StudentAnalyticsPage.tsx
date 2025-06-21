@@ -1,10 +1,10 @@
-import { useEffect, useState } from "react";
-import { MarksChart } from "../components/charts/MarksChart";
-import { collection, onSnapshot, orderBy, query } from "firebase/firestore";
+import UpcomingExamCalendar from "@/components/UpcomingExamCalendar";
 import { db } from "@/firebase/config";
 import { useAuth } from "@/hooks/useAuth";
 import { ExamDataType } from "@/types";
-import UpcomingExamCalendar from "@/components/UpcomingExamCalendar";
+import { collection, onSnapshot, orderBy, query } from "firebase/firestore";
+import { useEffect, useState } from "react";
+import { MarksChart } from "../components/charts/MarksChart";
 // import StudentMarksCard from "../components/StudentMarksCard";
 
 const StudentAnalyticsPage = () => {
@@ -30,7 +30,7 @@ const StudentAnalyticsPage = () => {
   }, [currentUser]);
 
   return (
-    <div className="w-full h-full flex flex-col lg:flex-row items-center lg:items-start justify-center p-2 lg:p-5">
+    <div className="w-full h-full flex flex-col lg:flex-row items-start justify-center p-2 lg:p-5 gap-5">
       {/* Chart Container */}
       <div className="w-full lg:w-2/3  p-3 rounded-md">
         {examsData && examsData.length > 0 ? (
@@ -39,8 +39,8 @@ const StudentAnalyticsPage = () => {
               .filter((exam) => exam.examStatus === "completed")
               .map(({ examName, examResult, avgResult, isAbsent }) => ({
                 exam: examName,
-                Mark: examResult,
-                avgResult: avgResult ?? 0,
+                Mark: isAbsent ? null : examResult ?? null,
+                avgResult: avgResult ?? null,
                 isAbsent,
               }))}
           />
@@ -62,7 +62,9 @@ const StudentAnalyticsPage = () => {
         )}
       </div> */}
 
-      <UpcomingExamCalendar />
+      <div className="w-full lg:w-1/3">
+        <UpcomingExamCalendar />
+      </div>
     </div>
   );
 };

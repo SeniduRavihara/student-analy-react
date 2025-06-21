@@ -1,14 +1,18 @@
-import { useEffect, useRef, useState } from "react";
-import { TrendingUp } from "lucide-react";
 import {
-  CartesianGrid,
-  Line,
-  LineChart,
-  XAxis,
-  YAxis,
+  CategoryScale,
+  Chart as ChartJS,
+  Filler,
+  Legend,
+  LinearScale,
+  LineElement,
+  PointElement,
+  Title,
   Tooltip,
-  TooltipProps,
-} from "recharts";
+  TooltipItem,
+} from "chart.js";
+import { TrendingUp } from "lucide-react";
+import { Line } from "react-chartjs-2";
+
 import {
   Card,
   CardContent,
@@ -17,147 +21,106 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
-export const description =
-  "A scrollable line chart showing average exam scores";
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
+  Filler
+);
 
-// Custom tooltip component
-const CustomTooltip = ({
-  active,
-  payload,
-  label,
-}: TooltipProps<number, string>) => {
-  if (active && payload && payload.length) {
-    const data = payload[0]?.payload;
-    return (
-      <div className="p-2 bg-white border border-gray-200 rounded shadow-md text-sm">
-        <div className="font-semibold">{label}</div>
-        <div>Average Result: {data?.avgMark}</div>
-      </div>
-    );
-  }
-  return null;
-};
-
-// Chart component
 export function AvgChart({
   chartData = [],
 }: {
-  chartData: Array<{ exam: string; avgMark: number }>;
+  chartData: Array<{ exam: string; avgMark: number | null }>;
 }) {
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const [screenWidth] = useState(window.innerWidth);
-  const [widthMultiplier, setWidthMultiplier] = useState(screenWidth / 4 + 10); // State for chart width multiplier
+  const options = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        display: false,
+      },
+      title: {
+        display: false,
+      },
+      tooltip: {
+        callbacks: {
+          label: function (context: TooltipItem<"line">) {
+            let label = context.dataset.label || "";
 
-  // console.log(widthMultiplier, screenWidth);
+            if (label) {
+              label += ": ";
+            }
+            if (context.parsed.y !== null) {
+              label += `${context.parsed.y}`;
+            }
+            return label;
+          },
+        },
+      },
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
+        max: 100,
+        title: {
+          display: true,
+          text: "Average Mark",
+        },
+      },
+      x: {
+        title: {
+          display: false,
+        },
+        grid: {
+          display: false,
+        },
+      },
+    },
+    elements: {
+      line: {
+        tension: 0.4, // smooth lines
+      },
+    },
+  };
 
-  useEffect(() => {
-    // Scroll to the end on component mount
-    if (scrollContainerRef.current) {
-      scrollContainerRef.current.scrollLeft =
-        scrollContainerRef.current.scrollWidth;
-    }
-  }, []);
+  const labels = chartData.map((data) => data.exam);
 
-  // Add padding data points to fill the chart
-  const paddedChartData = [
-    // { exam: "", avgMark: 0 },
-    ...chartData,
-    { exam: "", avgMark: null },
-  ];
+  const data = {
+    labels,
+    datasets: [
+      {
+        label: "Average Mark",
+        data: chartData.map((data) => data.avgMark),
+        borderColor: "hsl(210, 70%, 50%)",
+        backgroundColor: "hsla(210, 70%, 50%, 0.2)",
+        fill: true,
+      },
+    ],
+  };
+
+  const dataPointWidth = 80; // pixels per data point
+  const chartWidth = Math.max(400, labels.length * dataPointWidth);
 
   return (
     <Card className="w-full">
       <CardHeader>
         <CardTitle>Average Marks Per Exam</CardTitle>
       </CardHeader>
-      <CardContent className="flex flex-col gap-4">
-        {/* Slider to adjust width */}
-        <div className="flex items-center gap-2">
-          <label htmlFor="chart-slider" className="text-sm">
-            Adjust Chart Width
-          </label>
-          <input
-            id="chart-slider"
-            type="range"
-            min={100} // Minimum width per data point
-            max={300} // Maximum width per data point
-            value={widthMultiplier}
-            onChange={(e) => setWidthMultiplier(Number(e.target.value))}
-            className="w-full"
-          />
-        </div>
-
-        <div className="flex">
-          {/* Fixed Y-axis container */}
-          {/* <div className="flex items-center mr-4">
-            <LineChart
-              width={50}
-              height={400}
-              data={paddedChartData}
-              margin={{ top: 1, right: 10, bottom: 120, left: 5 }}
-
-              // className="gap-10"
-            >
-              <YAxis
-                domain={[0, 100]}
-                tickLine={false}
-                axisLine={false}
-                tickMargin={8}
-                label={{
-                  value: "Average Mark",
-                  angle: -90,
-                  position: "insideLeft",
-                  dy: 50,
-                }}
-              />
-            </LineChart>
-          </div> */}
-
-          {/* Scrollable chart container */}
-          <div className="overflow-x-auto w-full" ref={scrollContainerRef}>
-            <LineChart
-              width={Math.max(
-                widthMultiplier,
-                chartData.length * widthMultiplier
-              )} // Dynamic width
-              height={400}
-              data={paddedChartData}
-              margin={{ top: 10, bottom: 100 }}
-            >
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis
-                dataKey="exam"
-                tickLine={false}
-                axisLine={false}
-                tickMargin={1}
-                angle={45}
-                textAnchor="start"
-                interval={0}
-                className="text-[12px]"
-              />
-              <Tooltip content={<CustomTooltip />} />
-              <Line
-                dataKey="avgMark"
-                // type="linear"
-                type="natural"
-                stroke="hsl(210, 70%, 50%)"
-                strokeWidth={2}
-                dot={false}
-              />
-
-              <YAxis
-                domain={[0, 100]}
-                tickLine={false}
-                axisLine={false}
-                tickMargin={8}
-                label={{
-                  value: "Average Mark",
-                  angle: -90,
-                  position: "insideLeft",
-                  dy: 50,
-                }}
-              />
-            </LineChart>
+      <CardContent>
+        <div className="overflow-x-auto">
+          <div
+            style={{
+              position: "relative",
+              height: "400px",
+              width: `${chartWidth}px`,
+            }}
+          >
+            <Line options={options} data={data} />
           </div>
         </div>
       </CardContent>

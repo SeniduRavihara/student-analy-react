@@ -1,66 +1,112 @@
-import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { ExamDataType } from "@/types";
 
 type StudentMarksCardProps = {
   examsData: Array<ExamDataType> | null;
 };
 
-const StudentMarksCard = ({ examsData }: StudentMarksCardProps) => {
-  if (!examsData) {
-    return <div>Loading...</div>;
-  }
-
-  return (
-    <Card>
-      <CardContent>
-        <div className="py-4 rounded-md">
-          <h2 className="text-lg font-semibold mb-4">Exam Results</h2>
-          <table className="table-auto w-full border-collapse border border-gray-300">
-            <thead className="bg-gray-100">
-              <tr>
-                <th className="border border-gray-300 px-2 py-2">
-                  Exam Name
-                </th>
-                <th className="border border-gray-300 px-2 py-2">
-                  Marks
-                </th>
-                <th className="border border-gray-300 px-2 py-2">
-                  Grade
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {examsData.map((result, index) => (
-                <tr
-                  key={index}
-                  className={index % 2 === 0 ? "bg-gray-50" : "bg-white"}
-                >
-                  <td className="border border-gray-300 px-4 py-2">
-                    {result.examName}
-                  </td>
-                  <td className="border border-gray-300 px-4 py-2">
-                    {result.examResult}
-                  </td>
-                  <td className="border border-gray-300 px-4 py-2">
-                    {getGrade(result.examResult)}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </CardContent>
-    </Card>
-  );
-};
-
-// Helper function to calculate grade
 const getGrade = (marks: number): string => {
   if (marks >= 85) return "A";
   if (marks >= 70) return "B";
   if (marks >= 55) return "C";
-  if (marks >= 40) return "D";
+  if (marks >= 40) return "S";
   return "F";
+};
+
+const getGradeVariant = (
+  grade: string
+): "default" | "destructive" | "outline" | "secondary" => {
+  switch (grade) {
+    case "A":
+      return "default";
+    case "B":
+      return "secondary";
+    case "C":
+      return "secondary";
+    case "S":
+      return "outline";
+    case "F":
+      return "destructive";
+    default:
+      return "outline";
+  }
+};
+
+const StudentMarksCard = ({ examsData }: StudentMarksCardProps) => {
+  if (!examsData) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Exam Results</CardTitle>
+          <CardDescription>
+            A summary of your recent exam performance.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="text-center text-muted-foreground p-8">
+            Loading results...
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Exam Results</CardTitle>
+        <CardDescription>
+          A summary of your recent exam performance.
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Exam Name</TableHead>
+              <TableHead className="text-center">Marks</TableHead>
+              <TableHead className="text-right">Grade</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {examsData
+              .filter((exam) => exam.examStatus === "completed")
+              .map((result, index) => {
+                const grade = getGrade(result.examResult);
+                return (
+                  <TableRow key={index}>
+                    <TableCell className="font-medium">
+                      {result.examName}
+                    </TableCell>
+                    <TableCell className="text-center">
+                      {result.examResult}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Badge variant={getGradeVariant(grade)}>{grade}</Badge>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+          </TableBody>
+        </Table>
+      </CardContent>
+    </Card>
+  );
 };
 
 export default StudentMarksCard;
