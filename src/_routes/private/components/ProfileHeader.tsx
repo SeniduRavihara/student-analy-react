@@ -36,7 +36,7 @@ const ProfileHeader = () => {
           <StatCard
             icon={trophy}
             label="Last Result"
-            value={currentUserData?.lastResult}
+            value={currentUserData?.lastResult ?? undefined}
           />
           <StatCard
             icon={medal}
