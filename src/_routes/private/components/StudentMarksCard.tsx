@@ -1,4 +1,3 @@
-import { Badge } from "@/components/ui/badge";
 import {
   Card,
   CardContent,
@@ -18,33 +17,6 @@ import { ExamDataType } from "@/types";
 
 type StudentMarksCardProps = {
   examsData: Array<ExamDataType> | null;
-};
-
-const getGrade = (marks: number): string => {
-  if (marks >= 85) return "A";
-  if (marks >= 70) return "B";
-  if (marks >= 55) return "C";
-  if (marks >= 40) return "S";
-  return "F";
-};
-
-const getGradeVariant = (
-  grade: string
-): "default" | "destructive" | "outline" | "secondary" => {
-  switch (grade) {
-    case "A":
-      return "default";
-    case "B":
-      return "secondary";
-    case "C":
-      return "secondary";
-    case "S":
-      return "outline";
-    case "F":
-      return "destructive";
-    default:
-      return "outline";
-  }
 };
 
 const StudentMarksCard = ({ examsData }: StudentMarksCardProps) => {
@@ -81,14 +53,12 @@ const StudentMarksCard = ({ examsData }: StudentMarksCardProps) => {
               <TableHead>Exam Name</TableHead>
               <TableHead className="text-center">Marks</TableHead>
               <TableHead className="text-center">Rank</TableHead>
-              <TableHead className="text-right">Grade</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {examsData
               .filter((exam) => exam.examStatus === "completed")
               .map((result, index) => {
-                const grade = getGrade(result.examResult);
                 return (
                   <TableRow key={index}>
                     <TableCell className="font-medium">
@@ -99,9 +69,6 @@ const StudentMarksCard = ({ examsData }: StudentMarksCardProps) => {
                     </TableCell>
                     <TableCell className="text-center">
                       {result.rank ?? "-"}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Badge variant={getGradeVariant(grade)}>{grade}</Badge>
                     </TableCell>
                   </TableRow>
                 );
