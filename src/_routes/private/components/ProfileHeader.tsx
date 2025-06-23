@@ -16,7 +16,7 @@ const StatCard = ({
     <img src={icon} alt={label} className="w-12 h-12" />
     <div>
       <p className="text-sm text-muted-foreground">{label}</p>
-      <p className="text-2xl font-bold">{value || "N/A"}</p>
+      <p className="text-2xl font-bold">{value || "-"}</p>
     </div>
   </div>
 );
@@ -36,12 +36,12 @@ const ProfileHeader = () => {
           <StatCard
             icon={trophy}
             label="Last Result"
-            value={currentUserData?.lastResult ?? undefined}
+            value={currentUserData?.lastResult ?? "-"}
           />
           <StatCard
             icon={medal}
             label="Last Rank"
-            value={currentUserData?.lastRank}
+            value={currentUserData?.lastRank ?? "-"}
           />
         </div>
       </CardContent>

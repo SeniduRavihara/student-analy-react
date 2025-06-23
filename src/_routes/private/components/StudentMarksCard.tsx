@@ -65,7 +65,7 @@ const StudentMarksCard = ({ examsData }: StudentMarksCardProps) => {
                       {result.examName}
                     </TableCell>
                     <TableCell className="text-center">
-                      {result.examResult}
+                      {result.examResult ?? "-"}
                     </TableCell>
                     <TableCell className="text-center">
                       {result.rank ?? "-"}
