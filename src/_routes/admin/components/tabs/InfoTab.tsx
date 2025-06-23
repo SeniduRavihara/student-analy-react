@@ -1,6 +1,6 @@
-import { Card, CardContent } from "@/components/ui/card";
+import StudentMarksCard from "@/_routes/private/components/StudentMarksCard";
 import { Label } from "@/components/ui/label";
-import { UserDataType } from "@/types";
+import { ExamDataType, UserDataType } from "@/types";
 
 const InfoSection = ({
   title,
@@ -36,11 +36,17 @@ const InfoItem = ({
   </div>
 );
 
-const InfoTab = ({ userInfo }: { userInfo: UserDataType | null }) => {
+const InfoTab = ({
+  userInfo,
+  examsData,
+}: {
+  userInfo: UserDataType | null;
+  examsData: Array<ExamDataType> | null;
+}) => {
   return (
-    <Card className="w-full h-full border-none shadow-none">
+    <div className="w-full h-full relative z-10">
       {userInfo ? (
-        <CardContent className="p-4">
+        <div className="p-4">
           <InfoSection title="Personal Information">
             <InfoItem label="First Name" value={userInfo.firstName} />
             <InfoItem label="Last Name" value={userInfo.lastName} />
@@ -73,13 +79,17 @@ const InfoTab = ({ userInfo }: { userInfo: UserDataType | null }) => {
             <InfoItem label="Guardian's Name" value={userInfo.gurdianName} />
             <InfoItem label="Guardian's Phone" value={userInfo.gurdianPhone} />
           </InfoSection>
-        </CardContent>
+
+          <div className="z-20">
+            <StudentMarksCard examsData={examsData} />
+          </div>
+        </div>
       ) : (
         <div className="text-center text-muted-foreground p-8">
           Loading student data...
         </div>
       )}
-    </Card>
+    </div>
   );
 };
 

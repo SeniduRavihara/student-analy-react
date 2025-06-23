@@ -100,6 +100,7 @@ export type ExamDataType = {
   examResult: number;
   isAbsent: boolean;
   classType: string;
+  rank: number | null;
   // createdAt: Date;
 };
 

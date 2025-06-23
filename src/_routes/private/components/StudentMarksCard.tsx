@@ -80,6 +80,7 @@ const StudentMarksCard = ({ examsData }: StudentMarksCardProps) => {
             <TableRow>
               <TableHead>Exam Name</TableHead>
               <TableHead className="text-center">Marks</TableHead>
+              <TableHead className="text-center">Rank</TableHead>
               <TableHead className="text-right">Grade</TableHead>
             </TableRow>
           </TableHeader>
@@ -95,6 +96,9 @@ const StudentMarksCard = ({ examsData }: StudentMarksCardProps) => {
                     </TableCell>
                     <TableCell className="text-center">
                       {result.examResult}
+                    </TableCell>
+                    <TableCell className="text-center">
+                      {result.rank ?? "-"}
                     </TableCell>
                     <TableCell className="text-right">
                       <Badge variant={getGradeVariant(grade)}>{grade}</Badge>

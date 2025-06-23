@@ -22,6 +22,9 @@ const StudentProfilePage = () => {
           ...doc.data(),
         })) as ExamDataType[];
 
+        console.log("SENU", examsDataArr);
+        
+
         setExamsData(examsDataArr);
       });
 
