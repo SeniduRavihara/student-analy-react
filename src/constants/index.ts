@@ -19,9 +19,9 @@ export const CLASSES = ["THEORY", "REVISION"] ;
 export type ClassesType = "THEORY" | "REVISION";
 
 export const CLASSES_TO_YEARS = {
-  "2025": ["THEORY", "REVISION"],
-  "2026": ["THEORY"],
-  "2027": ["THEORY"],
+  "2025": ["THEORY", "REVISION", "PAPER"],
+  "2026": ["THEORY", "PAPER"],
+  "2027": ["THEORY", "PAPER"],
 };
 
 // Extract the valid years from EXAM_YEARS
