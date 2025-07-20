@@ -15,8 +15,8 @@ export const EXAM_YEARS = [
 ];
 
 // If you want to add new class catogary, add it to following array
-export const CLASSES = ["THEORY", "REVISION"] ;
-export type ClassesType = "THEORY" | "REVISION";
+export const CLASSES = ["THEORY", "REVISION", "PAPER"] ;
+export type ClassesType = "THEORY" | "REVISION" | "PAPER";
 
 export const CLASSES_TO_YEARS = {
   "2025": ["THEORY", "REVISION", "PAPER"],
