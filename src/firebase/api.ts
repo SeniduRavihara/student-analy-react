@@ -435,14 +435,16 @@ export const deleteExam = async (examId: string) => {
 
 export const setExamResults = async (
   examId: string,
-  examResults: Record<string, { examResult: number; isAbsent: boolean }>
+  examResults: Record<string, { examResult: number | null; isAbsent: boolean }>
 ) => {
   // Filter out absent students for rank and average calculations
   const presentResults = Object.entries(examResults).filter(
-    ([, result]) => !result.isAbsent
-  );
+    ([, result]) => !result.isAbsent && result.examResult !== null
+  ) as [string, { examResult: number; isAbsent: boolean }][];
 
-  // Calculate average result for present students and round to 2 decimal points
+  console.log("HELLO", presentResults);
+
+  // // Calculate average result for present students and round to 2 decimal points
   const totalMarks = presentResults.reduce(
     (sum, [, { examResult }]) => sum + examResult,
     0
@@ -454,7 +456,9 @@ export const setExamResults = async (
     ).toFixed(2)
   );
 
-  // Sort present students based on marks in descending order to determine rank
+  console.log("AVG", avgResult);
+
+  // // Sort present students based on marks in descending order to determine rank
   const sortedResults = presentResults
     .sort(([, a], [, b]) => b.examResult - a.examResult) // Sort by marks
     .map(([userId, result], index) => ({
@@ -463,32 +467,42 @@ export const setExamResults = async (
       rank: index + 1,
     })); // Assign rank
 
+  console.log("SOR", sortedResults);
+
   // Update each student's record with mark, rank, isAbsent, and avgResult
   const studentPromises = Object.entries(examResults).map(
     async ([userId, { examResult, isAbsent }]) => {
       const userExamRef = doc(db, `users/${userId}/exams`, examId);
       const userRef = doc(db, "users", userId);
 
+      // Ensure isAbsent has a default value if undefined
+      const isAbsentValue = isAbsent ?? false;
+
       // If the student is absent, set rank to null and keep marks as 0
-      const rank = isAbsent
-        ? null
-        : sortedResults.find((res) => res.userId === userId)?.rank;
+      const found = sortedResults.find((res) => res.userId === userId);
+      const rank = isAbsentValue ? null : found?.rank ?? null;
 
       // Update the exam sub-collection document
       const examUpdatePromise = updateDoc(userExamRef, {
-        examResult: isAbsent ? 0 : examResult,
-        isAbsent,
+        examResult: examResult ?? null, // Ensure examResult is never undefined
+        isAbsent: isAbsentValue,
         rank,
         avgResult,
       });
 
-      // Update the user's main document with last rank and result
-      const userUpdatePromise = updateDoc(userRef, {
-        lastRank: rank,
-        lastResult: isAbsent ? 0 : examResult,
-      });
+      // Update the user's main document with last rank and result only if valid data exists
+      const promises = [examUpdatePromise];
 
-      return Promise.all([examUpdatePromise, userUpdatePromise]);
+      // Only update user's main document if rank and result are valid (not null/undefined)
+      if (rank != null && examResult != null) {
+        const userUpdatePromise = updateDoc(userRef, {
+          lastRank: rank,
+          lastResult: examResult,
+        });
+        promises.push(userUpdatePromise);
+      }
+
+      return Promise.all(promises);
     }
   );
 

@@ -35,7 +35,7 @@ const ClassSelect: React.FC<ClassSelectProps> = ({
     }
   }, [location.pathname]);
 
-  console.log("Selected Class: ", selectedClass);
+  // console.log("Selected Class: ", selectedClass);
 
   return (
     <div className="w-36">

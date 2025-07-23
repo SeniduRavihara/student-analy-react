@@ -34,10 +34,6 @@ function Navbar({
     <div className="p-4 md:ml-56 border-b h-full flex items-center bg-[#ededed] ">
       <MobileSidebar />
 
-      {/* <h1 className="text-[#00A6ED]">
-        {toRoundLettersAndNumbers(headerText ?? "")}
-      </h1> */}
-
       {currentUserData?.roles == "ADMIN" &&
       selectedYear &&
       setSelectedYear &&

@@ -38,8 +38,10 @@ const toFullWidth = (text: string) => {
 const AddResultsPage = () => {
   const { examIdName } = useParams();
   const { usersData } = useOutletContext<OutletContextType>();
-  const [marks, setMarks] = useState<Record<string, number>>({});
-  const [absentStatus, setAbsentStatus] = useState<Record<string, boolean>>({});
+  const [marks, setMarks] = useState<
+    Record<string, { examResult: number| null; isAbsent: boolean }>
+  >({});
+  // const [absentStatus, setAbsentStatus] = useState<Record<string, boolean>>({});
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
 
@@ -57,12 +59,15 @@ const AddResultsPage = () => {
           const data = docSnapshot.data();
           setMarks((prevMarks) => ({
             ...prevMarks,
-            [uid]: data.examResult || 0,
+            [uid]: {
+              examResult: data.examResult || null,
+              isAbsent: data.isAbsent || false,
+            },
           }));
-          setAbsentStatus((prevStatus) => ({
-            ...prevStatus,
-            [uid]: data.isAbsent || false,
-          }));
+          // setAbsentStatus((prevStatus) => ({
+          //   ...prevStatus,
+          //   [uid]: data.isAbsent || false,
+          // }));
         }
       });
     });
@@ -73,38 +78,46 @@ const AddResultsPage = () => {
   const handleMarkChange = (uid: string, value: string) => {
     setMarks((prev) => ({
       ...prev,
-      [uid]: parseFloat(value),
+      [uid]: { examResult: parseFloat(value)|| null, isAbsent: false },
     }));
   };
 
   const handleAbsentToggle = (uid: string) => {
-    setAbsentStatus((prev) => {
-      const isAbsent = !prev[uid];
+    // setAbsentStatus((prev) => {
+    //   const isAbsent = !prev[uid];
+    //   return {
+    //     ...prev,
+    //     [uid]: isAbsent,
+    //   };
+    // });
+
+    // setMarks((prev) => ({
+    //   ...prev,
+    //   [uid]: null, // Reset marks to 0 if absent
+    // }));
+
+    setMarks((prev)=>{
+      const isAbsent = ! prev[uid].isAbsent
       return {
         ...prev,
-        [uid]: isAbsent,
-      };
-    });
-
-    setMarks((prev) => ({
-      ...prev,
-      [uid]: 0, // Reset marks to 0 if absent
-    }));
+        [uid]: {examResult: null , isAbsent}
+      }
+    })
   };
 
   const handleSubmitMarks = async () => {
     setIsLoading(true);
     if (!examId || !examName) return;
-    const results = Object.keys(marks).reduce((acc, uid) => {
-      acc[uid] = {
-        examResult: absentStatus[uid] ? 0 : marks[uid], // Mark 0 if absent
-        isAbsent: absentStatus[uid],
-      };
-      return acc;
-    }, {} as Record<string, { examResult: number; isAbsent: boolean }>);
-    console.log(results);
+    // const results = Object.keys(marks).reduce((acc, uid) => {
+    //   acc[uid] = {
+    //     examResult: absentStatus[uid] ? null : marks[uid], // Mark 0 if absent
+    //     isAbsent: absentStatus[uid],
+    //   };
+    //   return acc;
+    // }, {} as Record<string, { examResult: number; isAbsent: boolean }>);
+    console.log(marks);
 
-    await setExamResults(examId, results);
+    await setExamResults(examId, marks);
     setIsLoading(false);
     navigate("/admin/exams");
   };
@@ -132,15 +145,15 @@ const AddResultsPage = () => {
                     <TableCell>{userName}</TableCell>
                     <TableCell>
                       <Switch
-                        checked={absentStatus[uid] || false}
+                        checked={marks && marks[uid]?.isAbsent || false}
                         onCheckedChange={() => handleAbsentToggle(uid)}
                       />
                     </TableCell>
                     <TableCell>
                       <Input
-                        value={marks[uid] || ""}
+                        value={marks && marks[uid]?.examResult || ""}
                         onChange={(e) => handleMarkChange(uid, e.target.value)}
-                        disabled={absentStatus[uid] || false} // Disable if marked absent
+                        disabled={marks && marks[uid]?.isAbsent || false} // Disable if marked absent
                       />
                     </TableCell>
                   </TableRow>

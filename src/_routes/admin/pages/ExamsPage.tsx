@@ -87,7 +87,7 @@ const ExamsPage = () => {
         })) as ExamDataType[]
       ).filter((exam) => exam.examYear === selectedYear && exam.classType === selectedClass);
 
-      console.log("EXAM", examsDataArr);
+      // console.log("EXAM", examsDataArr);
       setExamsData(examsDataArr);
     });
 
