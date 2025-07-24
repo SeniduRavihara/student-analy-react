@@ -1,6 +1,5 @@
-import StudentMarksCard from "@/_routes/private/components/StudentMarksCard";
 import { Label } from "@/components/ui/label";
-import { ExamDataType, UserDataType } from "@/types";
+import { UserDataType } from "@/types";
 
 const InfoSection = ({
   title,
@@ -36,11 +35,7 @@ const InfoItem = ({
   </div>
 );
 
-const InfoTab = ({
-  userInfo,
-}: {
-  userInfo: UserDataType | null;
-}) => {
+const InfoTab = ({ userInfo }: { userInfo: UserDataType | null }) => {
   return (
     <div className="w-full h-ful relative z-10">
       {userInfo ? (
@@ -77,8 +72,6 @@ const InfoTab = ({
             <InfoItem label="Guardian's Name" value={userInfo.gurdianName} />
             <InfoItem label="Guardian's Phone" value={userInfo.gurdianPhone} />
           </InfoSection>
-
-          
         </div>
       ) : (
         <div className="text-center text-muted-foreground p-8">
