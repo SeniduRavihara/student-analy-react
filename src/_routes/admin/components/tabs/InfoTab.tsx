@@ -38,13 +38,11 @@ const InfoItem = ({
 
 const InfoTab = ({
   userInfo,
-  examsData,
 }: {
   userInfo: UserDataType | null;
-  examsData: Array<ExamDataType> | null;
 }) => {
   return (
-    <div className="w-full h-full relative z-10">
+    <div className="w-full h-ful relative z-10">
       {userInfo ? (
         <div className="p-4">
           <InfoSection title="Personal Information">
@@ -80,9 +78,7 @@ const InfoTab = ({
             <InfoItem label="Guardian's Phone" value={userInfo.gurdianPhone} />
           </InfoSection>
 
-          <div className="z-20">
-            <StudentMarksCard examsData={examsData} />
-          </div>
+          
         </div>
       ) : (
         <div className="text-center text-muted-foreground p-8">

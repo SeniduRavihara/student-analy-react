@@ -1,4 +1,5 @@
 import { MarksChart } from "@/_routes/private/components/charts/MarksChart";
+import StudentMarksCard from "@/_routes/private/components/StudentMarksCard";
 import { ExamDataType } from "@/types";
 
 const MarksTab = ({ examsData }: { examsData: Array<ExamDataType> | null }) => {
@@ -16,6 +17,10 @@ const MarksTab = ({ examsData }: { examsData: Array<ExamDataType> | null }) => {
                 isAbsent,
               }))}
           />
+
+          <div className="z-20 mt-10">
+            <StudentMarksCard examsData={examsData} />
+          </div>
         </div>
       ) : (
         <div className="text-center text-gray-500 py-10">

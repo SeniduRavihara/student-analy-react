@@ -77,7 +77,7 @@ const ExamsPage = () => {
     const collectionRef = collection(db, "exams");
 
     // Add query to sort by `createdAt` in ascending order
-    const q = query(collectionRef, orderBy("createdAt", "desc"));
+    const q = query(collectionRef, orderBy("examDate", "desc"));
 
     const unsubscribe = onSnapshot(q, (QuerySnapshot) => {
       const examsDataArr = (
