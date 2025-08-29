@@ -88,6 +88,7 @@ export type ExamTable = {
   examDate: Date;
   examStatus: "pending" | "completed";
   avgResult: number | null;
+  classType: string[];
 };
 
 export type ExamDataType = {
@@ -99,7 +100,7 @@ export type ExamDataType = {
   examYear: string;
   examResult: number;
   isAbsent: boolean;
-  classType: string;
+  classType: string[];
   rank: number | null;
   // createdAt: Date;
 };

@@ -355,7 +355,7 @@ export const createExam = async (
   examName: string,
   examDate: Date,
   examYear: string,
-  classType: string
+  classTypes: string[]
 ) => {
   const examCollectionRef = collection(db, "exams");
   await addDoc(examCollectionRef, {
@@ -365,13 +365,52 @@ export const createExam = async (
     avgResult: null,
     examYear,
     createdAt: serverTimestamp(),
-    classType,
+    classType: classTypes,
   });
 };
 
 export const deleteExam = async (examId: string) => {
   const examDocRef = doc(db, "exams", examId);
   await deleteDoc(examDocRef);
+};
+
+// -------------------------------------------------
+
+export const updateExamClassTypeToArray = async (examId: string) => {
+  try {
+    const examDocRef = doc(db, "exams", examId);
+    const examDoc = await getDoc(examDocRef);
+
+    if (!examDoc.exists()) {
+      throw new Error("Exam document does not exist!");
+    }
+
+    const examData = examDoc.data();
+    const currentClassType = examData.classType;
+
+    console.log("EXAM DATA", examData);
+
+    // Check if classType is already an array
+    if (Array.isArray(currentClassType)) {
+      console.log("classType is already an array:", currentClassType);
+      return;
+    }
+
+    // Convert string classType to array format
+    const newClassType = [currentClassType];
+
+    // Update the exam document
+    await updateDoc(examDocRef, {
+      classType: newClassType,
+    });
+
+    console.log(
+      `Updated exam ${examId} classType from "${currentClassType}" to ["${currentClassType}"]`
+    );
+  } catch (error) {
+    console.error("Error updating exam classType to array:", error);
+    throw error;
+  }
 };
 
 // -------------------------------------------------
@@ -461,13 +500,23 @@ export const setExamResults = async (
   // // Sort present students based on marks in descending order to determine rank
   const sortedResults = presentResults
     .sort(([, a], [, b]) => b.examResult - a.examResult) // Sort by marks
-    .map(([userId, result], index) => ({
-      userId,
-      result,
-      rank: index + 1,
-    })); // Assign rank
+    .map(([userId, result], _index, array) => {
+      // Find the first occurrence of this mark to determine rank
+      const firstIndex = array.findIndex(
+        ([, r]) => r.examResult === result.examResult
+      );
+      const rank = firstIndex + 1; // Use the first index + 1 as rank for all students with same marks
+
+      return {
+        userId,
+        result,
+        rank,
+      };
+    }); // Assign rank
 
   console.log("SOR", sortedResults);
+
+  // return;
 
   // Update each student's record with mark, rank, isAbsent, and avgResult
   const studentPromises = Object.entries(examResults).map(
@@ -476,7 +525,7 @@ export const setExamResults = async (
       const userRef = doc(db, "users", userId);
 
       // Ensure isAbsent has a default value if undefined
-      const isAbsentValue = isAbsent ?? false;
+      const isAbsentValue = (isAbsent ?? false) || examResult === null;
 
       // If the student is absent, set rank to null and keep marks as 0
       const found = sortedResults.find((res) => res.userId === userId);

@@ -12,6 +12,7 @@ const db = admin.firestore();
 // Helper function to update each user's sub-collection
 async function updateUserExamCollections(
   examId: string,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   examData: any,
   action: "create" | "delete" | "update"
 ) {
@@ -20,11 +21,24 @@ async function updateUserExamCollections(
 
   // Collect promises for paths with matching examYear
   const promises = usersSnapshot.docs
-    .filter(
-      (userDoc) =>
-        userDoc.data().examYear === examYear &&
-        userDoc.data().classes.includes(classType)
-    )
+    .filter((userDoc) => {
+      const userData = userDoc.data();
+      const userClasses = userData.classes || [];
+
+      // Handle both string and array formats for classType
+      if (Array.isArray(classType)) {
+        // If classType is an array, check if any of the user's classes match any of the exam's classTypes
+        return (
+          userData.examYear === examYear &&
+          classType.some((examClass) => userClasses.includes(examClass))
+        );
+      } else {
+        // If classType is still a string (backward compatibility)
+        return (
+          userData.examYear === examYear && userClasses.includes(classType)
+        );
+      }
+    })
     .map((userDoc) => {
       const userId = userDoc.id;
       const userExamsRef = db.collection(`users/${userId}/exams`).doc(examId);
@@ -74,6 +88,8 @@ export const onExamUpdate = onDocumentUpdated(
   async (event) => {
     const examData = event.data?.after.data();
     const examId = event.params.examId;
+
+    console.log("EXAM DATA", examData);
 
     if (examData) {
       await updateUserExamCollections(examId, examData, "update");

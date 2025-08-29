@@ -33,7 +33,7 @@ import { cn } from "@/lib/utils";
 import { ExamDataType, ExamTable } from "@/types";
 import { format } from "date-fns";
 import { collection, onSnapshot, orderBy, query } from "firebase/firestore";
-import { CalendarIcon, Loader2 } from "lucide-react";
+import { CalendarIcon, Loader2, SquareCheck } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate, useOutletContext } from "react-router-dom";
 import { ConfirmDialog } from "../components/ConfirmDialog";
@@ -51,7 +51,7 @@ const ExamsPage = () => {
   const [examName, setExamName] = useState("");
   const [examDate, setExamDate] = useState<Date>();
   const [examYear, setExamYear] = useState(EXAM_YEARS[0].year);
-  const [classType, setClassType] = useState<ClassesDataType>("THEORY");
+  const [classTypes, setClassTypes] = useState<ClassesDataType[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [confirmDialog, setConfirmDialog] = useState({
     isOpen: false,
@@ -73,6 +73,11 @@ const ExamsPage = () => {
   //   console.log(examYear);
   // }, [examYear]);
 
+  // Clear class types when exam year changes
+  useEffect(() => {
+    setClassTypes([]);
+  }, [examYear]);
+
   useEffect(() => {
     const collectionRef = collection(db, "exams");
 
@@ -85,7 +90,14 @@ const ExamsPage = () => {
           ...doc.data(),
           examId: doc.id,
         })) as ExamDataType[]
-      ).filter((exam) => exam.examYear === selectedYear && exam.classType === selectedClass);
+      ).filter((exam) => {
+        const examClassType = exam.classType;
+        const isMatch = Array.isArray(examClassType)
+          ? examClassType.includes(selectedClass)
+          : examClassType === selectedClass;
+
+        return exam.examYear === selectedYear && isMatch;
+      });
 
       // console.log("EXAM", examsDataArr);
       setExamsData(examsDataArr);
@@ -94,20 +106,34 @@ const ExamsPage = () => {
     return unsubscribe;
   }, [selectedClass, selectedYear]);
 
+  const toggleClassType = (classType: ClassesDataType) => {
+    setClassTypes((prevClasses) =>
+      prevClasses.includes(classType)
+        ? prevClasses.filter((c) => c !== classType)
+        : [...prevClasses, classType]
+    );
+  };
+
   const onClickCreateExam = async () => {
     // console.log(examYear);
     setLoading(true);
 
-    if (!examName || !examDate || !examYear || !classType) {
+    if (!examName || !examDate || !examYear || classTypes.length === 0) {
       toast({
-        title: "Please fill all the fields",
+        title: "Please fill all the fields and select at least one class type",
         variant: "destructive",
       });
       setLoading(false);
       return;
     }
 
-    await createExam(examName, examDate, examYear, classType);
+    // Create multiple exams, one for each selected class type
+    // for (const classType of classTypes) {
+    // await createExam(examName, examDate, examYear, classType);
+    // }
+
+    console.log({ examName, examDate, examYear, classTypes });
+    await createExam(examName, examDate, examYear, classTypes);
 
     toast({
       title: "Exam created successfully",
@@ -117,6 +143,7 @@ const ExamsPage = () => {
     setExamName("");
     setExamDate(undefined);
     setExamYear(EXAM_YEARS[0].year);
+    setClassTypes([]);
     setIsDialogOpen(false);
     setLoading(false);
   };
@@ -133,6 +160,28 @@ const ExamsPage = () => {
           <Button className="" onClick={() => setIsDialogOpen(true)}>
             Create New Exam
           </Button>
+
+          {/* <Button
+            className="ml-2"
+            variant="outline"
+            onClick={async () => {
+              try {
+                await updateExamClassTypeToArray("Cc5BFT9zaOjQR9izxkle");
+                toast({
+                  title: "Exam classType updated to array format successfully!",
+                  variant: "default",
+                });
+              } catch (error) {
+                console.error("Error updating exam classType:", error);
+                toast({
+                  title: "Error updating exam classType. Please try again.",
+                  variant: "destructive",
+                });
+              }
+            }}
+          >
+            Update Exam ClassType to Array
+          </Button> */}
         </CardContent>
       </Card>
 
@@ -171,24 +220,32 @@ const ExamsPage = () => {
               </SelectContent>
             </Select>
 
-            <Select
-              onValueChange={(value) => setClassType(value as ClassesDataType)}
-              // defaultValue={EXAM_YEARS[0].year}
-              value={classType}
-            >
-              <SelectTrigger className="">
-                <SelectValue placeholder={EXAM_YEARS[0].year} />
-              </SelectTrigger>
-              <SelectContent>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Class Types</label>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 {CLASSES_TO_YEARS[
                   examYear as keyof typeof CLASSES_TO_YEARS
-                ].map((item) => (
-                  <SelectItem key={item} value={item}>
-                    {item}
-                  </SelectItem>
+                ].map((classItem) => (
+                  <Card
+                    key={classItem}
+                    onClick={() =>
+                      toggleClassType(classItem as ClassesDataType)
+                    }
+                    className={cn(
+                      "p-3 flex items-center justify-between cursor-pointer transition-all",
+                      classTypes.includes(classItem as ClassesDataType)
+                        ? "bg-primary text-primary-foreground"
+                        : "hover:bg-accent"
+                    )}
+                  >
+                    <span className="font-medium">{classItem}</span>
+                    {classTypes.includes(classItem as ClassesDataType) && (
+                      <SquareCheck className="h-5 w-5" />
+                    )}
+                  </Card>
                 ))}
-              </SelectContent>
-            </Select>
+              </div>
+            </div>
 
             <Popover>
               <PopoverTrigger asChild>

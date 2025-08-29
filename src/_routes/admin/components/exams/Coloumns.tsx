@@ -1,7 +1,3 @@
-import { ExamTable } from "@/types";
-import { useNavigate } from "react-router-dom";
-import { ColumnDef } from "@tanstack/react-table";
-import { ArrowUpDown, MoreHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -11,6 +7,10 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { ExamTable } from "@/types";
+import { ColumnDef } from "@tanstack/react-table";
+import { ArrowUpDown, MoreHorizontal } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 export const columns = (
   navigate: ReturnType<typeof useNavigate>,
@@ -59,6 +59,24 @@ export const columns = (
           {row.getValue("avgResult") || "-"}
         </div>
       ),
+    },
+    {
+      accessorKey: "classType",
+      header: "Class Type",
+      cell: ({ row }) => {
+        const classType = row.getValue("classType");
+        const displayValue = Array.isArray(classType)
+          ? classType.join(", ")
+          : String(classType || "");
+
+        return (
+          <div className="capitalize">
+            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+              {displayValue}
+            </span>
+          </div>
+        );
+      },
     },
     {
       id: "actions",
