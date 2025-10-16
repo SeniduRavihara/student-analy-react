@@ -1,20 +1,36 @@
-import Navbar from "@/components/Navbar";
-import Sidebar from "@/components/sidebar/Sidebar";
-import { ClassesType as ClassesDataType, EXAM_YEARS } from "@/constants";
+import ModernAdminHeader from "@/components/header/ModernAdminHeader";
+import { ResponsiveContent } from "@/components/layout/ResponsiveContent";
+import ModernAdminSidebar from "@/components/sidebar/ModernAdminSidebar";
+import {
+  CLASSES_TO_YEARS,
+  ClassesType as ClassesDataType,
+  EXAM_YEARS,
+} from "@/constants";
+import { SidebarProvider } from "@/context/SidebarContext";
 import { db } from "@/firebase/config";
 import { useData } from "@/hooks/useData";
 import { UserDataType } from "@/types";
 import { CircularProgress } from "@mui/material";
 import { collection, onSnapshot } from "firebase/firestore";
 import { useEffect, useState } from "react";
-// import { CircularProgress } from "@chakra-ui/react";
 import { Navigate, Outlet } from "react-router-dom";
 
 const AdminLayout = () => {
   const { currentUserData } = useData();
   const [usersData, setUsersData] = useState<UserDataType[] | null>(null);
   const [selectedYear, setSelectedYear] = useState<string>(EXAM_YEARS[0].year);
-  const [selectedClass, setSecectedClass] = useState<ClassesDataType>("THEORY");
+  const [selectedClass, setSecectedClass] = useState<ClassesDataType>(
+    CLASSES_TO_YEARS[EXAM_YEARS[0].year][0] as ClassesDataType
+  );
+
+  // Reset class when year changes to ensure it's valid for the new year
+  useEffect(() => {
+    const availableClasses =
+      CLASSES_TO_YEARS[selectedYear as keyof typeof CLASSES_TO_YEARS];
+    if (!availableClasses.includes(selectedClass)) {
+      setSecectedClass(availableClasses[0] as ClassesDataType);
+    }
+  }, [selectedYear, selectedClass]);
 
   useEffect(() => {
     const collectionRef = collection(db, "users");
@@ -24,7 +40,12 @@ const AdminLayout = () => {
           ...doc.data(),
           uid: doc.id,
         })) as UserDataType[]
-      ).filter((user) => user.regNo && user.examYear == selectedYear && user.classes.includes(selectedClass)); // Ensure regNo exists
+      ).filter(
+        (user) =>
+          user.regNo &&
+          user.examYear == selectedYear &&
+          user.classes.includes(selectedClass)
+      ); // Ensure regNo exists
 
       setUsersData(usersDataArr);
     });
@@ -46,25 +67,31 @@ const AdminLayout = () => {
   }
 
   return currentUserData.roles == "ADMIN" ? (
-    <div className="">
-      <div className="hidden md:flex h-screen w-56 flex-col inset-y-0 fixed left-0 top-0 z-50">
-        <Sidebar />
-      </div>
-      <div className="min-h-screen flex flex-col md:ml-56">
-        <div className="h-[80px] inset-y-0 w-full  fixed top-0 left-0 z-10">
-          <Navbar
+    <SidebarProvider>
+      <div className="min-h-screen bg-gray-50">
+        <ModernAdminSidebar />
+        <ResponsiveContent>
+          <ModernAdminHeader
             selectedYear={selectedYear}
             setSelectedYear={setSelectedYear}
             selectedClass={selectedClass}
             setSelectedClass={setSecectedClass}
           />
-        </div>
-        <div className="w-full min-h-screen bg-[#ededed] mt-[80px]">
-          {/* <div className="w-full h-[2000px]"></div> */}
-          <Outlet context={{ usersData, setSelectedYear, selectedYear, selectedClass }} />
-        </div>
+          <main className="py-6">
+            <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+              <Outlet
+                context={{
+                  usersData,
+                  setSelectedYear,
+                  selectedYear,
+                  selectedClass,
+                }}
+              />
+            </div>
+          </main>
+        </ResponsiveContent>
       </div>
-    </div>
+    </SidebarProvider>
   ) : (
     <Navigate to="/" />
   );

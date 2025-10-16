@@ -1,11 +1,11 @@
-import UpcomingExamCalendar from "@/components/UpcomingExamCalendar";
 import { db } from "@/firebase/config";
 import { useAuth } from "@/hooks/useAuth";
 import { ExamDataType } from "@/types";
 import { collection, onSnapshot, orderBy, query } from "firebase/firestore";
+import { BarChart3 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { MarksChart } from "../components/charts/MarksChart";
-// import StudentMarksCard from "../components/StudentMarksCard";
+import StudentMarksCard from "../components/StudentMarksCard";
 
 const StudentAnalyticsPage = () => {
   const { currentUser } = useAuth();
@@ -30,40 +30,51 @@ const StudentAnalyticsPage = () => {
   }, [currentUser]);
 
   return (
-    <div className="w-full h-full flex flex-col lg:flex-row items-start justify-center p-2 lg:p-5 gap-5">
-      {/* Chart Container */}
-      <div className="w-full lg:w-2/3  p-3 rounded-md">
-        {examsData && examsData.length > 0 ? (
-          <MarksChart
-            chartData={examsData
-              .filter((exam) => exam.examStatus === "completed")
-              .map(({ examName, examResult, avgResult, isAbsent }) => ({
-                exam: examName,
-                Mark: isAbsent ? null : examResult ?? null,
-                avgResult: avgResult ?? null,
-                isAbsent,
-              }))}
-          />
-        ) : (
-          <div className="text-center text-gray-500">
-            No exam data available
-          </div>
-        )}
+    <div className="space-y-6">
+      {/* Page Header */}
+      <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
+        <h1 className="text-2xl font-bold text-gray-900 mb-2">My Analytics</h1>
+        <p className="text-gray-600">
+          Track your exam performance and progress over time
+        </p>
       </div>
 
-      {/* TODO: Student Marks Card Container */}
-      {/* <div className="w-full lg:w-1/3 p-3  rounded-md">
-        {examsData ? (
-          <StudentMarksCard examsData={examsData} />
-        ) : (
-          <div className="text-center text-gray-500">
-            Loading student data...
-          </div>
-        )}
-      </div> */}
+      {/* Analytics Content */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Chart Container */}
+        <div className="lg:col-span-2">
+          {examsData && examsData.length > 0 ? (
+            <MarksChart
+              chartData={examsData
+                .filter((exam) => exam.examStatus === "completed")
+                .map(({ examName, examResult, avgResult, isAbsent }) => ({
+                  exam: examName,
+                  Mark: isAbsent ? null : examResult ?? null,
+                  avgResult: avgResult ?? null,
+                  isAbsent,
+                }))}
+            />
+          ) : (
+            <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-12">
+              <div className="flex flex-col items-center justify-center text-gray-500">
+                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                  <BarChart3 className="h-8 w-8 text-gray-400" />
+                </div>
+                <p className="text-lg font-medium">No exam data available</p>
+                <p className="text-sm">
+                  Complete some exams to see your analytics
+                </p>
+              </div>
+            </div>
+          )}
+        </div>
 
-      <div className="w-full lg:w-1/3">
-        <UpcomingExamCalendar />
+        {/* Exam Results Table */}
+        <div className="lg:col-span-1">
+          <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+            <StudentMarksCard examsData={examsData} />
+          </div>
+        </div>
       </div>
     </div>
   );

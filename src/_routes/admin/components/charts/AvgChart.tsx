@@ -13,14 +13,6 @@ import {
 import { TrendingUp } from "lucide-react";
 import { Line } from "react-chartjs-2";
 
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -107,11 +99,25 @@ export function AvgChart({
   const chartWidth = Math.max(400, labels.length * dataPointWidth);
 
   return (
-    <Card className="w-full">
-      <CardHeader>
-        <CardTitle>Average Marks Per Exam</CardTitle>
-      </CardHeader>
-      <CardContent>
+    <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+      <div className="p-6 border-b border-gray-200">
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="text-lg font-semibold text-gray-900">
+              Average Marks Per Exam
+            </h3>
+            <p className="text-sm text-gray-600 mt-1">
+              Performance trends across all exams
+            </p>
+          </div>
+          <div className="flex items-center gap-2 text-sm text-blue-600">
+            <TrendingUp className="h-4 w-4" />
+            <span className="font-medium">Latest Trends</span>
+          </div>
+        </div>
+      </div>
+
+      <div className="p-6">
         <div className="overflow-x-auto">
           <div
             style={{
@@ -123,15 +129,14 @@ export function AvgChart({
             <Line options={options} data={data} />
           </div>
         </div>
-      </CardContent>
-      <CardFooter className="flex-col items-start gap-2 text-sm">
-        <div className="flex gap-2 font-medium leading-none">
-          Latest exam trend <TrendingUp className="h-4 w-4" />
-        </div>
-        <div className="leading-none text-muted-foreground">
-          Displaying average marks for recent exams
-        </div>
-      </CardFooter>
-    </Card>
+      </div>
+
+      <div className="px-6 py-4 bg-gray-50 border-t border-gray-200">
+        <p className="text-xs text-gray-500">
+          Displaying average marks for completed exams in {chartData.length}{" "}
+          exam{chartData.length !== 1 ? "s" : ""}
+        </p>
+      </div>
+    </div>
   );
 }

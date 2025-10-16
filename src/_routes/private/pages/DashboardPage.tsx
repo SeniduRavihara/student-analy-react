@@ -1,7 +1,6 @@
-import { Outlet } from "react-router-dom";
-import Navbar from "../../../components/Navbar";
-import Sidebar from "@/components/sidebar/Sidebar";
-import { useEffect, useState } from "react";
+import ModernUserHeader from "@/components/header/ModernUserHeader";
+import { ResponsiveContent } from "@/components/layout/ResponsiveContent";
+import ModernUserSidebar from "@/components/sidebar/ModernUserSidebar";
 import {
   Dialog,
   DialogContent,
@@ -9,6 +8,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { SidebarProvider } from "@/context/SidebarContext";
+import { useEffect, useState } from "react";
+import { Outlet } from "react-router-dom";
 
 const DashboardPage = () => {
   const [open, setOpen] = useState(false);
@@ -29,17 +31,17 @@ const DashboardPage = () => {
   // }
 
   return (
-    <div className="">
-      <div className="hidden md:flex h-screen w-56 flex-col inset-y-0 fixed left-0 top-0 z-50">
-        <Sidebar />
-      </div>
-      <div className="min-h-screen flex flex-col md:ml-56">
-        <div className="h-[80px] inset-y-0 w-full fixed top-0 left-0 z-10">
-          <Navbar />
-        </div>
-        <div className="w-full min-h-screen bg-[#ededed] mt-[80px]">
-          <Outlet />
-        </div>
+    <SidebarProvider>
+      <div className="min-h-screen bg-gray-50">
+        <ModernUserSidebar />
+        <ResponsiveContent>
+          <ModernUserHeader />
+          <main className="py-6">
+            <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+              <Outlet />
+            </div>
+          </main>
+        </ResponsiveContent>
       </div>
 
       <Dialog open={open} onOpenChange={setOpen}>
@@ -53,7 +55,7 @@ const DashboardPage = () => {
           </DialogHeader>
         </DialogContent>
       </Dialog>
-    </div>
+    </SidebarProvider>
   );
 };
 export default DashboardPage;

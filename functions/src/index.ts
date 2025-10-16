@@ -179,3 +179,8 @@ export const deleteUserData = functions.auth.user().onDelete(async (user) => {
 //       }
 //     }
 //   });
+
+// Simple Hello World function for testing
+export const helloWorld = functions.https.onRequest((request, response) => {
+  response.send("Hello World!");
+});
