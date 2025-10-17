@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -8,10 +9,19 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { ModernDataTable } from "@/components/ui/modern-data-table";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { CLASSES_TO_YEARS, ClassesType, EXAM_YEARS } from "@/constants";
 import { db } from "@/firebase/config";
 import { toast } from "@/hooks/use-toast";
-import { MCQTest } from "@/types";
+import { cn } from "@/lib/utils";
+import { MCQPack } from "@/types";
 import {
   addDoc,
   collection,
@@ -19,7 +29,7 @@ import {
   orderBy,
   query,
 } from "firebase/firestore";
-import { Edit, Eye, Plus, Trash2 } from "lucide-react";
+import { Edit, Eye, Loader2, Plus, SquareCheck, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate, useOutletContext } from "react-router-dom";
 
@@ -30,16 +40,19 @@ type OutletContextType = {
 
 const MCQPage = () => {
   const { selectedYear, selectedClass } = useOutletContext<OutletContextType>();
-  const [mcqTests, setMcqTests] = useState<MCQTest[]>([]);
+  const [mcqPacks, setMcqPacks] = useState<MCQPack[]>([]);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   // Form state
-  const [testTitle, setTestTitle] = useState("");
-  const [testDescription, setTestDescription] = useState("");
+  const [packTitle, setPackTitle] = useState("");
+  const [packDescription, setPackDescription] = useState("");
   const [timeLimit, setTimeLimit] = useState(30);
   const [passingMarks, setPassingMarks] = useState(50);
+  const [packYear, setPackYear] = useState(EXAM_YEARS[0].year);
+  const [classTypes, setClassTypes] = useState<ClassesType[]>([]);
+  const [showAllPacks, setShowAllPacks] = useState(false);
 
   useEffect(() => {
     const collectionRef = query(
@@ -48,31 +61,55 @@ const MCQPage = () => {
     );
 
     const unsubscribe = onSnapshot(collectionRef, (querySnapshot) => {
-      const testsData = querySnapshot.docs.map((doc) => ({
+      const packsData = querySnapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
         createdAt: doc.data().createdAt?.toDate() || new Date(),
         updatedAt: doc.data().updatedAt?.toDate() || new Date(),
-      })) as MCQTest[];
+      })) as MCQPack[];
 
-      // Filter by selected year and class
-      const filteredTests = testsData.filter(
-        (test) =>
-          test.examYear === selectedYear &&
-          test.classType.includes(selectedClass)
-      );
+      console.log("All MCQ packs from Firestore:", packsData);
+      console.log("Selected year:", selectedYear);
+      console.log("Selected class:", selectedClass);
 
-      setMcqTests(filteredTests);
+      // Filter by selected year and class (or show all for debugging)
+      const filteredPacks = showAllPacks
+        ? packsData
+        : packsData.filter(
+            (pack) =>
+              pack.examYear === selectedYear &&
+              pack.classType.includes(selectedClass)
+          );
+
+      console.log("Filtered packs:", filteredPacks);
+      setMcqPacks(filteredPacks);
     });
 
     return unsubscribe;
-  }, [selectedYear, selectedClass]);
+  }, [selectedYear, selectedClass, showAllPacks]);
 
-  const handleCreateTest = async () => {
-    if (!testTitle.trim()) {
+  const toggleClassType = (classType: ClassesType) => {
+    setClassTypes((prevClasses) =>
+      prevClasses.includes(classType)
+        ? prevClasses.filter((c) => c !== classType)
+        : [...prevClasses, classType]
+    );
+  };
+
+  const handleCreatePack = async () => {
+    if (!packTitle.trim()) {
       toast({
         title: "Error",
-        description: "Please enter a test title",
+        description: "Please enter a pack title",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (classTypes.length === 0) {
+      toast({
+        title: "Error",
+        description: "Please select at least one class type",
         variant: "destructive",
       });
       return;
@@ -80,42 +117,42 @@ const MCQPage = () => {
 
     setLoading(true);
     try {
-      const newTest: Omit<MCQTest, "id"> = {
-        title: testTitle,
-        description: testDescription,
-        examYear: selectedYear,
-        classType: [selectedClass],
-        questions: [],
+      const newPack: Omit<MCQPack, "id" | "createdAt" | "updatedAt"> = {
+        title: packTitle,
+        description: packDescription,
+        examYear: packYear,
+        classType: classTypes,
         timeLimit,
-        totalMarks: 0, // Will be calculated based on questions
         passingMarks,
         status: "draft",
-        createdAt: new Date(),
-        updatedAt: new Date(),
         createdBy: "admin", // You can get this from auth context
+        totalQuestions: 0,
+        totalMarks: 0,
       };
 
-      const docRef = await addDoc(collection(db, "mcqTests"), newTest);
+      const docRef = await addDoc(collection(db, "mcqTests"), newPack);
 
       toast({
         title: "Success",
-        description: "MCQ test created successfully!",
+        description: "MCQ pack created successfully!",
       });
 
       // Reset form
-      setTestTitle("");
-      setTestDescription("");
+      setPackTitle("");
+      setPackDescription("");
       setTimeLimit(30);
       setPassingMarks(50);
+      setPackYear(EXAM_YEARS[0].year);
+      setClassTypes([]);
       setIsCreateDialogOpen(false);
 
-      // Navigate to edit the test
+      // Navigate to edit the pack
       navigate(`/admin/mcq/${docRef.id}/edit`);
     } catch (error) {
-      console.error("Error creating MCQ test:", error);
+      console.error("Error creating MCQ pack:", error);
       toast({
         title: "Error",
-        description: "Failed to create MCQ test. Please try again.",
+        description: "Failed to create MCQ pack. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -126,7 +163,7 @@ const MCQPage = () => {
   const columns = [
     {
       accessorKey: "title",
-      header: "Test Title",
+      header: "Pack Title",
       cell: ({ row }: any) => (
         <div className="font-medium">{row.getValue("title")}</div>
       ),
@@ -139,10 +176,29 @@ const MCQPage = () => {
       ),
     },
     {
-      accessorKey: "questions",
+      accessorKey: "classType",
+      header: "Class Types",
+      cell: ({ row }: any) => {
+        const classTypes = row.getValue("classType") as string[];
+        return (
+          <div className="flex flex-wrap gap-1">
+            {classTypes.map((type, index) => (
+              <span
+                key={index}
+                className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full"
+              >
+                {type}
+              </span>
+            ))}
+          </div>
+        );
+      },
+    },
+    {
+      accessorKey: "totalQuestions",
       header: "Questions",
       cell: ({ row }: any) => (
-        <div className="text-center">{row.getValue("questions").length}</div>
+        <div className="text-center">{row.getValue("totalQuestions")}</div>
       ),
     },
     {
@@ -177,20 +233,20 @@ const MCQPage = () => {
       id: "actions",
       header: "Actions",
       cell: ({ row }: any) => {
-        const test = row.original;
+        const pack = row.original;
         return (
           <div className="flex items-center gap-2">
             <Button
               variant="outline"
               size="sm"
-              onClick={() => navigate(`/admin/mcq/${test.id}/edit`)}
+              onClick={() => navigate(`/admin/mcq/${pack.id}/edit`)}
             >
               <Edit className="h-4 w-4" />
             </Button>
             <Button
               variant="outline"
               size="sm"
-              onClick={() => navigate(`/admin/mcq/${test.id}/view`)}
+              onClick={() => navigate(`/admin/mcq/${pack.id}/view`)}
             >
               <Eye className="h-4 w-4" />
             </Button>
@@ -213,50 +269,60 @@ const MCQPage = () => {
       <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900 mb-2">MCQ Tests</h1>
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">MCQ Packs</h1>
             <p className="text-gray-600">
-              Create and manage multiple choice question tests for{" "}
-              {selectedYear} - {selectedClass}
+              {showAllPacks
+                ? "Showing all MCQ packs (debug mode)"
+                : `Create and manage multiple choice question packs for ${selectedYear} - ${selectedClass}`}
             </p>
           </div>
-          <Button
-            onClick={() => setIsCreateDialogOpen(true)}
-            className="bg-blue-600 hover:bg-blue-700"
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            Create New Test
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              onClick={() => setShowAllPacks(!showAllPacks)}
+              className={showAllPacks ? "bg-green-100 text-green-800" : ""}
+            >
+              {showAllPacks ? "Show Filtered" : "Show All Packs"}
+            </Button>
+            <Button
+              onClick={() => setIsCreateDialogOpen(true)}
+              className="bg-blue-600 hover:bg-blue-700"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Create New Pack
+            </Button>
+          </div>
         </div>
       </div>
 
-      {/* MCQ Tests Table */}
+      {/* MCQ Packs Table */}
       <ModernDataTable
         columns={columns}
-        data={mcqTests}
-        searchPlaceholder="Search by test title..."
+        data={mcqPacks}
+        searchPlaceholder="Search by pack title..."
         searchColumn="title"
         pageSize={8}
         title=""
         description=""
       />
 
-      {/* Create Test Dialog */}
+      {/* Create Pack Dialog */}
       <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
         <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
-            <DialogTitle>Create New MCQ Test</DialogTitle>
+            <DialogTitle>Create New MCQ Pack</DialogTitle>
             <DialogDescription>
-              Create a new multiple choice question test for your students.
+              Create a new multiple choice question pack for your students.
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4">
             <div>
-              <label className="text-sm font-medium">Test Title *</label>
+              <label className="text-sm font-medium">Pack Title *</label>
               <Input
-                value={testTitle}
-                onChange={(e) => setTestTitle(e.target.value)}
-                placeholder="Enter test title..."
+                value={packTitle}
+                onChange={(e) => setPackTitle(e.target.value)}
+                placeholder="Enter pack title..."
                 className="mt-1"
               />
             </div>
@@ -264,12 +330,57 @@ const MCQPage = () => {
             <div>
               <label className="text-sm font-medium">Description</label>
               <Textarea
-                value={testDescription}
-                onChange={(e) => setTestDescription(e.target.value)}
-                placeholder="Enter test description..."
+                value={packDescription}
+                onChange={(e) => setPackDescription(e.target.value)}
+                placeholder="Enter pack description..."
                 className="mt-1"
                 rows={3}
               />
+            </div>
+
+            <div>
+              <label className="text-sm font-medium">Exam Year</label>
+              <Select
+                onValueChange={setPackYear}
+                defaultValue={EXAM_YEARS[0].year}
+                value={packYear}
+              >
+                <SelectTrigger className="mt-1">
+                  <SelectValue placeholder="Select exam year" />
+                </SelectTrigger>
+                <SelectContent>
+                  {EXAM_YEARS.map((year) => (
+                    <SelectItem key={year.year} value={year.year}>
+                      {year.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Class Types *</label>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                {CLASSES_TO_YEARS[
+                  packYear as keyof typeof CLASSES_TO_YEARS
+                ].map((classItem) => (
+                  <Card
+                    key={classItem}
+                    onClick={() => toggleClassType(classItem as ClassesType)}
+                    className={cn(
+                      "p-3 flex items-center justify-between cursor-pointer transition-all",
+                      classTypes.includes(classItem as ClassesType)
+                        ? "bg-primary text-primary-foreground"
+                        : "hover:bg-accent"
+                    )}
+                  >
+                    <span className="font-medium">{classItem}</span>
+                    {classTypes.includes(classItem as ClassesType) && (
+                      <SquareCheck className="h-5 w-5" />
+                    )}
+                  </Card>
+                ))}
+              </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
@@ -297,21 +408,6 @@ const MCQPage = () => {
                 />
               </div>
             </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="text-sm font-medium">Exam Year</label>
-                <div className="mt-1 p-2 bg-gray-50 rounded border text-sm text-gray-600">
-                  {selectedYear}
-                </div>
-              </div>
-              <div>
-                <label className="text-sm font-medium">Class Type</label>
-                <div className="mt-1 p-2 bg-gray-50 rounded border text-sm text-gray-600">
-                  {selectedClass}
-                </div>
-              </div>
-            </div>
           </div>
 
           <div className="flex justify-end gap-2 pt-4">
@@ -322,11 +418,12 @@ const MCQPage = () => {
               Cancel
             </Button>
             <Button
-              onClick={handleCreateTest}
+              onClick={handleCreatePack}
               disabled={loading}
               className="bg-blue-600 hover:bg-blue-700"
             >
-              {loading ? "Creating..." : "Create Test"}
+              {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {loading ? "Creating..." : "Create Pack"}
             </Button>
           </div>
         </DialogContent>

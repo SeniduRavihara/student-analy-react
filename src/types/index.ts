@@ -120,36 +120,45 @@ export type MCQQuestion = {
   difficulty: "easy" | "medium" | "hard";
   subject?: string;
   topic?: string;
+  marks: number;
+  order: number;
+  createdAt: Date;
 };
 
-export type MCQTest = {
+export type MCQPack = {
   id: string;
   title: string;
   description: string;
   examYear: string;
   classType: string[];
-  questions: MCQQuestion[];
   timeLimit: number; // in minutes
-  totalMarks: number;
   passingMarks: number;
   status: "draft" | "published" | "archived";
   createdAt: Date;
   updatedAt: Date;
   createdBy: string; // admin UID
+  totalQuestions: number;
+  totalMarks: number;
 };
 
-export type MCQTestResult = {
+export type MCQResult = {
   id: string;
-  testId: string;
-  studentId: string;
-  studentName: string;
-  answers: { questionId: string; selectedOptionId: string }[];
+  packId: string;
+  packTitle: string;
+  answers: {
+    questionId: string;
+    selectedOptionId: string;
+    isCorrect: boolean;
+    timeSpent: number; // seconds per question
+  }[];
   score: number;
   totalMarks: number;
   percentage: number;
-  timeSpent: number; // in minutes
+  timeSpent: number; // total minutes
   completedAt: Date;
   isPassed: boolean;
+  examYear: string;
+  classType: string[];
 };
 
 // export type ExamDataType = {

@@ -18,16 +18,16 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { db } from "@/firebase/config";
 import { toast } from "@/hooks/use-toast";
-import { MCQOption, MCQQuestion, MCQTest } from "@/types";
+import { MCQOption, MCQPack, MCQQuestion } from "@/types";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { Edit, Plus, Save, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
 const MCQEditPage = () => {
-  const { testId } = useParams<{ testId: string }>();
+  const { packId } = useParams<{ packId: string }>();
   const navigate = useNavigate();
-  const [test, setTest] = useState<MCQTest | null>(null);
+  const [pack, setPack] = useState<MCQPack | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [isQuestionDialogOpen, setIsQuestionDialogOpen] = useState(false);
@@ -49,35 +49,35 @@ const MCQEditPage = () => {
   );
 
   useEffect(() => {
-    if (testId) {
-      fetchTest();
+    if (packId) {
+      fetchPack();
     }
-  }, [testId]);
+  }, [packId]);
 
-  const fetchTest = async () => {
+  const fetchPack = async () => {
     try {
-      const testDoc = await getDoc(doc(db, "mcqTests", testId!));
-      if (testDoc.exists()) {
-        const testData = {
-          id: testDoc.id,
-          ...testDoc.data(),
-          createdAt: testDoc.data().createdAt?.toDate() || new Date(),
-          updatedAt: testDoc.data().updatedAt?.toDate() || new Date(),
-        } as MCQTest;
-        setTest(testData);
+      const packDoc = await getDoc(doc(db, "mcqTests", packId!));
+      if (packDoc.exists()) {
+        const packData = {
+          id: packDoc.id,
+          ...packDoc.data(),
+          createdAt: packDoc.data().createdAt?.toDate() || new Date(),
+          updatedAt: packDoc.data().updatedAt?.toDate() || new Date(),
+        } as MCQPack;
+        setPack(packData);
       } else {
         toast({
           title: "Error",
-          description: "Test not found",
+          description: "Pack not found",
           variant: "destructive",
         });
         navigate("/admin/mcq");
       }
     } catch (error) {
-      console.error("Error fetching test:", error);
+      console.error("Error fetching pack:", error);
       toast({
         title: "Error",
-        description: "Failed to load test",
+        description: "Failed to load pack",
         variant: "destructive",
       });
     } finally {
@@ -85,25 +85,25 @@ const MCQEditPage = () => {
     }
   };
 
-  const handleSaveTest = async () => {
-    if (!test) return;
+  const handleSavePack = async () => {
+    if (!pack) return;
 
     setSaving(true);
     try {
-      await updateDoc(doc(db, "mcqTests", test.id), {
-        ...test,
+      await updateDoc(doc(db, "mcqTests", pack.id), {
+        ...pack,
         updatedAt: new Date(),
       });
 
       toast({
         title: "Success",
-        description: "Test saved successfully!",
+        description: "Pack saved successfully!",
       });
     } catch (error) {
-      console.error("Error saving test:", error);
+      console.error("Error saving pack:", error);
       toast({
         title: "Error",
-        description: "Failed to save test",
+        description: "Failed to save pack",
         variant: "destructive",
       });
     } finally {
@@ -137,15 +137,19 @@ const MCQEditPage = () => {
       options: options.filter((opt) => opt.text.trim()),
       explanation,
       difficulty,
+      marks: 1,
+      order: (pack?.questions?.length || 0) + 1,
+      createdAt: new Date(),
     };
 
-    const updatedTest = {
-      ...test!,
-      questions: [...test!.questions, newQuestion],
-      totalMarks: test!.questions.length + 1,
+    const updatedPack = {
+      ...pack!,
+      questions: [...(pack?.questions || []), newQuestion],
+      totalQuestions: (pack?.totalQuestions || 0) + 1,
+      totalMarks: (pack?.totalMarks || 0) + newQuestion.marks,
     };
 
-    setTest(updatedTest);
+    setPack(updatedPack);
     resetQuestionForm();
     setIsQuestionDialogOpen(false);
 
@@ -165,9 +169,9 @@ const MCQEditPage = () => {
   };
 
   const handleUpdateQuestion = () => {
-    if (!editingQuestion || !test) return;
+    if (!editingQuestion || !pack) return;
 
-    const updatedQuestions = test.questions.map((q) =>
+    const updatedQuestions = (pack.questions || []).map((q) =>
       q.id === editingQuestion.id
         ? {
             ...q,
@@ -179,9 +183,11 @@ const MCQEditPage = () => {
         : q
     );
 
-    setTest({
-      ...test,
+    setPack({
+      ...pack,
       questions: updatedQuestions,
+      totalQuestions: updatedQuestions.length,
+      totalMarks: updatedQuestions.reduce((sum, q) => sum + (q.marks || 1), 0),
     });
 
     resetQuestionForm();
@@ -195,13 +201,16 @@ const MCQEditPage = () => {
   };
 
   const handleDeleteQuestion = (questionId: string) => {
-    if (!test) return;
+    if (!pack) return;
 
-    const updatedQuestions = test.questions.filter((q) => q.id !== questionId);
-    setTest({
-      ...test,
+    const updatedQuestions = (pack.questions || []).filter(
+      (q) => q.id !== questionId
+    );
+    setPack({
+      ...pack,
       questions: updatedQuestions,
-      totalMarks: updatedQuestions.length,
+      totalQuestions: updatedQuestions.length,
+      totalMarks: updatedQuestions.reduce((sum, q) => sum + (q.marks || 1), 0),
     });
 
     toast({
@@ -241,16 +250,16 @@ const MCQEditPage = () => {
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading test...</p>
+          <p className="mt-4 text-gray-600">Loading pack...</p>
         </div>
       </div>
     );
   }
 
-  if (!test) {
+  if (!pack) {
     return (
       <div className="text-center py-12">
-        <p className="text-gray-600">Test not found</p>
+        <p className="text-gray-600">Pack not found</p>
       </div>
     );
   }
@@ -262,47 +271,47 @@ const MCQEditPage = () => {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-gray-900 mb-2">
-              Edit MCQ Test
+              Edit MCQ Pack
             </h1>
-            <p className="text-gray-600">{test.title}</p>
+            <p className="text-gray-600">{pack.title}</p>
           </div>
           <div className="flex gap-2">
             <Button variant="outline" onClick={() => navigate("/admin/mcq")}>
-              Back to Tests
+              Back to Packs
             </Button>
             <Button
-              onClick={handleSaveTest}
+              onClick={handleSavePack}
               disabled={saving}
               className="bg-blue-600 hover:bg-blue-700"
             >
               <Save className="h-4 w-4 mr-2" />
-              {saving ? "Saving..." : "Save Test"}
+              {saving ? "Saving..." : "Save Pack"}
             </Button>
           </div>
         </div>
       </div>
 
-      {/* Test Info */}
+      {/* Pack Info */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <Card>
           <CardHeader>
-            <CardTitle>Test Information</CardTitle>
+            <CardTitle>Pack Information</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
               <Label>Title</Label>
               <Input
-                value={test.title}
-                onChange={(e) => setTest({ ...test, title: e.target.value })}
+                value={pack.title}
+                onChange={(e) => setPack({ ...pack, title: e.target.value })}
                 className="mt-1"
               />
             </div>
             <div>
               <Label>Description</Label>
               <Textarea
-                value={test.description}
+                value={pack.description}
                 onChange={(e) =>
-                  setTest({ ...test, description: e.target.value })
+                  setPack({ ...pack, description: e.target.value })
                 }
                 className="mt-1"
                 rows={3}
@@ -313,9 +322,9 @@ const MCQEditPage = () => {
                 <Label>Time Limit (min)</Label>
                 <Input
                   type="number"
-                  value={test.timeLimit}
+                  value={pack.timeLimit}
                   onChange={(e) =>
-                    setTest({ ...test, timeLimit: Number(e.target.value) })
+                    setPack({ ...pack, timeLimit: Number(e.target.value) })
                   }
                   className="mt-1"
                 />
@@ -324,9 +333,9 @@ const MCQEditPage = () => {
                 <Label>Passing Marks (%)</Label>
                 <Input
                   type="number"
-                  value={test.passingMarks}
+                  value={pack.passingMarks}
                   onChange={(e) =>
-                    setTest({ ...test, passingMarks: Number(e.target.value) })
+                    setPack({ ...pack, passingMarks: Number(e.target.value) })
                   }
                   className="mt-1"
                 />
@@ -339,9 +348,9 @@ const MCQEditPage = () => {
           <CardHeader>
             <div className="flex items-center justify-between">
               <div>
-                <CardTitle>Questions ({test.questions.length})</CardTitle>
+                <CardTitle>Questions ({pack.questions?.length || 0})</CardTitle>
                 <CardDescription>
-                  Total Marks: {test.totalMarks}
+                  Total Marks: {pack.totalMarks}
                 </CardDescription>
               </div>
               <Button
@@ -358,14 +367,14 @@ const MCQEditPage = () => {
             </div>
           </CardHeader>
           <CardContent>
-            {test.questions.length === 0 ? (
+            {(pack.questions?.length || 0) === 0 ? (
               <div className="text-center py-8 text-gray-500">
                 <p>No questions added yet.</p>
                 <p className="text-sm">Click "Add Question" to get started.</p>
               </div>
             ) : (
               <div className="space-y-4">
-                {test.questions.map((question, index) => (
+                {(pack.questions || []).map((question, index) => (
                   <Card
                     key={question.id}
                     className="border-l-4 border-l-blue-500"
