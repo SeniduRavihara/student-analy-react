@@ -28,6 +28,7 @@ import DashboardPage from "./_routes/private/pages/DashboardPage";
 import RegisterAsNewPage from "./_routes/private/pages/RegisterAsNewPage";
 import StudentAnalyticsPage from "./_routes/private/pages/StudentAnalyticsPage";
 import StudentCalendarPage from "./_routes/private/pages/StudentCalendarPage";
+import UserMCQPage from "./_routes/private/pages/UserMCQPage";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -47,6 +48,7 @@ const router = createBrowserRouter(
       <Route element={<PrivateLayout />}>
         <Route path="/dashboard" element={<DashboardPage />}>
           <Route index element={<StudentAnalyticsPage />} />
+          <Route path="mcq" element={<UserMCQPage />} />
           <Route path="calendar" element={<StudentCalendarPage />} />
           <Route path="profile" element={<StudentProfilePage />} />
         </Route>

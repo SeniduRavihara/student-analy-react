@@ -77,7 +77,7 @@ const AnalyticsPage = () => {
   return (
     <div className="space-y-6">
       {/* Page Header */}
-      <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
+      <div className="bg-white rounded-lg border border-gray-200 shadow-xs p-6">
         <h1 className="text-2xl font-bold text-gray-900 mb-2">
           System Analytics
         </h1>
@@ -91,7 +91,7 @@ const AnalyticsPage = () => {
 
       {/* Analytics Chart */}
       {loading ? (
-        <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-12">
+        <div className="bg-white rounded-lg border border-gray-200 shadow-xs p-12">
           <div className="flex flex-col items-center justify-center">
             <Loader2 className="h-8 w-8 animate-spin text-blue-600 mb-4" />
             <p className="text-gray-600">Loading exam data...</p>
@@ -107,7 +107,7 @@ const AnalyticsPage = () => {
             }))}
         />
       ) : (
-        <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-12">
+        <div className="bg-white rounded-lg border border-gray-200 shadow-xs p-12">
           <div className="flex flex-col items-center justify-center text-gray-500">
             <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
               <BarChart3 className="h-8 w-8 text-gray-400" />

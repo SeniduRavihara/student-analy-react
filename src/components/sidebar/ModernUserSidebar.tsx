@@ -4,6 +4,7 @@ import {
   Calendar,
   ChevronLeft,
   ChevronRight,
+  HelpCircle,
   User,
   X,
 } from "lucide-react";
@@ -12,6 +13,7 @@ import { Link, useLocation } from "react-router-dom";
 
 const navigation = [
   { name: "Analytics", href: "/dashboard", icon: BarChart3 },
+  { name: "MCQ Tests", href: "/dashboard/mcq", icon: HelpCircle },
   { name: "Calendar", href: "/dashboard/calendar", icon: Calendar },
   { name: "Profile", href: "/dashboard/profile", icon: User },
 ];

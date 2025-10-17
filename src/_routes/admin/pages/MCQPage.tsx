@@ -25,11 +25,22 @@ import { MCQPack } from "@/types";
 import {
   addDoc,
   collection,
+  doc,
   onSnapshot,
   orderBy,
   query,
+  updateDoc,
 } from "firebase/firestore";
-import { Edit, Eye, Loader2, Plus, SquareCheck, Trash2 } from "lucide-react";
+import {
+  Edit,
+  Eye,
+  Globe,
+  Loader2,
+  Lock,
+  Plus,
+  SquareCheck,
+  Trash2,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate, useOutletContext } from "react-router-dom";
 
@@ -68,10 +79,6 @@ const MCQPage = () => {
         updatedAt: doc.data().updatedAt?.toDate() || new Date(),
       })) as MCQPack[];
 
-      console.log("All MCQ packs from Firestore:", packsData);
-      console.log("Selected year:", selectedYear);
-      console.log("Selected class:", selectedClass);
-
       // Filter by selected year and class (or show all for debugging)
       const filteredPacks = showAllPacks
         ? packsData
@@ -81,7 +88,11 @@ const MCQPage = () => {
               pack.classType.includes(selectedClass)
           );
 
-      console.log("Filtered packs:", filteredPacks);
+      console.log("Admin MCQPage: All packs from Firestore:", packsData);
+      console.log("Admin MCQPage: Selected year:", selectedYear);
+      console.log("Admin MCQPage: Selected class:", selectedClass);
+      console.log("Admin MCQPage: Filtered packs:", filteredPacks);
+
       setMcqPacks(filteredPacks);
     });
 
@@ -94,6 +105,30 @@ const MCQPage = () => {
         ? prevClasses.filter((c) => c !== classType)
         : [...prevClasses, classType]
     );
+  };
+
+  const handlePublishPack = async (packId: string, currentStatus: string) => {
+    try {
+      const newStatus = currentStatus === "published" ? "draft" : "published";
+      await updateDoc(doc(db, "mcqTests", packId), {
+        status: newStatus,
+        updatedAt: new Date(),
+      });
+
+      toast({
+        title: "Success",
+        description: `MCQ pack ${
+          newStatus === "published" ? "published" : "unpublished"
+        } successfully!`,
+      });
+    } catch (error) {
+      console.error("Error updating pack status:", error);
+      toast({
+        title: "Error",
+        description: "Failed to update pack status. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleCreatePack = async () => {
@@ -253,6 +288,22 @@ const MCQPage = () => {
             <Button
               variant="outline"
               size="sm"
+              onClick={() => handlePublishPack(pack.id, pack.status)}
+              className={
+                pack.status === "published"
+                  ? "text-orange-600 hover:text-orange-700"
+                  : "text-green-600 hover:text-green-700"
+              }
+            >
+              {pack.status === "published" ? (
+                <Lock className="h-4 w-4" />
+              ) : (
+                <Globe className="h-4 w-4" />
+              )}
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
               className="text-red-600 hover:text-red-700"
             >
               <Trash2 className="h-4 w-4" />
@@ -266,7 +317,7 @@ const MCQPage = () => {
   return (
     <div className="space-y-6">
       {/* Page Header */}
-      <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
+      <div className="bg-white rounded-lg border border-gray-200 shadow-xs p-6">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-gray-900 mb-2">MCQ Packs</h1>

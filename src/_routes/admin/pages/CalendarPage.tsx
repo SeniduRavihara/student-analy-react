@@ -12,7 +12,7 @@ const CalendarPage = () => {
       </div>
 
       {/* Calendar */}
-      <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
+      <div className="bg-white rounded-lg border shadow-xs overflow-hidden">
         <div className="p-6">
           <UpcomingExamCalendar />
         </div>

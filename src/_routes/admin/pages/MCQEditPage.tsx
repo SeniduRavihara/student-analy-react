@@ -19,8 +19,18 @@ import { Textarea } from "@/components/ui/textarea";
 import { db } from "@/firebase/config";
 import { toast } from "@/hooks/use-toast";
 import { MCQOption, MCQPack, MCQQuestion } from "@/types";
-import { doc, getDoc, updateDoc } from "firebase/firestore";
-import { Edit, Plus, Save, Trash2 } from "lucide-react";
+import {
+  addDoc,
+  collection,
+  deleteDoc,
+  doc,
+  getDoc,
+  getDocs,
+  orderBy,
+  query,
+  updateDoc,
+} from "firebase/firestore";
+import { Edit, Globe, Lock, Plus, Save, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
@@ -64,6 +74,21 @@ const MCQEditPage = () => {
           createdAt: packDoc.data().createdAt?.toDate() || new Date(),
           updatedAt: packDoc.data().updatedAt?.toDate() || new Date(),
         } as MCQPack;
+
+        // Fetch questions from sub-collection
+        const questionsQuery = query(
+          collection(db, "mcqTests", packId!, "questions"),
+          orderBy("order", "asc")
+        );
+        const questionsSnapshot = await getDocs(questionsQuery);
+        const questionsData = questionsSnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+          createdAt: doc.data().createdAt?.toDate() || new Date(),
+        })) as MCQQuestion[];
+
+        // Add questions to pack data
+        packData.questions = questionsData;
         setPack(packData);
       } else {
         toast({
@@ -85,13 +110,51 @@ const MCQEditPage = () => {
     }
   };
 
+  const handlePublishPack = async () => {
+    if (!pack) return;
+
+    try {
+      const newStatus = pack.status === "published" ? "draft" : "published";
+      await updateDoc(doc(db, "mcqTests", pack.id), {
+        status: newStatus,
+        updatedAt: new Date(),
+      });
+
+      setPack({ ...pack, status: newStatus });
+
+      toast({
+        title: "Success",
+        description: `MCQ pack ${
+          newStatus === "published" ? "published" : "unpublished"
+        } successfully!`,
+      });
+    } catch (error) {
+      console.error("Error updating pack status:", error);
+      toast({
+        title: "Error",
+        description: "Failed to update pack status. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
   const handleSavePack = async () => {
     if (!pack) return;
 
     setSaving(true);
     try {
+      // Calculate totals from questions
+      const totalQuestions = pack.questions?.length || 0;
+      const totalMarks =
+        pack.questions?.reduce((sum, q) => sum + (q.marks || 1), 0) || 0;
+
       await updateDoc(doc(db, "mcqTests", pack.id), {
-        ...pack,
+        title: pack.title,
+        description: pack.description,
+        timeLimit: pack.timeLimit,
+        passingMarks: pack.passingMarks,
+        totalQuestions,
+        totalMarks,
         updatedAt: new Date(),
       });
 
@@ -111,7 +174,7 @@ const MCQEditPage = () => {
     }
   };
 
-  const handleAddQuestion = () => {
+  const handleAddQuestion = async () => {
     if (!questionText.trim()) {
       toast({
         title: "Error",
@@ -131,32 +194,61 @@ const MCQEditPage = () => {
       return;
     }
 
-    const newQuestion: MCQQuestion = {
-      id: Date.now().toString(),
-      question: questionText,
-      options: options.filter((opt) => opt.text.trim()),
-      explanation,
-      difficulty,
-      marks: 1,
-      order: (pack?.questions?.length || 0) + 1,
-      createdAt: new Date(),
-    };
+    if (!pack) {
+      toast({
+        title: "Error",
+        description: "Pack not found",
+        variant: "destructive",
+      });
+      return;
+    }
 
-    const updatedPack = {
-      ...pack!,
-      questions: [...(pack?.questions || []), newQuestion],
-      totalQuestions: (pack?.totalQuestions || 0) + 1,
-      totalMarks: (pack?.totalMarks || 0) + newQuestion.marks,
-    };
+    try {
+      const newQuestionData = {
+        question: questionText,
+        options: options.filter((opt) => opt.text.trim()),
+        explanation,
+        difficulty,
+        marks: 1,
+        order: (pack?.questions?.length || 0) + 1,
+        createdAt: new Date(),
+      };
 
-    setPack(updatedPack);
-    resetQuestionForm();
-    setIsQuestionDialogOpen(false);
+      // Save question to sub-collection
+      const docRef = await addDoc(
+        collection(db, "mcqTests", pack.id, "questions"),
+        newQuestionData
+      );
 
-    toast({
-      title: "Success",
-      description: "Question added successfully!",
-    });
+      const newQuestion: MCQQuestion = {
+        id: docRef.id,
+        ...newQuestionData,
+      };
+
+      // Update pack data
+      const updatedPack = {
+        ...pack,
+        questions: [...(pack?.questions || []), newQuestion],
+        totalQuestions: (pack?.totalQuestions || 0) + 1,
+        totalMarks: (pack?.totalMarks || 0) + newQuestion.marks,
+      };
+
+      setPack(updatedPack);
+      resetQuestionForm();
+      setIsQuestionDialogOpen(false);
+
+      toast({
+        title: "Success",
+        description: "Question added successfully!",
+      });
+    } catch (error) {
+      console.error("Error adding question:", error);
+      toast({
+        title: "Error",
+        description: "Failed to add question. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleEditQuestion = (question: MCQQuestion) => {
@@ -168,55 +260,94 @@ const MCQEditPage = () => {
     setIsQuestionDialogOpen(true);
   };
 
-  const handleUpdateQuestion = () => {
+  const handleUpdateQuestion = async () => {
     if (!editingQuestion || !pack) return;
 
-    const updatedQuestions = (pack.questions || []).map((q) =>
-      q.id === editingQuestion.id
-        ? {
-            ...q,
-            question: questionText,
-            options: options.filter((opt) => opt.text.trim()),
-            explanation,
-            difficulty,
-          }
-        : q
-    );
+    try {
+      const updatedQuestionData = {
+        question: questionText,
+        options: options.filter((opt) => opt.text.trim()),
+        explanation,
+        difficulty,
+        marks: editingQuestion.marks,
+        order: editingQuestion.order,
+      };
 
-    setPack({
-      ...pack,
-      questions: updatedQuestions,
-      totalQuestions: updatedQuestions.length,
-      totalMarks: updatedQuestions.reduce((sum, q) => sum + (q.marks || 1), 0),
-    });
+      // Update question in sub-collection
+      await updateDoc(
+        doc(db, "mcqTests", pack.id, "questions", editingQuestion.id),
+        updatedQuestionData
+      );
 
-    resetQuestionForm();
-    setIsQuestionDialogOpen(false);
-    setEditingQuestion(null);
+      const updatedQuestions = (pack.questions || []).map((q) =>
+        q.id === editingQuestion.id
+          ? {
+              ...q,
+              ...updatedQuestionData,
+            }
+          : q
+      );
 
-    toast({
-      title: "Success",
-      description: "Question updated successfully!",
-    });
+      setPack({
+        ...pack,
+        questions: updatedQuestions,
+        totalQuestions: updatedQuestions.length,
+        totalMarks: updatedQuestions.reduce(
+          (sum, q) => sum + (q.marks || 1),
+          0
+        ),
+      });
+
+      resetQuestionForm();
+      setIsQuestionDialogOpen(false);
+      setEditingQuestion(null);
+
+      toast({
+        title: "Success",
+        description: "Question updated successfully!",
+      });
+    } catch (error) {
+      console.error("Error updating question:", error);
+      toast({
+        title: "Error",
+        description: "Failed to update question. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
-  const handleDeleteQuestion = (questionId: string) => {
+  const handleDeleteQuestion = async (questionId: string) => {
     if (!pack) return;
 
-    const updatedQuestions = (pack.questions || []).filter(
-      (q) => q.id !== questionId
-    );
-    setPack({
-      ...pack,
-      questions: updatedQuestions,
-      totalQuestions: updatedQuestions.length,
-      totalMarks: updatedQuestions.reduce((sum, q) => sum + (q.marks || 1), 0),
-    });
+    try {
+      // Delete question from sub-collection
+      await deleteDoc(doc(db, "mcqTests", pack.id, "questions", questionId));
 
-    toast({
-      title: "Success",
-      description: "Question deleted successfully!",
-    });
+      const updatedQuestions = (pack.questions || []).filter(
+        (q) => q.id !== questionId
+      );
+      setPack({
+        ...pack,
+        questions: updatedQuestions,
+        totalQuestions: updatedQuestions.length,
+        totalMarks: updatedQuestions.reduce(
+          (sum, q) => sum + (q.marks || 1),
+          0
+        ),
+      });
+
+      toast({
+        title: "Success",
+        description: "Question deleted successfully!",
+      });
+    } catch (error) {
+      console.error("Error deleting question:", error);
+      toast({
+        title: "Error",
+        description: "Failed to delete question. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   const resetQuestionForm = () => {
@@ -267,7 +398,7 @@ const MCQEditPage = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
+      <div className="bg-white rounded-lg border border-gray-200 shadow-xs p-6">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-gray-900 mb-2">
@@ -278,6 +409,22 @@ const MCQEditPage = () => {
           <div className="flex gap-2">
             <Button variant="outline" onClick={() => navigate("/admin/mcq")}>
               Back to Packs
+            </Button>
+            <Button
+              variant="outline"
+              onClick={handlePublishPack}
+              className={
+                pack.status === "published"
+                  ? "text-orange-600 hover:text-orange-700 border-orange-200"
+                  : "text-green-600 hover:text-green-700 border-green-200"
+              }
+            >
+              {pack.status === "published" ? (
+                <Lock className="h-4 w-4 mr-2" />
+              ) : (
+                <Globe className="h-4 w-4 mr-2" />
+              )}
+              {pack.status === "published" ? "Unpublish" : "Publish"}
             </Button>
             <Button
               onClick={handleSavePack}

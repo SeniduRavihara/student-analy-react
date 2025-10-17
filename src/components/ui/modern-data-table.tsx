@@ -112,7 +112,7 @@ export function ModernDataTable<TData, TValue>({
       )}
 
       {/* Search and Filter Bar */}
-      <div className="bg-white p-4 rounded-lg shadow-sm border">
+      <div className="bg-white p-4 rounded-lg border shadow-xs">
         <div className="flex gap-4 items-center">
           <div className="flex-1">
             <div className="relative">
@@ -162,7 +162,7 @@ export function ModernDataTable<TData, TValue>({
 
       {/* Table */}
       {loading ? (
-        <div className="bg-white rounded-lg shadow-sm border">
+        <div className="bg-white rounded-lg border shadow-xs">
           <div className="p-6">
             <div className="animate-pulse space-y-4">
               {[1, 2, 3, 4, 5].map((i) => (
@@ -186,7 +186,7 @@ export function ModernDataTable<TData, TValue>({
           </p>
         </div>
       ) : (
-        <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
+        <div className="bg-white rounded-lg border shadow-xs overflow-hidden">
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
@@ -254,7 +254,7 @@ export function ModernDataTable<TData, TValue>({
 
       {/* Pagination */}
       {filteredData.length > 0 && (
-        <div className="bg-white p-4 rounded-lg shadow-sm border">
+        <div className="bg-white p-4 rounded-lg border shadow-xs">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="text-sm text-gray-600">
               Showing{" "}

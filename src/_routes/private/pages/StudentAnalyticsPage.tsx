@@ -32,7 +32,7 @@ const StudentAnalyticsPage = () => {
   return (
     <div className="space-y-6">
       {/* Page Header */}
-      <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
+      <div className="bg-white rounded-lg border border-gray-200 shadow-xs  p-6">
         <h1 className="text-2xl font-bold text-gray-900 mb-2">My Analytics</h1>
         <p className="text-gray-600">
           Track your exam performance and progress over time
@@ -55,7 +55,7 @@ const StudentAnalyticsPage = () => {
                 }))}
             />
           ) : (
-            <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-12">
+            <div className="bg-white rounded-lg border border-gray-200 shadow-xs  p-12">
               <div className="flex flex-col items-center justify-center text-gray-500">
                 <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
                   <BarChart3 className="h-8 w-8 text-gray-400" />
@@ -71,7 +71,7 @@ const StudentAnalyticsPage = () => {
 
         {/* Exam Results Table */}
         <div className="lg:col-span-1">
-          <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+          <div className="bg-white rounded-lg border border-gray-200 shadow-xs  overflow-hidden">
             <StudentMarksCard examsData={examsData} />
           </div>
         </div>
