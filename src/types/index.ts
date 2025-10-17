@@ -105,6 +105,53 @@ export type ExamDataType = {
   // createdAt: Date;
 };
 
+// MCQ Types
+export type MCQOption = {
+  id: string;
+  text: string;
+  isCorrect: boolean;
+};
+
+export type MCQQuestion = {
+  id: string;
+  question: string;
+  options: MCQOption[];
+  explanation?: string;
+  difficulty: "easy" | "medium" | "hard";
+  subject?: string;
+  topic?: string;
+};
+
+export type MCQTest = {
+  id: string;
+  title: string;
+  description: string;
+  examYear: string;
+  classType: string[];
+  questions: MCQQuestion[];
+  timeLimit: number; // in minutes
+  totalMarks: number;
+  passingMarks: number;
+  status: "draft" | "published" | "archived";
+  createdAt: Date;
+  updatedAt: Date;
+  createdBy: string; // admin UID
+};
+
+export type MCQTestResult = {
+  id: string;
+  testId: string;
+  studentId: string;
+  studentName: string;
+  answers: { questionId: string; selectedOptionId: string }[];
+  score: number;
+  totalMarks: number;
+  percentage: number;
+  timeSpent: number; // in minutes
+  completedAt: Date;
+  isPassed: boolean;
+};
+
 // export type ExamDataType = {
 //   examDate: Date;
 //   examName: string;

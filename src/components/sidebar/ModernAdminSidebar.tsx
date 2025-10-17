@@ -5,6 +5,7 @@ import {
   Calendar,
   ChevronLeft,
   ChevronRight,
+  HelpCircle,
   LayoutDashboard,
   Users,
   X,
@@ -16,6 +17,7 @@ const navigation = [
   { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
   { name: "Students", href: "/admin/students", icon: Users },
   { name: "Exams", href: "/admin/exams", icon: BookOpen },
+  { name: "MCQ Tests", href: "/admin/mcq", icon: HelpCircle },
   { name: "Calendar", href: "/admin/calendar", icon: Calendar },
   { name: "Analytics", href: "/admin/analytics", icon: BarChart3 },
 ];

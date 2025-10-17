@@ -21,6 +21,8 @@ import AddResultsPage from "./_routes/admin/pages/AddResultsPage";
 import AnalyticsPage from "./_routes/admin/pages/AnalyticsPage";
 import CalendarPage from "./_routes/admin/pages/CalendarPage";
 import ExamsPage from "./_routes/admin/pages/ExamsPage";
+import MCQEditPage from "./_routes/admin/pages/MCQEditPage";
+import MCQPage from "./_routes/admin/pages/MCQPage";
 import DashboardPage from "./_routes/private/pages/DashboardPage";
 import RegisterAsNewPage from "./_routes/private/pages/RegisterAsNewPage";
 import StudentAnalyticsPage from "./_routes/private/pages/StudentAnalyticsPage";
@@ -56,6 +58,8 @@ const router = createBrowserRouter(
         <Route path="students" element={<StudentDetailsPage />} />
         <Route path="analytics" element={<AnalyticsPage />} />
         <Route path="exams" element={<ExamsPage />} />
+        <Route path="mcq" element={<MCQPage />} />
+        <Route path="mcq/:testId/edit" element={<MCQEditPage />} />
         <Route path="calendar" element={<CalendarPage />} />
         <Route
           path="exams/add-results/:examIdName"
