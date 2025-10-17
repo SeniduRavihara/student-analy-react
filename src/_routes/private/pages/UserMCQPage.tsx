@@ -18,9 +18,11 @@ import {
 } from "firebase/firestore";
 import { Clock, Play, Users } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const UserMCQPage = () => {
   const { currentUserData } = useData();
+  const navigate = useNavigate();
   const [mcqPacks, setMcqPacks] = useState<MCQPack[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAllPacks, setShowAllPacks] = useState(false);
@@ -106,8 +108,7 @@ const UserMCQPage = () => {
   }, [currentUserData, showAllPacks]);
 
   const handleStartTest = (packId: string) => {
-    // TODO: Navigate to MCQ test taking page
-    console.log("Starting test:", packId);
+    navigate(`/dashboard/mcq/${packId}/test`);
   };
 
   if (loading) {

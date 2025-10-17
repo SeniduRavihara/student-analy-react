@@ -25,6 +25,8 @@ import MCQEditPage from "./_routes/admin/pages/MCQEditPage";
 import MCQPage from "./_routes/admin/pages/MCQPage";
 import MCQViewPage from "./_routes/admin/pages/MCQViewPage";
 import DashboardPage from "./_routes/private/pages/DashboardPage";
+import MCQResultsPage from "./_routes/private/pages/MCQResultsPage";
+import MCQTestPage from "./_routes/private/pages/MCQTestPage";
 import RegisterAsNewPage from "./_routes/private/pages/RegisterAsNewPage";
 import StudentAnalyticsPage from "./_routes/private/pages/StudentAnalyticsPage";
 import StudentCalendarPage from "./_routes/private/pages/StudentCalendarPage";
@@ -49,6 +51,8 @@ const router = createBrowserRouter(
         <Route path="/dashboard" element={<DashboardPage />}>
           <Route index element={<StudentAnalyticsPage />} />
           <Route path="mcq" element={<UserMCQPage />} />
+          <Route path="mcq/:packId/test" element={<MCQTestPage />} />
+          <Route path="mcq/results" element={<MCQResultsPage />} />
           <Route path="calendar" element={<StudentCalendarPage />} />
           <Route path="profile" element={<StudentProfilePage />} />
         </Route>
