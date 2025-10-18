@@ -184,3 +184,293 @@ export const deleteUserData = functions.auth.user().onDelete(async (user) => {
 export const helloWorld = functions.https.onRequest((request, response) => {
   response.send("Hello World!");
 });
+
+// --------------------------------------------------------------
+// MCQ ANALYTICS CLOUD FUNCTIONS
+// --------------------------------------------------------------
+
+// Cloud Function to update MCQ analytics when a user submits a test
+export const onMCQResultSubmit = onDocumentCreated(
+  "users/{userId}/mcqTests/{packId}",
+  async (event) => {
+    const resultData = event.data?.data();
+    const { userId, packId } = event.params;
+
+    if (!resultData) {
+      console.error("No result data found");
+      return;
+    }
+
+    try {
+      console.log(
+        `Updating MCQ analytics for pack ${packId} by user ${userId}`
+      );
+
+      // Update pack-level analytics atomically
+      const packAnalyticsRef = db.doc(`mcqTests/${packId}/analytics/pack`);
+
+      // Get current analytics to calculate new values
+      const currentAnalytics = await packAnalyticsRef.get();
+      const currentData = currentAnalytics.exists
+        ? currentAnalytics.data()
+        : null;
+
+      if (!currentData) {
+        // First submission - create initial analytics
+        const initialAnalytics = {
+          totalAttempts: 1,
+          uniqueUsers: 1,
+          averageScore: resultData.percentage,
+          passRate: resultData.isPassed ? 100 : 0,
+          averageTimeSpent: resultData.timeSpent,
+          highestScore: resultData.percentage,
+          lowestScore: resultData.percentage,
+          scoreDistribution: [
+            { range: "0-20%", count: resultData.percentage <= 20 ? 1 : 0 },
+            {
+              range: "21-40%",
+              count:
+                resultData.percentage > 20 && resultData.percentage <= 40
+                  ? 1
+                  : 0,
+            },
+            {
+              range: "41-60%",
+              count:
+                resultData.percentage > 40 && resultData.percentage <= 60
+                  ? 1
+                  : 0,
+            },
+            {
+              range: "61-80%",
+              count:
+                resultData.percentage > 60 && resultData.percentage <= 80
+                  ? 1
+                  : 0,
+            },
+            { range: "81-100%", count: resultData.percentage > 80 ? 1 : 0 },
+          ],
+          passFailDistribution: {
+            passed: resultData.isPassed ? 1 : 0,
+            failed: resultData.isPassed ? 0 : 1,
+          },
+          questionStats: resultData.answers.map((answer: any) => ({
+            questionId: answer.questionId,
+            accuracy: answer.isCorrect ? 100 : 0,
+            totalAttempts: 1,
+            correctAnswers: answer.isCorrect ? 1 : 0,
+          })),
+          lastUpdated: admin.firestore.FieldValue.serverTimestamp(),
+        };
+
+        await packAnalyticsRef.set(initialAnalytics);
+      } else {
+        // Update existing analytics incrementally
+        const newTotalAttempts = currentData.totalAttempts + 1;
+        const newAverageScore =
+          (currentData.averageScore * currentData.totalAttempts +
+            resultData.percentage) /
+          newTotalAttempts;
+        const newPassRate =
+          (((currentData.passRate / 100) * currentData.totalAttempts +
+            (resultData.isPassed ? 1 : 0)) /
+            newTotalAttempts) *
+          100;
+        const newAverageTimeSpent =
+          (currentData.averageTimeSpent * currentData.totalAttempts +
+            resultData.timeSpent) /
+          newTotalAttempts;
+
+        // Update score distribution
+        const newScoreDistribution = currentData.scoreDistribution.map(
+          (range: any) => {
+            let count = range.count;
+            if (range.range === "0-20%" && resultData.percentage <= 20) count++;
+            else if (
+              range.range === "21-40%" &&
+              resultData.percentage > 20 &&
+              resultData.percentage <= 40
+            )
+              count++;
+            else if (
+              range.range === "41-60%" &&
+              resultData.percentage > 40 &&
+              resultData.percentage <= 60
+            )
+              count++;
+            else if (
+              range.range === "61-80%" &&
+              resultData.percentage > 60 &&
+              resultData.percentage <= 80
+            )
+              count++;
+            else if (range.range === "81-100%" && resultData.percentage > 80)
+              count++;
+            return { ...range, count };
+          }
+        );
+
+        // Update pass/fail distribution
+        const newPassFailDistribution = {
+          passed:
+            currentData.passFailDistribution.passed +
+            (resultData.isPassed ? 1 : 0),
+          failed:
+            currentData.passFailDistribution.failed +
+            (resultData.isPassed ? 0 : 1),
+        };
+
+        // Update question stats
+        const newQuestionStats = currentData.questionStats.map((stat: any) => {
+          const answer = resultData.answers.find(
+            (a: any) => a.questionId === stat.questionId
+          );
+          if (answer) {
+            const newCorrectAnswers =
+              stat.correctAnswers + (answer.isCorrect ? 1 : 0);
+            return {
+              ...stat,
+              totalAttempts: newTotalAttempts,
+              correctAnswers: newCorrectAnswers,
+              accuracy: (newCorrectAnswers / newTotalAttempts) * 100,
+            };
+          }
+          return {
+            ...stat,
+            totalAttempts: newTotalAttempts,
+            accuracy: (stat.correctAnswers / newTotalAttempts) * 100,
+          };
+        });
+
+        await packAnalyticsRef.update({
+          totalAttempts: newTotalAttempts,
+          uniqueUsers: currentData.uniqueUsers + 1, // Assume new user for simplicity
+          averageScore: newAverageScore,
+          passRate: newPassRate,
+          averageTimeSpent: newAverageTimeSpent,
+          highestScore: Math.max(
+            currentData.highestScore,
+            resultData.percentage
+          ),
+          lowestScore: Math.min(currentData.lowestScore, resultData.percentage),
+          scoreDistribution: newScoreDistribution,
+          passFailDistribution: newPassFailDistribution,
+          questionStats: newQuestionStats,
+          lastUpdated: admin.firestore.FieldValue.serverTimestamp(),
+        });
+      }
+
+      // Update question-level analytics for each answer
+      for (const answer of resultData.answers) {
+        const questionAnalyticsRef = db.doc(
+          `mcqTests/${packId}/questions/${answer.questionId}/analytics/question`
+        );
+
+        // Get current question analytics
+        const currentQuestionAnalytics = await questionAnalyticsRef.get();
+        const currentQuestionData = currentQuestionAnalytics.exists
+          ? currentQuestionAnalytics.data()
+          : null;
+
+        const timeSpentPerQuestion =
+          (resultData.timeSpent * 60) / resultData.answers.length; // Convert to seconds per question
+
+        if (!currentQuestionData) {
+          // First submission for this question
+          const initialQuestionAnalytics = {
+            totalAttempts: 1,
+            correctAnswers: answer.isCorrect ? 1 : 0,
+            incorrectAnswers: answer.isCorrect ? 0 : 1,
+            accuracy: answer.isCorrect ? 100 : 0,
+            averageTimeSpent: timeSpentPerQuestion,
+            difficultyBreakdown: {
+              easy: { attempts: 1, correct: answer.isCorrect ? 1 : 0 },
+              medium: { attempts: 0, correct: 0 },
+              hard: { attempts: 0, correct: 0 },
+            },
+            optionStats: [], // Will be populated by getting question data
+            timeStats: {
+              averageTime: timeSpentPerQuestion,
+              fastestTime: timeSpentPerQuestion,
+              slowestTime: timeSpentPerQuestion,
+            },
+            performanceTrend: {
+              recentAccuracy: answer.isCorrect ? 100 : 0,
+              improvementRate: 0,
+            },
+            lastUpdated: admin.firestore.FieldValue.serverTimestamp(),
+          };
+
+          await questionAnalyticsRef.set(initialQuestionAnalytics);
+        } else {
+          // Update existing question analytics
+          const newTotalAttempts = currentQuestionData.totalAttempts + 1;
+          const newCorrectAnswers =
+            currentQuestionData.correctAnswers + (answer.isCorrect ? 1 : 0);
+          const newIncorrectAnswers =
+            currentQuestionData.incorrectAnswers + (answer.isCorrect ? 0 : 1);
+          const newAccuracy = (newCorrectAnswers / newTotalAttempts) * 100;
+          const newAverageTimeSpent =
+            (currentQuestionData.averageTimeSpent *
+              currentQuestionData.totalAttempts +
+              timeSpentPerQuestion) /
+            newTotalAttempts;
+
+          // Update option stats (simplified - just increment selected option)
+          const newOptionStats = currentQuestionData.optionStats.map(
+            (optionStat: any) => {
+              if (optionStat.optionId === answer.selectedOptionId) {
+                return {
+                  ...optionStat,
+                  selectedCount: optionStat.selectedCount + 1,
+                };
+              }
+              return optionStat;
+            }
+          );
+
+          // Update time stats
+          const newTimeStats = {
+            averageTime: newAverageTimeSpent,
+            fastestTime: Math.min(
+              currentQuestionData.timeStats.fastestTime,
+              timeSpentPerQuestion
+            ),
+            slowestTime: Math.max(
+              currentQuestionData.timeStats.slowestTime,
+              timeSpentPerQuestion
+            ),
+          };
+
+          // Calculate performance trend
+          const recentAccuracy = answer.isCorrect ? 100 : 0;
+          const improvementRate =
+            newTotalAttempts > 1
+              ? ((newAccuracy - currentQuestionData.accuracy) /
+                  currentQuestionData.accuracy) *
+                100
+              : 0;
+
+          await questionAnalyticsRef.update({
+            totalAttempts: newTotalAttempts,
+            correctAnswers: newCorrectAnswers,
+            incorrectAnswers: newIncorrectAnswers,
+            accuracy: newAccuracy,
+            averageTimeSpent: newAverageTimeSpent,
+            optionStats: newOptionStats,
+            timeStats: newTimeStats,
+            performanceTrend: {
+              recentAccuracy,
+              improvementRate,
+            },
+            lastUpdated: admin.firestore.FieldValue.serverTimestamp(),
+          });
+        }
+      }
+
+      console.log(`Successfully updated MCQ analytics for pack ${packId}`);
+    } catch (error) {
+      console.error(`Error updating MCQ analytics for pack ${packId}:`, error);
+    }
+  }
+);

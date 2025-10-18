@@ -191,10 +191,13 @@ const MCQTestPage = () => {
       };
 
       // Save result to user's sub-collection
-      await setDoc(doc(db, "users", currentUserData.uid, "mcqs", pack.id), {
+      await setDoc(doc(db, "users", currentUserData.uid, "mcqTests", pack.id), {
         ...result,
         completedAt: serverTimestamp(),
       });
+
+      // Analytics will be updated automatically by Cloud Function
+      // when the result is saved to users/{uid}/mcqTests/{packId}
 
       setTestCompleted(true);
       setTestStarted(false);

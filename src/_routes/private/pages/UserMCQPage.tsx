@@ -7,69 +7,27 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { db } from "@/firebase/config";
-import { useData } from "@/hooks/useData";
 import { MCQPack } from "@/types";
-import {
-  collection,
-  onSnapshot,
-  orderBy,
-  query,
-  where,
-} from "firebase/firestore";
+import { collection, onSnapshot, orderBy, query } from "firebase/firestore";
 import { Clock, Play, Users } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 const UserMCQPage = () => {
-  const { currentUserData } = useData();
   const navigate = useNavigate();
   const [mcqPacks, setMcqPacks] = useState<MCQPack[]>([]);
   const [loading, setLoading] = useState(true);
-  const [showAllPacks, setShowAllPacks] = useState(false);
 
   useEffect(() => {
-    console.log("UserMCQPage: useEffect triggered");
-    console.log("User data:", currentUserData);
-    console.log(
-      "User data keys:",
-      currentUserData ? Object.keys(currentUserData) : "No data"
+    // Load all MCQ documents ordered by creation date
+    const collectionRef = query(
+      collection(db, "mcqTests"),
+      orderBy("createdAt", "desc")
     );
-
-    if (!currentUserData) {
-      console.log("UserMCQPage: No user data available");
-      setLoading(false);
-      return;
-    }
-
-    // Get user's year and class from their data
-    const userYear = currentUserData.examYear;
-    const userClasses = currentUserData.classes || [];
-
-    console.log("UserMCQPage: User year:", userYear);
-    console.log("UserMCQPage: User classes:", userClasses);
-
-    if (!userYear || userClasses.length === 0) {
-      console.log("UserMCQPage: Missing user year or classes");
-      setLoading(false);
-      return;
-    }
-
-    console.log("UserMCQPage: Setting up Firestore query...");
-    const collectionRef = showAllPacks
-      ? query(collection(db, "mcqTests"), orderBy("createdAt", "desc"))
-      : query(
-          collection(db, "mcqTests"),
-          where("examYear", "==", userYear),
-          where("status", "==", "published"),
-          orderBy("createdAt", "desc")
-        );
 
     const unsubscribe = onSnapshot(
       collectionRef,
       (querySnapshot) => {
-        console.log("UserMCQPage: Firestore query result:", querySnapshot);
-        console.log("UserMCQPage: Query snapshot size:", querySnapshot.size);
-
         const packsData = querySnapshot.docs.map((doc) => ({
           id: doc.id,
           ...doc.data(),
@@ -77,35 +35,17 @@ const UserMCQPage = () => {
           updatedAt: doc.data().updatedAt?.toDate() || new Date(),
         })) as MCQPack[];
 
-        console.log("UserMCQPage: All MCQ packs from Firestore:", packsData);
-
-        // Filter by user's class types (only if not showing all packs)
-        const filteredPacks = showAllPacks
-          ? packsData
-          : packsData.filter((pack) =>
-              pack.classType.some((classType) =>
-                userClasses.includes(classType)
-              )
-            );
-
-        console.log("UserMCQPage: Filtered packs for user:", filteredPacks);
-        console.log(
-          "UserMCQPage: Filtering logic - pack.classType:",
-          packsData.map((p) => p.classType)
-        );
-        console.log("UserMCQPage: User classes to match:", userClasses);
-
-        setMcqPacks(filteredPacks);
+        setMcqPacks(packsData);
         setLoading(false);
       },
       (error) => {
-        console.error("UserMCQPage: Firestore query error:", error);
+        console.error("Error fetching MCQ packs:", error);
         setLoading(false);
       }
     );
 
     return unsubscribe;
-  }, [currentUserData, showAllPacks]);
+  }, []);
 
   const handleStartTest = (packId: string) => {
     navigate(`/dashboard/mcq/${packId}/test`);
@@ -129,26 +69,8 @@ const UserMCQPage = () => {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-gray-900 mb-2">MCQ Tests</h1>
-            <p className="text-gray-600">
-              {showAllPacks
-                ? "Showing all MCQ tests (debug mode)"
-                : "Available multiple choice question tests for your class"}
-            </p>
-            {currentUserData && (
-              <div className="mt-2 text-sm text-gray-500">
-                <span className="font-medium">Your Info:</span> Year:{" "}
-                {currentUserData.examYear}, Classes:{" "}
-                {currentUserData.classes?.join(", ") || "None"}
-              </div>
-            )}
+            <p className="text-gray-600">All available MCQ tests</p>
           </div>
-          <Button
-            variant="outline"
-            onClick={() => setShowAllPacks(!showAllPacks)}
-            className={showAllPacks ? "bg-green-100 text-green-800" : ""}
-          >
-            {showAllPacks ? "Show Filtered" : "Show All Tests"}
-          </Button>
         </div>
       </div>
 
@@ -159,9 +81,7 @@ const UserMCQPage = () => {
             <Users className="h-12 w-12 mb-4 text-gray-300" />
             <h3 className="text-lg font-medium mb-2">No MCQ Tests Available</h3>
             <p className="text-center">
-              There are currently no published MCQ tests for your class.
-              <br />
-              Check back later or contact your teacher.
+              There are currently no MCQ tests in the database.
             </p>
           </div>
         </div>
@@ -177,8 +97,14 @@ const UserMCQPage = () => {
                       {pack.description}
                     </CardDescription>
                   </div>
-                  <span className="bg-green-100 text-green-800 text-xs font-medium px-2 py-1 rounded-full">
-                    Published
+                  <span
+                    className={`px-2 py-1 text-xs font-medium rounded-full ${
+                      pack.status === "published"
+                        ? "bg-green-100 text-green-800"
+                        : "bg-gray-100 text-gray-800"
+                    }`}
+                  >
+                    {pack.status}
                   </span>
                 </div>
               </CardHeader>
@@ -198,7 +124,7 @@ const UserMCQPage = () => {
 
                   {/* Class Types */}
                   <div className="flex flex-wrap gap-1">
-                    {pack.classType.map((type, index) => (
+                    {pack.classType?.map((type, index) => (
                       <span
                         key={index}
                         className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full"

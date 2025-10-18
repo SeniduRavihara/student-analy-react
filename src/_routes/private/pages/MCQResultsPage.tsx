@@ -31,7 +31,7 @@ const MCQResultsPage = () => {
 
     try {
       const resultsQuery = query(
-        collection(db, "users", currentUserData.uid, "mcqs"),
+        collection(db, "users", currentUserData.uid, "mcqTests"),
         orderBy("completedAt", "desc")
       );
 

@@ -29,6 +29,7 @@ import {
   onSnapshot,
   orderBy,
   query,
+  serverTimestamp,
   updateDoc,
 } from "firebase/firestore";
 import {
@@ -63,38 +64,43 @@ const MCQPage = () => {
   const [passingMarks, setPassingMarks] = useState(50);
   const [packYear, setPackYear] = useState(EXAM_YEARS[0].year);
   const [classTypes, setClassTypes] = useState<ClassesType[]>([]);
-  const [showAllPacks, setShowAllPacks] = useState(false);
+  const [showAllPacks, setShowAllPacks] = useState(true); // Show all by default
 
   useEffect(() => {
+    // Load MCQ packs with ordering
+
     const collectionRef = query(
       collection(db, "mcqTests"),
       orderBy("createdAt", "desc")
     );
 
-    const unsubscribe = onSnapshot(collectionRef, (querySnapshot) => {
-      const packsData = querySnapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-        createdAt: doc.data().createdAt?.toDate() || new Date(),
-        updatedAt: doc.data().updatedAt?.toDate() || new Date(),
-      })) as MCQPack[];
+    const unsubscribe = onSnapshot(
+      collectionRef,
+      (querySnapshot) => {
+        const packsData = querySnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+          createdAt: doc.data().createdAt?.toDate() || new Date(),
+          updatedAt: doc.data().updatedAt?.toDate() || new Date(),
+        })) as MCQPack[];
 
-      // Filter by selected year and class (or show all for debugging)
-      const filteredPacks = showAllPacks
-        ? packsData
-        : packsData.filter(
-            (pack) =>
-              pack.examYear === selectedYear &&
-              pack.classType.includes(selectedClass)
-          );
+        // Filter by selected year and class (or show all for debugging)
+        const filteredPacks = showAllPacks
+          ? packsData
+          : packsData.filter(
+              (pack) =>
+                pack.examYear === selectedYear &&
+                pack.classType.includes(selectedClass)
+            );
 
-      console.log("Admin MCQPage: All packs from Firestore:", packsData);
-      console.log("Admin MCQPage: Selected year:", selectedYear);
-      console.log("Admin MCQPage: Selected class:", selectedClass);
-      console.log("Admin MCQPage: Filtered packs:", filteredPacks);
-
-      setMcqPacks(filteredPacks);
-    });
+        setMcqPacks(filteredPacks);
+      },
+      (error) => {
+        console.error("🔍 Admin: Firestore error:", error);
+        console.error("🔍 Admin: Error code:", error.code);
+        console.error("🔍 Admin: Error message:", error.message);
+      }
+    );
 
     return unsubscribe;
   }, [selectedYear, selectedClass, showAllPacks]);
@@ -152,7 +158,7 @@ const MCQPage = () => {
 
     setLoading(true);
     try {
-      const newPack: Omit<MCQPack, "id" | "createdAt" | "updatedAt"> = {
+      const newPack = {
         title: packTitle,
         description: packDescription,
         examYear: packYear,
@@ -163,6 +169,8 @@ const MCQPage = () => {
         createdBy: "admin", // You can get this from auth context
         totalQuestions: 0,
         totalMarks: 0,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
       };
 
       const docRef = await addDoc(collection(db, "mcqTests"), newPack);

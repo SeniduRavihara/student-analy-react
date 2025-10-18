@@ -81,6 +81,7 @@ const MCQEditPage = () => {
           orderBy("order", "asc")
         );
         const questionsSnapshot = await getDocs(questionsQuery);
+
         const questionsData = questionsSnapshot.docs.map((doc) => ({
           id: doc.id,
           ...doc.data(),
@@ -232,7 +233,6 @@ const MCQEditPage = () => {
         totalQuestions: (pack?.totalQuestions || 0) + 1,
         totalMarks: (pack?.totalMarks || 0) + newQuestion.marks,
       };
-
       setPack(updatedPack);
       resetQuestionForm();
       setIsQuestionDialogOpen(false);
@@ -243,6 +243,7 @@ const MCQEditPage = () => {
       });
     } catch (error) {
       console.error("Error adding question:", error);
+      console.error("Error details:", error);
       toast({
         title: "Error",
         description: "Failed to add question. Please try again.",

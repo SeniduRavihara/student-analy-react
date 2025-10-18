@@ -7,7 +7,8 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { db } from "@/firebase/config";
-import { MCQPack, MCQQuestion, MCQResult } from "@/types";
+import { McqService } from "@/firebase/services/McqService";
+import { MCQPack, MCQPackAnalytics, MCQQuestion, MCQResult } from "@/types";
 import {
   collection,
   doc,
@@ -46,6 +47,8 @@ const MCQViewPage = () => {
   const [pack, setPack] = useState<MCQPack | null>(null);
   const [questions, setQuestions] = useState<MCQQuestion[]>([]);
   const [results, setResults] = useState<MCQResult[]>([]);
+  const [analytics, setAnalytics] = useState<MCQPackAnalytics | null>(null);
+  const [questionAnalytics, setQuestionAnalytics] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -55,10 +58,13 @@ const MCQViewPage = () => {
   }, [packId]);
 
   const fetchMCQData = async () => {
+    console.log("MCQ View Page: Starting fetchMCQData for packId:", packId);
     try {
       // Fetch MCQ pack details
+      console.log("MCQ View Page: Fetching pack details...");
       const packDoc = await getDoc(doc(db, "mcqTests", packId!));
       if (packDoc.exists()) {
+        console.log("MCQ View Page: Pack found, processing...");
         const packData = {
           id: packDoc.id,
           ...packDoc.data(),
@@ -68,6 +74,7 @@ const MCQViewPage = () => {
         setPack(packData);
 
         // Fetch questions
+        console.log("MCQ View Page: Fetching questions...");
         const questionsQuery = query(
           collection(db, "mcqTests", packId!, "questions"),
           orderBy("order", "asc")
@@ -79,13 +86,34 @@ const MCQViewPage = () => {
           createdAt: doc.data().createdAt?.toDate() || new Date(),
         })) as MCQQuestion[];
         setQuestions(questionsData);
+        console.log("MCQ View Page: Questions loaded:", questionsData.length);
 
-        // Fetch all student results for this MCQ pack
+        // Fetch analytics from the new structure
+        console.log("Fetching pack analytics for packId:", packId);
+        const analyticsResult = await McqService.getMCQPackAnalytics(packId!);
+        console.log("Pack analytics result:", analyticsResult);
+        if (analyticsResult.data) {
+          setAnalytics(analyticsResult.data);
+        } else {
+          console.log("No analytics data found, will show empty state");
+        }
+
+        // Fetch detailed question analytics
+        console.log("Fetching question analytics for packId:", packId);
+        const questionAnalyticsResult =
+          await McqService.getAllQuestionAnalytics(packId!);
+        console.log("Question analytics result:", questionAnalyticsResult);
+        if (questionAnalyticsResult.data) {
+          setQuestionAnalytics(questionAnalyticsResult.data);
+        }
+
+        // Still fetch individual results for detailed view (optional)
         await fetchStudentResults(packId!);
       }
     } catch (error) {
       console.error("Error fetching MCQ data:", error);
     } finally {
+      console.log("MCQ View Page: Setting loading to false");
       setLoading(false);
     }
   };
@@ -96,7 +124,7 @@ const MCQViewPage = () => {
       const allResults: MCQResult[] = [];
 
       for (const userDoc of usersSnapshot.docs) {
-        const mcqRef = doc(db, "users", userDoc.id, "mcqs", packId);
+        const mcqRef = doc(db, "users", userDoc.id, "mcqTests", packId);
         const mcqDoc = await getDoc(mcqRef);
 
         if (mcqDoc.exists()) {
@@ -115,8 +143,8 @@ const MCQViewPage = () => {
     }
   };
 
-  // Calculate analytics data
-  const analytics = {
+  // Use analytics data from the new structure, fallback to calculated data
+  const analyticsData = analytics || {
     totalAttempts: results.length,
     averageScore:
       results.length > 0
@@ -136,26 +164,53 @@ const MCQViewPage = () => {
       results.length > 0 ? Math.min(...results.map((r) => r.percentage)) : 0,
   };
 
-  // Question analysis
-  const questionAnalysis = questions.map((question) => {
-    const correctAnswers = results.reduce((count, result) => {
-      const answer = result.answers.find((a) => a.questionId === question.id);
-      return count + (answer?.isCorrect ? 1 : 0);
-    }, 0);
+  console.log("Debug - MCQ View Page Data:");
+  console.log("- Pack:", pack);
+  console.log("- Questions:", questions);
+  console.log("- Results:", results);
+  console.log("- Analytics:", analytics);
+  console.log("- Question Analytics:", questionAnalytics);
+  console.log("- Analytics Data:", analyticsData);
 
-    return {
-      questionId: question.id,
-      question: question.question,
-      difficulty: question.difficulty,
-      correctAnswers,
-      totalAttempts: results.length,
-      accuracy:
-        results.length > 0 ? (correctAnswers / results.length) * 100 : 0,
-    };
-  });
+  // Debug question analytics structure
+  if (questionAnalytics.length > 0) {
+    console.log("First question analytics structure:", questionAnalytics[0]);
+    console.log(
+      "First question analytics.analytics:",
+      questionAnalytics[0]?.analytics
+    );
+    console.log(
+      "First question optionStats:",
+      questionAnalytics[0]?.analytics?.optionStats
+    );
+    console.log(
+      "First question timeStats:",
+      questionAnalytics[0]?.analytics?.timeStats
+    );
+  }
 
-  // Score distribution data
-  const scoreDistribution = [
+  // Question analysis (use analytics data if available) - Not used in current UI
+  // const questionAnalysis =
+  //   analytics?.questionStats ||
+  //   questions.map((question) => {
+  //     const correctAnswers = results.reduce((count, result) => {
+  //       const answer = result.answers.find((a) => a.questionId === question.id);
+  //       return count + (answer?.isCorrect ? 1 : 0);
+  //     }, 0);
+
+  //     return {
+  //       questionId: question.id,
+  //       question: question.question,
+  //       difficulty: question.difficulty,
+  //       correctAnswers,
+  //       totalAttempts: results.length,
+  //       accuracy:
+  //         results.length > 0 ? (correctAnswers / results.length) * 100 : 0,
+  //     };
+  //   });
+
+  // Score distribution data (use analytics data if available)
+  const scoreDistribution = analytics?.scoreDistribution || [
     {
       range: "0-20%",
       count: results.filter((r) => r.percentage >= 0 && r.percentage <= 20)
@@ -183,21 +238,26 @@ const MCQViewPage = () => {
     },
   ];
 
-  // Pass/Fail distribution
+  // Pass/Fail distribution (use analytics data if available)
   const passFailData = [
     {
       name: "Passed",
-      value: results.filter((r) => r.isPassed).length,
+      value:
+        analytics?.passFailDistribution?.passed ||
+        results.filter((r) => r.isPassed).length,
       color: "#10b981",
     },
     {
       name: "Failed",
-      value: results.filter((r) => !r.isPassed).length,
+      value:
+        analytics?.passFailDistribution?.failed ||
+        results.filter((r) => !r.isPassed).length,
       color: "#ef4444",
     },
   ];
 
   if (loading) {
+    console.log("MCQ View Page: Still loading...");
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
@@ -261,7 +321,9 @@ const MCQViewPage = () => {
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{analytics.totalAttempts}</div>
+            <div className="text-2xl font-bold">
+              {analyticsData.totalAttempts}
+            </div>
             <p className="text-xs text-muted-foreground">Students attempted</p>
           </CardContent>
         </Card>
@@ -273,7 +335,7 @@ const MCQViewPage = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {analytics.averageScore.toFixed(1)}%
+              {analyticsData.averageScore.toFixed(1)}%
             </div>
             <p className="text-xs text-muted-foreground">Across all attempts</p>
           </CardContent>
@@ -286,7 +348,7 @@ const MCQViewPage = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {analytics.passRate.toFixed(1)}%
+              {analyticsData.passRate.toFixed(1)}%
             </div>
             <p className="text-xs text-muted-foreground">Students passed</p>
           </CardContent>
@@ -299,7 +361,7 @@ const MCQViewPage = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {analytics.averageTimeSpent.toFixed(1)}m
+              {analyticsData.averageTimeSpent.toFixed(1)}m
             </div>
             <p className="text-xs text-muted-foreground">Time per attempt</p>
           </CardContent>
@@ -359,59 +421,218 @@ const MCQViewPage = () => {
         </Card>
       </div>
 
-      {/* Question Analysis */}
+      {/* Individual Question Summary */}
+      {questionAnalytics.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Individual Question Summary</CardTitle>
+            <CardDescription>
+              Quick overview of each question's performance
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {questionAnalytics.map((qa, index) => (
+                <div key={qa.questionId} className="border rounded-lg p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="font-semibold">Q{index + 1}</span>
+                    <span
+                      className={`text-xs px-2 py-1 rounded ${
+                        qa.analytics.accuracy >= 80
+                          ? "bg-green-100 text-green-800"
+                          : qa.analytics.accuracy >= 60
+                          ? "bg-yellow-100 text-yellow-800"
+                          : "bg-red-100 text-red-800"
+                      }`}
+                    >
+                      {qa.analytics.accuracy.toFixed(1)}%
+                    </span>
+                  </div>
+                  <div className="text-sm text-gray-600 mb-2">
+                    {qa.analytics.correctAnswers}/{qa.analytics.totalAttempts}{" "}
+                    correct
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div
+                      className={`h-2 rounded-full ${
+                        qa.analytics.accuracy >= 80
+                          ? "bg-green-500"
+                          : qa.analytics.accuracy >= 60
+                          ? "bg-yellow-500"
+                          : "bg-red-500"
+                      }`}
+                      style={{ width: `${qa.analytics.accuracy}%` }}
+                    ></div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Detailed Question Analysis */}
       <Card>
         <CardHeader>
-          <CardTitle>Question Analysis</CardTitle>
-          <CardDescription>Performance breakdown by question</CardDescription>
+          <CardTitle>Detailed Question Analysis</CardTitle>
+          <CardDescription>
+            Individual question performance with option selection stats
+          </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
-            {questionAnalysis.map((q, index) => (
-              <div key={q.questionId} className="border rounded-lg p-4">
-                <div className="flex items-start justify-between mb-2">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2 py-1 rounded">
-                        Q{index + 1}
-                      </span>
-                      <span
-                        className={`text-xs font-medium px-2 py-1 rounded ${
-                          q.difficulty === "easy"
-                            ? "bg-green-100 text-green-800"
-                            : q.difficulty === "medium"
-                            ? "bg-yellow-100 text-yellow-800"
-                            : "bg-red-100 text-red-800"
-                        }`}
-                      >
-                        {q.difficulty}
-                      </span>
+          <div className="space-y-6">
+            {questionAnalytics.length > 0 ? (
+              questionAnalytics.map((qa, index) => (
+                <div key={qa.questionId} className="border rounded-lg p-6">
+                  {/* Question Header */}
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="bg-blue-100 text-blue-800 text-sm font-medium px-3 py-1 rounded">
+                          Q{index + 1}
+                        </span>
+                        <span
+                          className={`text-sm font-medium px-3 py-1 rounded ${
+                            qa.difficulty === "easy"
+                              ? "bg-green-100 text-green-800"
+                              : qa.difficulty === "medium"
+                              ? "bg-yellow-100 text-yellow-800"
+                              : "bg-red-100 text-red-800"
+                          }`}
+                        >
+                          {qa.difficulty}
+                        </span>
+                      </div>
+                      <p className="font-medium text-lg mb-3">
+                        {qa.questionText}
+                      </p>
                     </div>
-                    <p className="font-medium text-sm mb-2">{q.question}</p>
+                    <div className="text-right">
+                      <div className="text-2xl font-bold text-blue-600">
+                        {qa.analytics.accuracy.toFixed(1)}%
+                      </div>
+                      <div className="text-sm text-gray-500">
+                        {qa.analytics.correctAnswers}/
+                        {qa.analytics.totalAttempts} correct
+                      </div>
+                      <div className="text-xs text-gray-400 mt-1">
+                        {qa.analytics.incorrectAnswers} incorrect
+                      </div>
+                    </div>
                   </div>
-                  <div className="text-right">
-                    <div className="text-lg font-bold">
-                      {q.accuracy.toFixed(1)}%
+
+                  {/* Performance Bar */}
+                  <div className="w-full bg-gray-200 rounded-full h-3 mb-4">
+                    <div
+                      className={`h-3 rounded-full transition-all ${
+                        qa.analytics.accuracy >= 80
+                          ? "bg-green-500"
+                          : qa.analytics.accuracy >= 60
+                          ? "bg-yellow-500"
+                          : "bg-red-500"
+                      }`}
+                      style={{ width: `${qa.analytics.accuracy}%` }}
+                    ></div>
+                  </div>
+
+                  {/* Option Selection Stats */}
+                  <div className="mb-4">
+                    <h4 className="font-semibold text-sm text-gray-700 mb-3">
+                      Option Selection Statistics:
+                    </h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      {qa.analytics.optionStats?.length > 0 ? (
+                        qa.analytics.optionStats.map(
+                          (option: any, optIndex: number) => (
+                            <div
+                              key={option.optionId}
+                              className={`p-3 rounded-lg border-2 ${
+                                option.isCorrect
+                                  ? "border-green-200 bg-green-50"
+                                  : "border-gray-200 bg-gray-50"
+                              }`}
+                            >
+                              <div className="flex items-center justify-between mb-2">
+                                <span className="font-medium text-sm">
+                                  {String.fromCharCode(65 + optIndex)}.{" "}
+                                  {option.optionText}
+                                </span>
+                                <span
+                                  className={`text-xs px-2 py-1 rounded ${
+                                    option.isCorrect
+                                      ? "bg-green-100 text-green-800"
+                                      : "bg-gray-100 text-gray-600"
+                                  }`}
+                                >
+                                  {option.isCorrect ? "Correct" : "Incorrect"}
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <div className="flex-1 bg-gray-200 rounded-full h-2">
+                                  <div
+                                    className="bg-blue-500 h-2 rounded-full"
+                                    style={{
+                                      width: `${
+                                        qa.analytics.totalAttempts > 0
+                                          ? (option.selectedCount /
+                                              qa.analytics.totalAttempts) *
+                                            100
+                                          : 0
+                                      }%`,
+                                    }}
+                                  ></div>
+                                </div>
+                                <span className="text-sm font-medium text-gray-600">
+                                  {option.selectedCount} (
+                                  {qa.analytics.totalAttempts > 0
+                                    ? (
+                                        (option.selectedCount /
+                                          qa.analytics.totalAttempts) *
+                                        100
+                                      ).toFixed(1)
+                                    : 0}
+                                  %)
+                                </span>
+                              </div>
+                            </div>
+                          )
+                        )
+                      ) : (
+                        <div className="col-span-2 text-center text-gray-500 py-4">
+                          No option statistics available yet
+                        </div>
+                      )}
                     </div>
-                    <div className="text-xs text-gray-500">
-                      {q.correctAnswers}/{q.totalAttempts} correct
+                  </div>
+
+                  {/* Time Statistics */}
+                  <div className="grid grid-cols-3 gap-4 text-center">
+                    <div className="bg-gray-50 p-3 rounded-lg">
+                      <div className="text-sm text-gray-600">Average Time</div>
+                      <div className="font-semibold">
+                        {qa.analytics.timeStats?.averageTime?.toFixed(1) || 0}s
+                      </div>
+                    </div>
+                    <div className="bg-gray-50 p-3 rounded-lg">
+                      <div className="text-sm text-gray-600">Fastest</div>
+                      <div className="font-semibold text-green-600">
+                        {qa.analytics.timeStats?.fastestTime?.toFixed(1) || 0}s
+                      </div>
+                    </div>
+                    <div className="bg-gray-50 p-3 rounded-lg">
+                      <div className="text-sm text-gray-600">Slowest</div>
+                      <div className="font-semibold text-red-600">
+                        {qa.analytics.timeStats?.slowestTime?.toFixed(1) || 0}s
+                      </div>
                     </div>
                   </div>
                 </div>
-                <div className="w-full bg-gray-200 rounded-full h-2">
-                  <div
-                    className={`h-2 rounded-full ${
-                      q.accuracy >= 80
-                        ? "bg-green-500"
-                        : q.accuracy >= 60
-                        ? "bg-yellow-500"
-                        : "bg-red-500"
-                    }`}
-                    style={{ width: `${q.accuracy}%` }}
-                  ></div>
-                </div>
+              ))
+            ) : (
+              <div className="text-center text-gray-500 py-8">
+                No detailed question analytics available yet.
               </div>
-            ))}
+            )}
           </div>
         </CardContent>
       </Card>
