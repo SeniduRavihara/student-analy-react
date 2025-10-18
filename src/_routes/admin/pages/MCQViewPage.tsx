@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/card";
 import { db } from "@/firebase/config";
 import { McqService } from "@/firebase/services/McqService";
-import { MCQPack, MCQPackAnalytics, MCQQuestion, MCQResult } from "@/types";
+import { MCQPack, MCQPackAnalytics, MCQQuestion } from "@/types";
 import {
   collection,
   doc,
@@ -17,15 +17,7 @@ import {
   orderBy,
   query,
 } from "firebase/firestore";
-import {
-  ArrowLeft,
-  BarChart3,
-  CheckCircle,
-  Clock,
-  Target,
-  Users,
-  XCircle,
-} from "lucide-react";
+import { ArrowLeft, BarChart3, Clock, Target, Users } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
@@ -46,7 +38,6 @@ const MCQViewPage = () => {
   const navigate = useNavigate();
   const [pack, setPack] = useState<MCQPack | null>(null);
   const [questions, setQuestions] = useState<MCQQuestion[]>([]);
-  const [results, setResults] = useState<MCQResult[]>([]);
   const [analytics, setAnalytics] = useState<MCQPackAnalytics | null>(null);
   const [questionAnalytics, setQuestionAnalytics] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -60,9 +51,31 @@ const MCQViewPage = () => {
   const fetchMCQData = async () => {
     console.log("MCQ View Page: Starting fetchMCQData for packId:", packId);
     try {
-      // Fetch MCQ pack details
-      console.log("MCQ View Page: Fetching pack details...");
-      const packDoc = await getDoc(doc(db, "mcqTests", packId!));
+      // Fetch all data in parallel for better performance
+      const [
+        packDoc,
+        questionsSnapshot,
+        analyticsResult,
+        questionAnalyticsResult,
+      ] = await Promise.all([
+        // Fetch MCQ pack details
+        getDoc(doc(db, "mcqTests", packId!)),
+
+        // Fetch questions
+        getDocs(
+          query(
+            collection(db, "mcqTests", packId!, "questions"),
+            orderBy("order", "asc")
+          )
+        ),
+
+        // Fetch analytics from the new structure
+        McqService.getMCQPackAnalytics(packId!),
+
+        // Fetch detailed question analytics
+        McqService.getAllQuestionAnalytics(packId!),
+      ]);
+
       if (packDoc.exists()) {
         console.log("MCQ View Page: Pack found, processing...");
         const packData = {
@@ -73,13 +86,7 @@ const MCQViewPage = () => {
         } as MCQPack;
         setPack(packData);
 
-        // Fetch questions
-        console.log("MCQ View Page: Fetching questions...");
-        const questionsQuery = query(
-          collection(db, "mcqTests", packId!, "questions"),
-          orderBy("order", "asc")
-        );
-        const questionsSnapshot = await getDocs(questionsQuery);
+        // Process questions
         const questionsData = questionsSnapshot.docs.map((doc) => ({
           id: doc.id,
           ...doc.data(),
@@ -88,9 +95,7 @@ const MCQViewPage = () => {
         setQuestions(questionsData);
         console.log("MCQ View Page: Questions loaded:", questionsData.length);
 
-        // Fetch analytics from the new structure
-        console.log("Fetching pack analytics for packId:", packId);
-        const analyticsResult = await McqService.getMCQPackAnalytics(packId!);
+        // Process analytics
         console.log("Pack analytics result:", analyticsResult);
         if (analyticsResult.data) {
           setAnalytics(analyticsResult.data);
@@ -98,17 +103,14 @@ const MCQViewPage = () => {
           console.log("No analytics data found, will show empty state");
         }
 
-        // Fetch detailed question analytics
-        console.log("Fetching question analytics for packId:", packId);
-        const questionAnalyticsResult =
-          await McqService.getAllQuestionAnalytics(packId!);
+        // Process question analytics
         console.log("Question analytics result:", questionAnalyticsResult);
         if (questionAnalyticsResult.data) {
           setQuestionAnalytics(questionAnalyticsResult.data);
         }
 
-        // Still fetch individual results for detailed view (optional)
-        await fetchStudentResults(packId!);
+        // Note: Removed fetchStudentResults as it's very slow and not essential for analytics view
+        // Individual results can be fetched on-demand if needed
       }
     } catch (error) {
       console.error("Error fetching MCQ data:", error);
@@ -118,59 +120,27 @@ const MCQViewPage = () => {
     }
   };
 
-  const fetchStudentResults = async (packId: string) => {
-    try {
-      const usersSnapshot = await getDocs(collection(db, "users"));
-      const allResults: MCQResult[] = [];
-
-      for (const userDoc of usersSnapshot.docs) {
-        const mcqRef = doc(db, "users", userDoc.id, "mcqTests", packId);
-        const mcqDoc = await getDoc(mcqRef);
-
-        if (mcqDoc.exists()) {
-          const resultData = {
-            id: mcqDoc.id,
-            ...mcqDoc.data(),
-            completedAt: mcqDoc.data().completedAt?.toDate() || new Date(),
-          } as MCQResult;
-          allResults.push(resultData);
-        }
-      }
-
-      setResults(allResults);
-    } catch (error) {
-      console.error("Error fetching student results:", error);
-    }
-  };
-
-  // Use analytics data from the new structure, fallback to calculated data
+  // Use analytics data from the new structure
   const analyticsData = analytics || {
-    totalAttempts: results.length,
-    averageScore:
-      results.length > 0
-        ? results.reduce((sum, r) => sum + r.percentage, 0) / results.length
-        : 0,
-    passRate:
-      results.length > 0
-        ? (results.filter((r) => r.isPassed).length / results.length) * 100
-        : 0,
-    averageTimeSpent:
-      results.length > 0
-        ? results.reduce((sum, r) => sum + r.timeSpent, 0) / results.length
-        : 0,
-    highestScore:
-      results.length > 0 ? Math.max(...results.map((r) => r.percentage)) : 0,
-    lowestScore:
-      results.length > 0 ? Math.min(...results.map((r) => r.percentage)) : 0,
+    totalAttempts: 0,
+    averageScore: 0,
+    passRate: 0,
+    averageTimeSpent: 0,
+    highestScore: 0,
+    lowestScore: 0,
+    scoreDistribution: {
+      "0-20": 0,
+      "21-40": 0,
+      "41-60": 0,
+      "61-80": 0,
+      "81-100": 0,
+    },
+    passFailDistribution: {
+      pass: 0,
+      fail: 0,
+    },
+    questionStats: [],
   };
-
-  console.log("Debug - MCQ View Page Data:");
-  console.log("- Pack:", pack);
-  console.log("- Questions:", questions);
-  console.log("- Results:", results);
-  console.log("- Analytics:", analytics);
-  console.log("- Question Analytics:", questionAnalytics);
-  console.log("- Analytics Data:", analyticsData);
 
   // Debug question analytics structure
   if (questionAnalytics.length > 0) {
@@ -210,51 +180,38 @@ const MCQViewPage = () => {
   //   });
 
   // Score distribution data (use analytics data if available)
-  const scoreDistribution = analytics?.scoreDistribution || [
-    {
-      range: "0-20%",
-      count: results.filter((r) => r.percentage >= 0 && r.percentage <= 20)
-        .length,
-    },
-    {
-      range: "21-40%",
-      count: results.filter((r) => r.percentage >= 21 && r.percentage <= 40)
-        .length,
-    },
-    {
-      range: "41-60%",
-      count: results.filter((r) => r.percentage >= 41 && r.percentage <= 60)
-        .length,
-    },
-    {
-      range: "61-80%",
-      count: results.filter((r) => r.percentage >= 61 && r.percentage <= 80)
-        .length,
-    },
-    {
-      range: "81-100%",
-      count: results.filter((r) => r.percentage >= 81 && r.percentage <= 100)
-        .length,
-    },
-  ];
+  const scoreDistribution = analytics?.scoreDistribution
+    ? analytics.scoreDistribution // Cloud Function already saves it in the correct format
+    : [
+        { range: "0-20%", count: 0 },
+        { range: "21-40%", count: 0 },
+        { range: "41-60%", count: 0 },
+        { range: "61-80%", count: 0 },
+        { range: "81-100%", count: 0 },
+      ];
 
   // Pass/Fail distribution (use analytics data if available)
   const passFailData = [
     {
       name: "Passed",
-      value:
-        analytics?.passFailDistribution?.passed ||
-        results.filter((r) => r.isPassed).length,
+      value: analytics?.passFailDistribution?.passed || 0,
       color: "#10b981",
     },
     {
       name: "Failed",
-      value:
-        analytics?.passFailDistribution?.failed ||
-        results.filter((r) => !r.isPassed).length,
+      value: analytics?.passFailDistribution?.failed || 0,
       color: "#ef4444",
     },
   ];
+
+  console.log("Debug - MCQ View Page Data:");
+  console.log("- Pack:", pack);
+  console.log("- Questions:", questions);
+  console.log("- Analytics:", analytics);
+  console.log("- Question Analytics:", questionAnalytics);
+  console.log("- Analytics Data:", analyticsData);
+  console.log("- Score Distribution:", scoreDistribution);
+  console.log("- Pass/Fail Data:", passFailData);
 
   if (loading) {
     console.log("MCQ View Page: Still loading...");
@@ -637,67 +594,22 @@ const MCQViewPage = () => {
         </CardContent>
       </Card>
 
-      {/* Student Results Table */}
+      {/* Student Results Summary */}
       <Card>
         <CardHeader>
-          <CardTitle>Student Results</CardTitle>
-          <CardDescription>Individual student performance</CardDescription>
+          <CardTitle>Student Results Summary</CardTitle>
+          <CardDescription>Overall performance metrics</CardDescription>
         </CardHeader>
         <CardContent>
-          {results.length === 0 ? (
-            <div className="text-center py-8 text-gray-500">
-              <p>No students have attempted this MCQ pack yet.</p>
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b">
-                    <th className="text-left p-2">Student</th>
-                    <th className="text-left p-2">Score</th>
-                    <th className="text-left p-2">Percentage</th>
-                    <th className="text-left p-2">Time Spent</th>
-                    <th className="text-left p-2">Status</th>
-                    <th className="text-left p-2">Completed</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {results.map((result) => (
-                    <tr key={result.id} className="border-b">
-                      <td className="p-2 font-medium">{result.packTitle}</td>
-                      <td className="p-2">
-                        {result.score}/{result.totalMarks}
-                      </td>
-                      <td className="p-2">{result.percentage.toFixed(1)}%</td>
-                      <td className="p-2">{result.timeSpent.toFixed(1)}m</td>
-                      <td className="p-2">
-                        <span
-                          className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${
-                            result.isPassed
-                              ? "bg-green-100 text-green-800"
-                              : "bg-red-100 text-red-800"
-                          }`}
-                        >
-                          {result.isPassed ? (
-                            <>
-                              <CheckCircle className="h-3 w-3" /> Passed
-                            </>
-                          ) : (
-                            <>
-                              <XCircle className="h-3 w-3" /> Failed
-                            </>
-                          )}
-                        </span>
-                      </td>
-                      <td className="p-2 text-sm text-gray-500">
-                        {result.completedAt.toLocaleDateString()}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
+          <div className="text-center py-8 text-gray-500">
+            <p>
+              Individual student results are not loaded for performance
+              optimization.
+            </p>
+            <p className="text-sm mt-2">
+              Analytics data above shows the overall performance metrics.
+            </p>
+          </div>
         </CardContent>
       </Card>
     </div>

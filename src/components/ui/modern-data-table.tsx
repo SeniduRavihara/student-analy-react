@@ -195,7 +195,7 @@ export function ModernDataTable<TData, TValue>({
                     {headerGroup.headers.map((header) => (
                       <th
                         key={header.id}
-                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                        className="px-6 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                       >
                         {header.isPlaceholder
                           ? null
@@ -208,17 +208,19 @@ export function ModernDataTable<TData, TValue>({
                   </tr>
                 ))}
               </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
+              <tbody className="divide-y divide-gray-200">
                 {table.getRowModel().rows?.length ? (
                   table.getRowModel().rows.map((row, index) => (
                     <tr
                       key={row.id}
-                      className="hover:bg-gray-50 transition-colors"
+                      className={`hover:bg-gray-50 transition-colors ${
+                        index % 2 === 0 ? "bg-white" : "bg-gray-50"
+                      }`}
                     >
                       {row.getVisibleCells().map((cell) => (
                         <td
                           key={cell.id}
-                          className="px-6 py-4 whitespace-nowrap"
+                          className="px-6 py-2 whitespace-nowrap"
                         >
                           {flexRender(
                             cell.column.columnDef.cell,
@@ -271,6 +273,20 @@ export function ModernDataTable<TData, TValue>({
             </div>
 
             <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-2">
+                <span className="text-sm text-gray-600">Rows per page:</span>
+                <select
+                  value={table.getState().pagination.pageSize}
+                  onChange={(e) => table.setPageSize(Number(e.target.value))}
+                  className="px-2 py-1 border border-gray-300 rounded text-sm focus:ring-blue-500 focus:border-blue-500"
+                >
+                  {[5, 8, 10, 20, 50].map((pageSize) => (
+                    <option key={pageSize} value={pageSize}>
+                      {pageSize}
+                    </option>
+                  ))}
+                </select>
+              </div>
               <Button
                 variant="outline"
                 size="sm"

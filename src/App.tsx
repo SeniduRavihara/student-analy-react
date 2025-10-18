@@ -8,8 +8,11 @@ import PrivateLayout from "@/_routes/private/PrivateLayout";
 import HomePage from "@/_routes/public/pages/HomePage";
 import PublicLayout from "@/_routes/public/PublicLayout";
 import RootLayout from "@/_routes/RootLayout";
+import ToastContainer from "@/components/ui/toast-container";
 import AuthContextProvider from "@/context/AuthContext";
 import DataContextProvider from "@/context/DataContext";
+import { ModalProvider } from "@/context/ModalContext";
+import { ToastProvider } from "@/context/ToastContext";
 import {
   createBrowserRouter,
   createRoutesFromElements,
@@ -80,11 +83,16 @@ const router = createBrowserRouter(
 
 const App = () => {
   return (
-    <DataContextProvider>
-      <AuthContextProvider>
-        <RouterProvider router={router} />
-      </AuthContextProvider>
-    </DataContextProvider>
+    <ModalProvider>
+      <ToastProvider>
+        <DataContextProvider>
+          <AuthContextProvider>
+            <RouterProvider router={router} />
+            <ToastContainer />
+          </AuthContextProvider>
+        </DataContextProvider>
+      </ToastProvider>
+    </ModalProvider>
   );
 };
 export default App;

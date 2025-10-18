@@ -839,24 +839,29 @@ export class McqService {
       }
 
       const questions = questionsResult.data || [];
-      const questionAnalytics = [];
 
-      // Get analytics for each question
-      for (const question of questions) {
+      // Get analytics for all questions in parallel
+      const analyticsPromises = questions.map(async (question) => {
         const analyticsResult = await this.getMCQQuestionAnalytics(
           packId,
           question.id
         );
         if (analyticsResult.data) {
-          questionAnalytics.push({
+          return {
             questionId: question.id,
             questionText: question.question,
             difficulty: question.difficulty,
             options: question.options,
             analytics: analyticsResult.data,
-          });
+          };
         }
-      }
+        return null;
+      });
+
+      const analyticsResults = await Promise.all(analyticsPromises);
+      const questionAnalytics = analyticsResults.filter(
+        (result) => result !== null
+      );
 
       return { data: questionAnalytics, error: null };
     } catch (error) {
