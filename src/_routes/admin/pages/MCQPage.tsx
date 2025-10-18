@@ -22,6 +22,7 @@ import { CLASSES_TO_YEARS, ClassesType, EXAM_YEARS } from "@/constants";
 import { useModal } from "@/context/ModalContext";
 import { useToast } from "@/context/ToastContext";
 import { db } from "@/firebase/config";
+import { StorageService } from "@/firebase/services/StorageService";
 import { cn } from "@/lib/utils";
 import { MCQPack } from "@/types";
 import {
@@ -1180,6 +1181,9 @@ const MCQPage = () => {
 
     if (confirmed) {
       try {
+        // Delete all images from Firebase Storage first
+        await StorageService.deleteMCQTestFolder(packId);
+
         // Create a batch to delete both the main document and subcollection
         const batch = writeBatch(db);
 

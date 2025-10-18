@@ -517,13 +517,26 @@ const MCQTestPage = () => {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <p className="text-lg font-medium">{currentQuestion.question}</p>
+          {/* Question Content */}
+          {currentQuestion.questionContentType === "text" ? (
+            <p className="text-lg font-medium">{currentQuestion.question}</p>
+          ) : (
+            <div className="space-y-2">
+              {currentQuestion.questionImageUrl && (
+                <img
+                  src={currentQuestion.questionImageUrl}
+                  alt="Question"
+                  className="max-w-full h-auto max-h-96 border rounded-lg"
+                />
+              )}
+            </div>
+          )}
 
           <div className="space-y-3">
             {currentQuestion.options.map((option, index) => (
               <label
                 key={option.id}
-                className={`flex items-center gap-3 p-3 border rounded-lg cursor-pointer transition-all ${
+                className={`flex items-start gap-3 p-3 border rounded-lg cursor-pointer transition-all ${
                   answers[currentQuestion.id] === option.id
                     ? "border-blue-500 bg-blue-50"
                     : "border-gray-200 hover:border-gray-300"
@@ -537,12 +550,26 @@ const MCQTestPage = () => {
                   onChange={() =>
                     handleAnswerSelect(currentQuestion.id, option.id)
                   }
-                  className="w-4 h-4 text-blue-600"
+                  className="w-4 h-4 text-blue-600 mt-1"
                 />
-                <span className="font-medium">
+                <span className="font-medium mt-1">
                   {String.fromCharCode(65 + index)}.
                 </span>
-                <span className="flex-1">{option.text}</span>
+                <div className="flex-1">
+                  {option.contentType === "text" ? (
+                    <span>{option.text}</span>
+                  ) : (
+                    <div>
+                      {option.imageUrl && (
+                        <img
+                          src={option.imageUrl}
+                          alt={`Option ${String.fromCharCode(65 + index)}`}
+                          className="max-w-full h-auto max-h-32 border rounded"
+                        />
+                      )}
+                    </div>
+                  )}
+                </div>
               </label>
             ))}
           </div>

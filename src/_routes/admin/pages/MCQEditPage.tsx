@@ -17,7 +17,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { db } from "@/firebase/config";
+import { StorageService } from "@/firebase/services/StorageService";
+import { StorageTest } from "@/firebase/services/StorageTest";
 import { toast } from "@/hooks/use-toast";
+import { useData } from "@/hooks/useData";
 import { MCQOption, MCQPack, MCQQuestion } from "@/types";
 import {
   addDoc,
@@ -37,6 +40,7 @@ import { useNavigate, useParams } from "react-router-dom";
 const MCQEditPage = () => {
   const { packId } = useParams<{ packId: string }>();
   const navigate = useNavigate();
+  const { currentUserData } = useData();
   const [pack, setPack] = useState<MCQPack | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -47,16 +51,109 @@ const MCQEditPage = () => {
 
   // Question form state
   const [questionText, setQuestionText] = useState("");
+  const [questionImageUrl, setQuestionImageUrl] = useState("");
+  const [questionContentType, setQuestionContentType] = useState<
+    "text" | "image"
+  >("text");
   const [options, setOptions] = useState<MCQOption[]>([
-    { id: "1", text: "", isCorrect: false },
-    { id: "2", text: "", isCorrect: false },
-    { id: "3", text: "", isCorrect: false },
-    { id: "4", text: "", isCorrect: false },
+    { id: "1", text: "", isCorrect: false, contentType: "text" },
+    { id: "2", text: "", isCorrect: false, contentType: "text" },
+    { id: "3", text: "", isCorrect: false, contentType: "text" },
+    { id: "4", text: "", isCorrect: false, contentType: "text" },
   ]);
   const [explanation, setExplanation] = useState("");
   const [difficulty, setDifficulty] = useState<"easy" | "medium" | "hard">(
     "medium"
   );
+
+  // Image upload functions using Firebase Storage
+  const handleQuestionImageUpload = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = event.target.files?.[0];
+    if (file && pack) {
+      try {
+        // Check if user is authenticated
+        if (!currentUserData?.uid) {
+          toast({
+            title: "Error",
+            description: "You must be logged in to upload images",
+            variant: "destructive",
+          });
+          return;
+        }
+
+        // TEMPORARY: Use base64 for testing
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const imageUrl = e.target?.result as string;
+          setQuestionImageUrl(imageUrl);
+          setQuestionContentType("image");
+          toast({
+            title: "Success",
+            description: "Question image uploaded successfully (base64)",
+          });
+        };
+        reader.readAsDataURL(file);
+        return;
+      } catch (error) {
+        console.error("Upload error:", error);
+        toast({
+          title: "Error",
+          description:
+            "Failed to upload image. Please check your internet connection and try again.",
+          variant: "destructive",
+        });
+      }
+    }
+  };
+
+  const handleOptionImageUpload = async (
+    optionId: string,
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = event.target.files?.[0];
+    if (file && pack) {
+      try {
+        // Check if user is authenticated
+        if (!currentUserData?.uid) {
+          toast({
+            title: "Error",
+            description: "You must be logged in to upload images",
+            variant: "destructive",
+          });
+          return;
+        }
+
+        // TEMPORARY: Use base64 for testing
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const imageUrl = e.target?.result as string;
+          setOptions((prev) =>
+            prev.map((option) =>
+              option.id === optionId
+                ? { ...option, imageUrl, contentType: "image" as const }
+                : option
+            )
+          );
+          toast({
+            title: "Success",
+            description: "Option image uploaded successfully (base64)",
+          });
+        };
+        reader.readAsDataURL(file);
+        return;
+      } catch (error) {
+        console.error("Upload error:", error);
+        toast({
+          title: "Error",
+          description:
+            "Failed to upload image. Please check your internet connection and try again.",
+          variant: "destructive",
+        });
+      }
+    }
+  };
 
   useEffect(() => {
     if (packId) {
@@ -176,10 +273,19 @@ const MCQEditPage = () => {
   };
 
   const handleAddQuestion = async () => {
-    if (!questionText.trim()) {
+    if (questionContentType === "text" && !questionText.trim()) {
       toast({
         title: "Error",
-        description: "Please enter a question",
+        description: "Please enter a question text",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (questionContentType === "image" && !questionImageUrl) {
+      toast({
+        title: "Error",
+        description: "Please upload a question image",
         variant: "destructive",
       });
       return;
@@ -205,15 +311,41 @@ const MCQEditPage = () => {
     }
 
     try {
-      const newQuestionData = {
-        question: questionText,
-        options: options.filter((opt) => opt.text.trim()),
+      // Clean options to remove undefined values
+      const cleanOptions = options.map((option) => {
+        const cleanOption: any = {
+          id: option.id,
+          isCorrect: option.isCorrect,
+          contentType: option.contentType,
+        };
+
+        // Only add text or imageUrl if they have values
+        if (option.contentType === "text" && option.text) {
+          cleanOption.text = option.text;
+        } else if (option.contentType === "image" && option.imageUrl) {
+          cleanOption.imageUrl = option.imageUrl;
+        }
+
+        return cleanOption;
+      });
+
+      // Build question data object without undefined fields
+      const newQuestionData: any = {
+        questionContentType,
+        options: cleanOptions,
         explanation,
         difficulty,
         marks: 1,
         order: (pack?.questions?.length || 0) + 1,
         createdAt: new Date(),
       };
+
+      // Only add text or image fields based on content type
+      if (questionContentType === "text") {
+        newQuestionData.question = questionText;
+      } else if (questionContentType === "image") {
+        newQuestionData.questionImageUrl = questionImageUrl;
+      }
 
       // Save question to sub-collection
       const docRef = await addDoc(
@@ -253,9 +385,22 @@ const MCQEditPage = () => {
   };
 
   const handleEditQuestion = (question: MCQQuestion) => {
+    console.log("Editing question:", question);
+    console.log("Original options:", question.options);
+
     setEditingQuestion(question);
-    setQuestionText(question.question);
-    setOptions(question.options);
+    setQuestionText(question.question || "");
+    setQuestionImageUrl(question.questionImageUrl || "");
+    setQuestionContentType(question.questionContentType || "text");
+
+    // Ensure options have contentType field (for backward compatibility)
+    const optionsWithContentType = question.options.map((option) => ({
+      ...option,
+      contentType: option.contentType || (option.imageUrl ? "image" : "text"),
+    }));
+    console.log("Options with contentType:", optionsWithContentType);
+    setOptions(optionsWithContentType);
+
     setExplanation(question.explanation || "");
     setDifficulty(question.difficulty);
     setIsQuestionDialogOpen(true);
@@ -265,14 +410,54 @@ const MCQEditPage = () => {
     if (!editingQuestion || !pack) return;
 
     try {
-      const updatedQuestionData = {
-        question: questionText,
-        options: options.filter((opt) => opt.text.trim()),
+      console.log("Updating question with options:", options);
+
+      // Clean options to remove undefined values
+      const cleanOptions = options.map((option) => {
+        const cleanOption: any = {
+          id: option.id,
+          isCorrect: option.isCorrect,
+          contentType: option.contentType,
+        };
+
+        // Only add text or imageUrl if they have values
+        if (option.contentType === "text" && option.text) {
+          cleanOption.text = option.text;
+        } else if (option.contentType === "image" && option.imageUrl) {
+          cleanOption.imageUrl = option.imageUrl;
+        }
+
+        return cleanOption;
+      });
+
+      console.log("Cleaned options:", cleanOptions);
+
+      // Build updated question data object without undefined fields
+      const updatedQuestionData: any = {
+        questionContentType,
+        options: cleanOptions,
         explanation,
         difficulty,
         marks: editingQuestion.marks,
         order: editingQuestion.order,
       };
+
+      // Only add text or image fields based on content type
+      if (questionContentType === "text") {
+        updatedQuestionData.question = questionText;
+        // Remove image field if switching to text
+        if (editingQuestion.questionImageUrl) {
+          await StorageService.deleteImageByUrl(
+            editingQuestion.questionImageUrl
+          );
+        }
+      } else if (questionContentType === "image") {
+        updatedQuestionData.questionImageUrl = questionImageUrl;
+        // Remove text field if switching to image
+        if (editingQuestion.question) {
+          // Text field will be automatically removed by not including it
+        }
+      }
 
       // Update question in sub-collection
       await updateDoc(
@@ -321,6 +506,9 @@ const MCQEditPage = () => {
     if (!pack) return;
 
     try {
+      // Delete question images from Firebase Storage
+      await StorageService.deleteQuestionImage(pack.id, questionId);
+
       // Delete question from sub-collection
       await deleteDoc(doc(db, "mcqTests", pack.id, "questions", questionId));
 
@@ -353,11 +541,13 @@ const MCQEditPage = () => {
 
   const resetQuestionForm = () => {
     setQuestionText("");
+    setQuestionImageUrl("");
+    setQuestionContentType("text");
     setOptions([
-      { id: "1", text: "", isCorrect: false },
-      { id: "2", text: "", isCorrect: false },
-      { id: "3", text: "", isCorrect: false },
-      { id: "4", text: "", isCorrect: false },
+      { id: "1", text: "", isCorrect: false, contentType: "text" },
+      { id: "2", text: "", isCorrect: false, contentType: "text" },
+      { id: "3", text: "", isCorrect: false, contentType: "text" },
+      { id: "4", text: "", isCorrect: false, contentType: "text" },
     ]);
     setExplanation("");
     setDifficulty("medium");
@@ -367,6 +557,59 @@ const MCQEditPage = () => {
     setOptions(
       options.map((opt) => (opt.id === optionId ? { ...opt, text } : opt))
     );
+  };
+
+  const handleOptionContentTypeChange = (
+    optionId: string,
+    contentType: "text" | "image"
+  ) => {
+    setOptions(
+      options.map((opt) =>
+        opt.id === optionId
+          ? {
+              ...opt,
+              contentType,
+              text: contentType === "text" ? opt.text : undefined,
+              imageUrl: contentType === "image" ? opt.imageUrl : undefined,
+            }
+          : opt
+      )
+    );
+  };
+
+  // Test Firebase Storage connection
+  const testStorageConnection = async () => {
+    try {
+      toast({
+        title: "Testing Storage",
+        description: "Testing Firebase Storage connection...",
+      });
+
+      const textTest = await StorageTest.testStorageConnection();
+      const imageTest = await StorageTest.testImageUpload();
+
+      if (textTest && imageTest) {
+        toast({
+          title: "Storage Test Passed",
+          description: "Firebase Storage is working correctly!",
+        });
+      } else {
+        toast({
+          title: "Storage Test Failed",
+          description:
+            "Firebase Storage has issues. Check console for details.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error("Storage test error:", error);
+      toast({
+        title: "Storage Test Error",
+        description:
+          "Failed to test Firebase Storage. Check console for details.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleCorrectAnswerChange = (optionId: string) => {
@@ -501,17 +744,26 @@ const MCQEditPage = () => {
                   Total Marks: {pack.totalMarks}
                 </CardDescription>
               </div>
-              <Button
-                onClick={() => {
-                  resetQuestionForm();
-                  setEditingQuestion(null);
-                  setIsQuestionDialogOpen(true);
-                }}
-                className="bg-blue-600 hover:bg-blue-700"
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                Add Question
-              </Button>
+              <div className="flex gap-2">
+                <Button
+                  onClick={() => {
+                    resetQuestionForm();
+                    setEditingQuestion(null);
+                    setIsQuestionDialogOpen(true);
+                  }}
+                  className="bg-blue-600 hover:bg-blue-700"
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Question
+                </Button>
+                <Button
+                  onClick={testStorageConnection}
+                  variant="outline"
+                  className="text-orange-600 border-orange-600 hover:bg-orange-50"
+                >
+                  Test Storage
+                </Button>
+              </div>
             </div>
           </CardHeader>
           <CardContent>
@@ -621,15 +873,67 @@ const MCQEditPage = () => {
           </DialogHeader>
 
           <div className="space-y-4">
+            {/* Question Content Type */}
+            <div>
+              <Label>Question Content Type *</Label>
+              <div className="flex gap-4 mt-2">
+                <label className="flex items-center gap-2">
+                  <input
+                    type="radio"
+                    value="text"
+                    checked={questionContentType === "text"}
+                    onChange={(e) =>
+                      setQuestionContentType(e.target.value as "text" | "image")
+                    }
+                    className="text-blue-600"
+                  />
+                  <span className="text-sm">Text</span>
+                </label>
+                <label className="flex items-center gap-2">
+                  <input
+                    type="radio"
+                    value="image"
+                    checked={questionContentType === "image"}
+                    onChange={(e) =>
+                      setQuestionContentType(e.target.value as "text" | "image")
+                    }
+                    className="text-blue-600"
+                  />
+                  <span className="text-sm">Image</span>
+                </label>
+              </div>
+            </div>
+
+            {/* Question Content */}
             <div>
               <Label>Question *</Label>
-              <Textarea
-                value={questionText}
-                onChange={(e) => setQuestionText(e.target.value)}
-                placeholder="Enter your question..."
-                className="mt-1"
-                rows={3}
-              />
+              {questionContentType === "text" ? (
+                <Textarea
+                  value={questionText}
+                  onChange={(e) => setQuestionText(e.target.value)}
+                  placeholder="Enter your question..."
+                  className="mt-1"
+                  rows={3}
+                />
+              ) : (
+                <div className="mt-1 space-y-2">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleQuestionImageUpload}
+                    className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                  />
+                  {questionImageUrl && (
+                    <div className="mt-2">
+                      <img
+                        src={questionImageUrl}
+                        alt="Question preview"
+                        className="max-w-full h-auto max-h-48 border rounded"
+                      />
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
 
             <div>
@@ -649,29 +953,89 @@ const MCQEditPage = () => {
 
             <div>
               <Label>Options *</Label>
-              <div className="space-y-2 mt-2">
+              <div className="space-y-3 mt-2">
                 {options.map((option, index) => (
-                  <div key={option.id} className="flex items-center gap-2">
-                    <span className="text-sm font-medium w-6">
-                      {String.fromCharCode(65 + index)}.
-                    </span>
-                    <Input
-                      value={option.text}
-                      onChange={(e) =>
-                        handleOptionChange(option.id, e.target.value)
-                      }
-                      placeholder={`Option ${String.fromCharCode(65 + index)}`}
-                      className="flex-1"
-                    />
-                    <label className="flex items-center gap-1">
-                      <input
-                        type="checkbox"
-                        checked={option.isCorrect}
-                        onChange={() => handleCorrectAnswerChange(option.id)}
-                        className="rounded"
+                  <div
+                    key={option.id}
+                    className="border rounded-lg p-3 space-y-2"
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-medium w-6">
+                        {String.fromCharCode(65 + index)}.
+                      </span>
+                      <div className="flex gap-2">
+                        <label className="flex items-center gap-1">
+                          <input
+                            type="radio"
+                            name={`option-type-${option.id}`}
+                            value="text"
+                            checked={option.contentType === "text"}
+                            onChange={() =>
+                              handleOptionContentTypeChange(option.id, "text")
+                            }
+                            className="text-blue-600"
+                          />
+                          <span className="text-xs">Text</span>
+                        </label>
+                        <label className="flex items-center gap-1">
+                          <input
+                            type="radio"
+                            name={`option-type-${option.id}`}
+                            value="image"
+                            checked={option.contentType === "image"}
+                            onChange={() =>
+                              handleOptionContentTypeChange(option.id, "image")
+                            }
+                            className="text-blue-600"
+                          />
+                          <span className="text-xs">Image</span>
+                        </label>
+                      </div>
+                      <label className="flex items-center gap-1 ml-auto">
+                        <input
+                          type="checkbox"
+                          checked={option.isCorrect}
+                          onChange={() => handleCorrectAnswerChange(option.id)}
+                          className="rounded"
+                        />
+                        <span className="text-sm">Correct</span>
+                      </label>
+                    </div>
+
+                    {option.contentType === "text" ? (
+                      <Input
+                        value={option.text || ""}
+                        onChange={(e) =>
+                          handleOptionChange(option.id, e.target.value)
+                        }
+                        placeholder={`Option ${String.fromCharCode(
+                          65 + index
+                        )}`}
+                        className="w-full"
                       />
-                      <span className="text-sm">Correct</span>
-                    </label>
+                    ) : (
+                      <div className="space-y-2">
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) =>
+                            handleOptionImageUpload(option.id, e)
+                          }
+                          className="block w-full text-sm text-gray-500 file:mr-4 file:py-1 file:px-3 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                        />
+                        {option.imageUrl && (
+                          <div>
+                            <img
+                              src={option.imageUrl}
+                              alt={`Option ${String.fromCharCode(
+                                65 + index
+                              )} preview`}
+                              className="max-w-full h-auto max-h-32 border rounded"
+                            />
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>

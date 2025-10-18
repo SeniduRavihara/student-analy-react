@@ -108,13 +108,17 @@ export type ExamDataType = {
 // MCQ Types
 export type MCQOption = {
   id: string;
-  text: string;
+  text?: string; // Optional text content
+  imageUrl?: string; // Optional image URL
   isCorrect: boolean;
+  contentType: "text" | "image"; // Type of content
 };
 
 export type MCQQuestion = {
   id: string;
-  question: string;
+  question?: string; // Optional text question
+  questionImageUrl?: string; // Optional question image URL
+  questionContentType: "text" | "image"; // Type of question content
   options: MCQOption[];
   explanation?: string;
   difficulty: "easy" | "medium" | "hard";
@@ -139,6 +143,7 @@ export type MCQPack = {
   createdBy: string; // admin UID
   totalQuestions: number;
   totalMarks: number;
+  questions?: MCQQuestion[]; // Optional for when questions are loaded
 };
 
 export type MCQResult = {
