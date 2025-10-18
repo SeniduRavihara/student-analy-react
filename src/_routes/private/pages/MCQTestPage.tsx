@@ -73,6 +73,37 @@ const MCQTestPage = () => {
 
   const fetchMCQData = async () => {
     try {
+      if (!currentUserData?.uid) {
+        toast({
+          title: "Error",
+          description: "User not authenticated",
+          variant: "destructive",
+        });
+        navigate("/dashboard");
+        return;
+      }
+
+      // Check if user has already attempted this test
+      const userResultRef = doc(
+        db,
+        "users",
+        currentUserData.uid,
+        "mcqTests",
+        packId!
+      );
+      const userResultDoc = await getDoc(userResultRef);
+
+      if (userResultDoc.exists()) {
+        toast({
+          title: "Test Already Completed",
+          description:
+            "You have already attempted this MCQ test. You can only take each test once.",
+          variant: "destructive",
+        });
+        navigate("/dashboard/mcq");
+        return;
+      }
+
       // Fetch MCQ pack details
       const packDoc = await getDoc(doc(db, "mcqTests", packId!));
       if (packDoc.exists()) {
