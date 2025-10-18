@@ -1,3 +1,4 @@
+import { ChartSkeleton, StatsCardSkeleton } from "@/components/ui/skeleton";
 import { db } from "@/firebase/config";
 import { useAuth } from "@/hooks/useAuth";
 import { ExamDataType } from "@/types";
@@ -10,6 +11,7 @@ import StudentMarksCard from "../components/StudentMarksCard";
 const StudentAnalyticsPage = () => {
   const { currentUser } = useAuth();
   const [examsData, setExamsData] = useState<Array<ExamDataType> | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (currentUser) {
@@ -23,11 +25,40 @@ const StudentAnalyticsPage = () => {
         })) as ExamDataType[];
 
         setExamsData(examsDataArr);
+        setLoading(false);
       });
 
       return unsubscribe;
+    } else {
+      setLoading(false);
     }
   }, [currentUser]);
+
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        {/* Page Header Skeleton */}
+        <div className="bg-white rounded-lg border border-gray-200 shadow-xs p-6">
+          <div className="h-8 bg-gray-200 rounded w-48 mb-2 animate-pulse"></div>
+          <div className="h-4 bg-gray-200 rounded w-96 animate-pulse"></div>
+        </div>
+
+        {/* Analytics Content Skeleton */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Chart Skeleton */}
+          <div className="lg:col-span-2">
+            <ChartSkeleton />
+          </div>
+
+          {/* Stats Skeleton */}
+          <div className="space-y-4">
+            <StatsCardSkeleton />
+            <StatsCardSkeleton />
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">

@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { QuestionCardSkeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
 import { db } from "@/firebase/config";
 import { StorageService } from "@/firebase/services/StorageService";
@@ -767,7 +768,13 @@ const MCQEditPage = () => {
             </div>
           </CardHeader>
           <CardContent>
-            {(pack.questions?.length || 0) === 0 ? (
+            {loading ? (
+              <div className="space-y-4">
+                {[1, 2, 3].map((i) => (
+                  <QuestionCardSkeleton key={i} />
+                ))}
+              </div>
+            ) : (pack.questions?.length || 0) === 0 ? (
               <div className="text-center py-8 text-gray-500">
                 <p>No questions added yet.</p>
                 <p className="text-sm">Click "Add Question" to get started.</p>

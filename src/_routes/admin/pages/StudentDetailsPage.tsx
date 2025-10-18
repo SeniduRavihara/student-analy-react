@@ -19,9 +19,11 @@ const StudentDetailsPage = () => {
   const [openDetailsPopup, setOpenDetailsPopup] = useState(false);
   const [selectedUser, setSelectedUser] = useState<UserDataType | null>(null);
   const [examsData, setExamsData] = useState<Array<ExamDataType> | null>(null);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (selectedUser) {
+      setLoading(true);
       const collectionRef = query(
         collection(db, "users", selectedUser?.uid, "exams"),
         orderBy("examDate", "asc")
@@ -32,6 +34,7 @@ const StudentDetailsPage = () => {
         })) as ExamDataType[];
 
         setExamsData(examsDataArr);
+        setLoading(false);
       });
 
       return unsubscribe;
@@ -42,7 +45,7 @@ const StudentDetailsPage = () => {
     {
       label: "Marks",
       value: "marks",
-      content: <MarksTab examsData={examsData} />,
+      content: <MarksTab examsData={examsData} loading={loading} />,
     },
     {
       label: "Info",

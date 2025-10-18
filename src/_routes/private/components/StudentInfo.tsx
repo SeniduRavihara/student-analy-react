@@ -55,27 +55,39 @@ const StudentInfo = () => {
   const [gurdianPhone, setGurdianPhone] = useState("");
   const [address, setAddress] = useState("");
   const [loading, setLoading] = useState(false);
+  const [dataLoading, setDataLoading] = useState(true);
 
   useEffect(() => {
     if (currentUser) {
       const fetchData = async () => {
-        const userInfo = (await fetchUserInfo(currentUser.uid)) as UserDataType;
-        setFirstName(userInfo.firstName);
-        setLastName(userInfo.lastName);
-        setWhatsapp(userInfo.whatsapp);
-        setNic(userInfo.nic);
-        setBDate(userInfo.bDate ? new Date(userInfo.bDate) : undefined);
-        setPhone(userInfo.phone);
-        setSchool(userInfo.school);
-        setExamYear(userInfo.examYear);
-        setMedia(userInfo.media);
-        setStream(userInfo.stream);
-        setGurdiandName(userInfo.gurdianName);
-        setGurdianPhone(userInfo.gurdianPhone);
-        setAddress(userInfo.address);
-        setClasses(userInfo.classes || []);
+        try {
+          setDataLoading(true);
+          const userInfo = (await fetchUserInfo(
+            currentUser.uid
+          )) as UserDataType;
+          setFirstName(userInfo.firstName);
+          setLastName(userInfo.lastName);
+          setWhatsapp(userInfo.whatsapp);
+          setNic(userInfo.nic);
+          setBDate(userInfo.bDate ? new Date(userInfo.bDate) : undefined);
+          setPhone(userInfo.phone);
+          setSchool(userInfo.school);
+          setExamYear(userInfo.examYear);
+          setMedia(userInfo.media);
+          setStream(userInfo.stream);
+          setGurdiandName(userInfo.gurdianName);
+          setGurdianPhone(userInfo.gurdianPhone);
+          setAddress(userInfo.address);
+          setClasses(userInfo.classes || []);
+        } catch (error) {
+          console.error("Error fetching user info:", error);
+        } finally {
+          setDataLoading(false);
+        }
       };
       fetchData();
+    } else {
+      setDataLoading(false);
     }
   }, [currentUser]);
 
@@ -119,6 +131,58 @@ const StudentInfo = () => {
         : [...prevClasses, selectedClass]
     );
   };
+
+  if (dataLoading) {
+    return (
+      <Card className="w-full">
+        <CardHeader>
+          <CardTitle>Profile Information</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-6">
+            {/* Personal Details Skeleton */}
+            <div className="space-y-4">
+              <div className="h-6 bg-gray-200 rounded w-48 animate-pulse"></div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {[1, 2, 3, 4, 5, 6].map((i) => (
+                  <div key={i} className="space-y-2">
+                    <div className="h-4 bg-gray-200 rounded w-20 animate-pulse"></div>
+                    <div className="h-10 bg-gray-200 rounded animate-pulse"></div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Academic Details Skeleton */}
+            <div className="space-y-4">
+              <div className="h-6 bg-gray-200 rounded w-48 animate-pulse"></div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {[1, 2, 3, 4].map((i) => (
+                  <div key={i} className="space-y-2">
+                    <div className="h-4 bg-gray-200 rounded w-24 animate-pulse"></div>
+                    <div className="h-10 bg-gray-200 rounded animate-pulse"></div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Guardian Details Skeleton */}
+            <div className="space-y-4">
+              <div className="h-6 bg-gray-200 rounded w-48 animate-pulse"></div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="space-y-2">
+                    <div className="h-4 bg-gray-200 rounded w-28 animate-pulse"></div>
+                    <div className="h-10 bg-gray-200 rounded animate-pulse"></div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card className="w-full">

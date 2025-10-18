@@ -6,6 +6,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { ChartSkeleton, StatsCardSkeleton } from "@/components/ui/skeleton";
 import { db } from "@/firebase/config";
 import { McqService } from "@/firebase/services/McqService";
 import { MCQPack, MCQPackAnalytics, MCQQuestion } from "@/types";
@@ -216,10 +217,46 @@ const MCQViewPage = () => {
   if (loading) {
     console.log("MCQ View Page: Still loading...");
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading MCQ analytics...</p>
+      <div className="space-y-6">
+        {/* Header Skeleton */}
+        <div className="bg-white rounded-lg border border-gray-200 shadow-xs p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="h-8 bg-gray-200 rounded w-64 mb-2 animate-pulse"></div>
+              <div className="h-4 bg-gray-200 rounded w-48 animate-pulse"></div>
+            </div>
+            <div className="h-10 bg-gray-200 rounded w-32 animate-pulse"></div>
+          </div>
+        </div>
+
+        {/* Stats Cards Skeleton */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {[1, 2, 3, 4].map((i) => (
+            <StatsCardSkeleton key={i} />
+          ))}
+        </div>
+
+        {/* Charts Skeleton */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <ChartSkeleton />
+          <ChartSkeleton />
+        </div>
+
+        {/* Question Summary Skeleton */}
+        <div className="bg-white rounded-lg border border-gray-200 shadow-xs p-6">
+          <div className="h-6 bg-gray-200 rounded w-48 mb-4 animate-pulse"></div>
+          <div className="space-y-4">
+            {[1, 2, 3, 4, 5].map((i) => (
+              <div key={i} className="border rounded-lg p-4 animate-pulse">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="h-5 bg-gray-200 rounded w-16"></div>
+                  <div className="h-5 bg-gray-200 rounded w-20"></div>
+                </div>
+                <div className="h-4 bg-gray-200 rounded w-full mb-2"></div>
+                <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     );

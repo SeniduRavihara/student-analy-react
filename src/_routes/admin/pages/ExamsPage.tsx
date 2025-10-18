@@ -58,6 +58,7 @@ const ExamsPage = () => {
   });
 
   const [loading, setLoading] = useState(false);
+  const [dataLoading, setDataLoading] = useState(true);
 
   const { selectedYear, selectedClass } = useOutletContext<OutletContextType>();
 
@@ -78,6 +79,7 @@ const ExamsPage = () => {
   }, [examYear]);
 
   useEffect(() => {
+    setDataLoading(true);
     const collectionRef = collection(db, "exams");
 
     // Add query to sort by `createdAt` in ascending order
@@ -100,6 +102,7 @@ const ExamsPage = () => {
 
       // console.log("EXAM", examsDataArr);
       setExamsData(examsDataArr);
+      setDataLoading(false);
     });
 
     return unsubscribe;
@@ -176,6 +179,7 @@ const ExamsPage = () => {
         searchPlaceholder="Search by exam name..."
         searchColumn="examName"
         pageSize={8}
+        loading={dataLoading}
       />
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>

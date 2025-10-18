@@ -6,6 +6,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { MCQGridSkeleton } from "@/components/ui/skeleton";
 import { db } from "@/firebase/config";
 import { useData } from "@/hooks/useData";
 import { MCQPack } from "@/types";
@@ -106,7 +107,9 @@ const UserMCQPage = () => {
       </div>
 
       {/* MCQ Tests Grid */}
-      {mcqPacks.length === 0 ? (
+      {loading ? (
+        <MCQGridSkeleton count={6} />
+      ) : mcqPacks.length === 0 ? (
         <div className="bg-white rounded-lg border border-gray-200 shadow-xs p-12">
           <div className="flex flex-col items-center justify-center text-gray-500">
             <Users className="h-12 w-12 mb-4 text-gray-300" />

@@ -1,3 +1,4 @@
+import { ChartSkeleton } from "@/components/ui/skeleton";
 import { db } from "@/firebase/config";
 import { ExamDataType, UserDataType } from "@/types";
 import {
@@ -7,7 +8,7 @@ import {
   query,
   where,
 } from "firebase/firestore";
-import { BarChart3, Loader2 } from "lucide-react";
+import { BarChart3 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useOutletContext } from "react-router-dom";
 import { AvgChart } from "../components/charts/AvgChart";
@@ -91,12 +92,7 @@ const AnalyticsPage = () => {
 
       {/* Analytics Chart */}
       {loading ? (
-        <div className="bg-white rounded-lg border border-gray-200 shadow-xs p-12">
-          <div className="flex flex-col items-center justify-center">
-            <Loader2 className="h-8 w-8 animate-spin text-blue-600 mb-4" />
-            <p className="text-gray-600">Loading exam data...</p>
-          </div>
-        </div>
+        <ChartSkeleton />
       ) : examsData && examsData.length > 0 ? (
         <AvgChart
           chartData={examsData
