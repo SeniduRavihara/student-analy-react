@@ -49,6 +49,13 @@ const MCQEditPage = () => {
   const [editingQuestion, setEditingQuestion] = useState<MCQQuestion | null>(
     null
   );
+  const [currentPage, setCurrentPage] = useState(1);
+  const questionsPerPage = 5;
+
+  // Reset to first page when pack changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [pack?.id]);
 
   // Question form state
   const [questionText, setQuestionText] = useState("");
@@ -781,7 +788,18 @@ const MCQEditPage = () => {
               </div>
             ) : (
               <div className="space-y-4">
-                {(pack.questions || []).map((question, index) => (
+                {/* Pagination logic */}
+                {(() => {
+                  const questions = pack.questions || [];
+                  const totalQuestions = questions.length;
+                  const totalPages = Math.ceil(totalQuestions / questionsPerPage);
+                  const startIndex = (currentPage - 1) * questionsPerPage;
+                  const endIndex = startIndex + questionsPerPage;
+                  const currentQuestions = questions.slice(startIndex, endIndex);
+
+                  return (
+                    <>
+                      {currentQuestions.map((question, index) => (
                   <Card
                     key={question.id}
                     className="border-l-4 border-l-blue-500"
@@ -791,7 +809,7 @@ const MCQEditPage = () => {
                         <div className="flex-1">
                           <div className="flex items-center gap-2 mb-2">
                             <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2 py-1 rounded">
-                              Q{index + 1}
+                            Q{startIndex + index + 1}
                             </span>
                             <span
                               className={`text-xs font-medium px-2 py-1 rounded ${
@@ -872,6 +890,60 @@ const MCQEditPage = () => {
                     </CardContent>
                   </Card>
                 ))}
+
+                          {/* Pagination Controls */}
+                      {totalPages > 1 && (
+                        <div className="flex items-center justify-between pt-4 border-t">
+                          <div className="text-sm text-gray-600">
+                            Showing {startIndex + 1} to {Math.min(endIndex, totalQuestions)} of {totalQuestions} questions
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => setCurrentPage(currentPage - 1)}
+                              disabled={currentPage === 1}
+                            >
+                              Previous
+                            </Button>
+
+                            <div className="flex items-center space-x-1">
+                              {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                                const pageNumber = Math.max(1, Math.min(totalPages - 4, currentPage - 2)) + i;
+                                if (pageNumber > totalPages) return null;
+
+                                return (
+                                  <Button
+                                    key={pageNumber}
+                                    variant={pageNumber === currentPage ? "default" : "outline"}
+                                    size="sm"
+                                    onClick={() => setCurrentPage(pageNumber)}
+                                    className={`w-8 h-8 p-0 ${
+                                      pageNumber === currentPage
+                                        ? "bg-blue-600 hover:bg-blue-700 text-white"
+                                        : "bg-white border-gray-300 hover:bg-gray-50"
+                                    }`}
+                                  >
+                                    {pageNumber}
+                                  </Button>
+                                );
+                              })}
+                            </div>
+
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => setCurrentPage(currentPage + 1)}
+                              disabled={currentPage === totalPages}
+                            >
+                              Next
+                            </Button>
+                          </div>
+                        </div>
+                      )}
+                    </>
+                  );
+                })()}
               </div>
             )}
           </CardContent>
