@@ -1274,11 +1274,12 @@ const MCQPage = () => {
       ),
     },
     {
-      accessorKey: "description",
-      header: "Description",
-      cell: ({ row }: any) => (
-        <div className="max-w-xs truncate">{row.getValue("description")}</div>
-      ),
+    accessorKey: "description",
+    header: "Description",
+    cell: ({ row }: any) => (
+    <div className="max-w-xs truncate">{row.getValue("description")}</div>
+    ),
+      enableHiding: true,
     },
     {
       accessorKey: "classType",
