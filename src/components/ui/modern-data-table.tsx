@@ -55,10 +55,10 @@ export function ModernDataTable<TData, TValue>({
   const isMobile = useMediaQuery("(max-width: 768px)");
 
   React.useEffect(() => {
-    // Hide specific columns on mobile
+    // Hide specific columns on mobile and hide lastResult by default
     setColumnVisibility({
       email: !isMobile,
-      lastResult: !isMobile,
+      lastResult: false, // Always hide by default, can be toggled
       avgResult: !isMobile,
       examStatus: !isMobile,
       actions: !isMobile,
