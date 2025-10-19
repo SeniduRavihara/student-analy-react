@@ -805,9 +805,17 @@ const MCQEditPage = () => {
                               {question.difficulty}
                             </span>
                           </div>
-                          <p className="font-medium mb-2">
-                            {question.question}
-                          </p>
+                          <div className="font-medium mb-2">
+                          {question.questionContentType === "image" && question.questionImageUrl ? (
+                              <img
+                                src={question.questionImageUrl}
+                                alt="Question"
+                                className="max-w-full h-auto max-h-32 object-contain rounded border"
+                              />
+                            ) : (
+                              <p>{question.question}</p>
+                            )}
+                          </div>
                           <div className="space-y-1">
                             {question.options.map((option, optIndex) => (
                               <div
@@ -817,15 +825,23 @@ const MCQEditPage = () => {
                                 <span className="text-sm text-gray-500 w-6">
                                   {String.fromCharCode(65 + optIndex)}.
                                 </span>
-                                <span
-                                  className={`text-sm ${
-                                    option.isCorrect
-                                      ? "font-medium text-green-600"
-                                      : ""
-                                  }`}
+                                <div
+                                className={`text-sm ${
+                                option.isCorrect
+                                ? "font-medium text-green-600"
+                                : ""
+                                }`}
                                 >
-                                  {option.text}
-                                </span>
+                                {option.contentType === "image" && option.imageUrl ? (
+                                    <img
+                                      src={option.imageUrl}
+                                      alt={`Option ${String.fromCharCode(65 + optIndex)}`}
+                                      className="max-w-16 max-h-16 object-contain rounded border inline-block"
+                                    />
+                                  ) : (
+                                    <span>{option.text}</span>
+                                  )}
+                                </div>
                                 {option.isCorrect && (
                                   <span className="text-green-600 text-xs">
                                     ✓
