@@ -5,7 +5,7 @@ import { ExamDataType } from "@/types";
 import { collection, onSnapshot, orderBy, query } from "firebase/firestore";
 import moment from "moment";
 import { useEffect, useState } from "react";
-import { Calendar, momentLocalizer } from "react-big-calendar";
+import { Calendar, momentLocalizer, View } from "react-big-calendar";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import { MdNavigateBefore, MdNavigateNext } from "react-icons/md";
 import { Button } from "./ui/button";
@@ -24,8 +24,8 @@ const CustomToolbar = ({
     navigate: "PREV" | "NEXT" | "TODAY" | "DATE",
     date?: Date
   ) => void;
-  view: string;
-  onView: (view: string) => void;
+  view: View;
+  onView: (view: View) => void;
 }) => {
   const goToBack = () => {
     onNavigate("PREV");
@@ -92,7 +92,7 @@ const CustomToolbar = ({
         {["month", "week", "day"].map((viewName) => (
           <Button
             key={viewName}
-            onClick={() => onView(viewName)}
+            onClick={() => onView(viewName as View)}
             variant={view === viewName ? "default" : "outline"}
             size="sm"
             className="capitalize"
@@ -108,7 +108,7 @@ const CustomToolbar = ({
 const ExamCalendar = () => {
   const { currentUser } = useAuth();
   const [examsData, setExamsData] = useState<Array<ExamDataType> | null>(null);
-  const [currentView, setCurrentView] = useState("month");
+  const [currentView, setCurrentView] = useState<View>("month");
 
   useEffect(() => {
     if (currentUser) {
@@ -168,7 +168,7 @@ const ExamCalendar = () => {
               toolbar: CustomToolbar, // Use the custom toolbar
             }}
             onSelectEvent={(event) => console.log(event)} // Optional: To handle clicking events
-            eventPropGetter={(event) => ({
+            eventPropGetter={() => ({
               style: {
                 backgroundColor: "#3b82f6",
                 border: "none",

@@ -677,7 +677,7 @@ export class McqService {
             },
             optionStats: question.options.map((option) => ({
               optionId: option.id,
-              optionText: option.text,
+              optionText: option.text || "",
               selectedCount: answer.selectedOptionId === option.id ? 1 : 0,
               isCorrect: option.isCorrect,
             })),

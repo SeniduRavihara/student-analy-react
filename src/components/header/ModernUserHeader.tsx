@@ -4,13 +4,11 @@ import { useAuth } from "@/hooks/useAuth";
 import { useData } from "@/hooks/useData";
 import { Bell, LogOut, Menu, User } from "lucide-react";
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 
 export default function ModernUserHeader() {
   const { toggleSidebar } = useSidebar();
   const { currentUser } = useAuth();
   const { currentUserData } = useData();
-  const navigate = useNavigate();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const handleLogout = async () => {

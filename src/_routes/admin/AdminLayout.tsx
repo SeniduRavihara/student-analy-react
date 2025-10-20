@@ -20,7 +20,7 @@ const AdminLayout = () => {
   const [usersData, setUsersData] = useState<UserDataType[] | null>(null);
   const [selectedYear, setSelectedYear] = useState<string>(EXAM_YEARS[0].year);
   const [selectedClass, setSecectedClass] = useState<ClassesDataType>(
-    CLASSES_TO_YEARS[EXAM_YEARS[0].year][0] as ClassesDataType
+    CLASSES_TO_YEARS[EXAM_YEARS[0].year as keyof typeof CLASSES_TO_YEARS][0] as ClassesDataType
   );
 
   // Reset class when year changes to ensure it's valid for the new year

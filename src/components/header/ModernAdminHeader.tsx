@@ -1,19 +1,18 @@
 import ClassSelect from "@/_routes/admin/components/ClassSelect";
 import YearSelect from "@/_routes/admin/components/YearSelect";
-import { ClassesType } from "@/constants";
+import { ClassesType as ClassesDataType } from "@/constants";
 import { useSidebar } from "@/context/SidebarContext";
 import { logout } from "@/firebase/api";
 import { useAuth } from "@/hooks/useAuth";
 import { useData } from "@/hooks/useData";
 import { Bell, LogOut, Menu, User } from "lucide-react";
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 
 interface ModernAdminHeaderProps {
   selectedYear: string;
   setSelectedYear: (year: string) => void;
-  selectedClass: ClassesType;
-  setSelectedClass: (classType: ClassesType) => void;
+  selectedClass: ClassesDataType;
+  setSelectedClass: React.Dispatch<React.SetStateAction<ClassesDataType>>;
 }
 
 export default function ModernAdminHeader({
@@ -25,7 +24,6 @@ export default function ModernAdminHeader({
   const { toggleSidebar } = useSidebar();
   const { currentUser } = useAuth();
   const { currentUserData } = useData();
-  const navigate = useNavigate();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const handleLogout = async () => {
