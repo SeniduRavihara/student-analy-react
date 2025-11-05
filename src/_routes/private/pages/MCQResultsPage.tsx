@@ -10,7 +10,7 @@ import { db } from "@/firebase/config";
 import { useData } from "@/hooks/useData";
 import { MCQResult } from "@/types";
 import { collection, getDocs, orderBy, query } from "firebase/firestore";
-import { ArrowLeft, CheckCircle, Eye, RotateCcw, XCircle } from "lucide-react";
+import { ArrowLeft, CheckCircle, Eye, XCircle } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -48,10 +48,6 @@ const MCQResultsPage = () => {
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleRetakeTest = (packId: string) => {
-    navigate(`/dashboard/mcq/${packId}/test`);
   };
 
   const handleViewDetails = (result: MCQResult) => {
@@ -185,15 +181,6 @@ const MCQResultsPage = () => {
                   >
                     <Eye className="h-4 w-4 mr-2" />
                     View Details
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleRetakeTest(result.packId)}
-                    className="text-blue-600 hover:text-blue-700"
-                  >
-                    <RotateCcw className="h-4 w-4 mr-2" />
-                    Retake Test
                   </Button>
                 </div>
               </CardContent>

@@ -15,7 +15,7 @@ import {
   query,
   where,
 } from "firebase/firestore";
-import { BarChart3, BookOpen, TrendingUp, Users, Globe } from "lucide-react";
+import { BarChart3, BookOpen, Globe, TrendingUp, Users } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useOutletContext } from "react-router-dom";
 
@@ -218,7 +218,9 @@ const RealAdminDashboard = () => {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Exams (All)</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Total Exams (All)
+            </CardTitle>
             <BookOpen className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -231,7 +233,9 @@ const RealAdminDashboard = () => {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Overall Average Score</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Overall Average Score
+            </CardTitle>
             <BarChart3 className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -244,7 +248,9 @@ const RealAdminDashboard = () => {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Overall Success Rate</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Overall Success Rate
+            </CardTitle>
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -329,15 +335,22 @@ const RealAdminDashboard = () => {
             </div>
             <div className="flex items-center space-x-3">
               <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-              <span className="text-sm">{totalAllActiveExams} active exams ({activeExams} filtered)</span>
+              <span className="text-sm">
+                {totalAllActiveExams} active exams ({activeExams} filtered)
+              </span>
             </div>
             <div className="flex items-center space-x-3">
               <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
-              <span className="text-sm">{totalAllCompletedExams} completed exams ({completedExams} filtered)</span>
+              <span className="text-sm">
+                {totalAllCompletedExams} completed exams ({completedExams}{" "}
+                filtered)
+              </span>
             </div>
             <div className="flex items-center space-x-3">
               <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-              <span className="text-sm">Overall avg: {overallAverageScore}% (Filtered: {averageScore}%)</span>
+              <span className="text-sm">
+                Overall avg: {overallAverageScore}% (Filtered: {averageScore}%)
+              </span>
             </div>
           </CardContent>
         </Card>
@@ -375,7 +388,8 @@ const RealAdminDashboard = () => {
         </Button>
         <Button variant="outline">View Analytics</Button>
         <Button variant="outline">
-          Manage Exams ({totalAllExams} total / {activeExams + completedExams} filtered)
+          Manage Exams ({totalAllExams} total / {activeExams + completedExams}{" "}
+          filtered)
         </Button>
       </div>
     </div>

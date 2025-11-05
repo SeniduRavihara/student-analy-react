@@ -26,11 +26,10 @@ import {
   CheckCircle,
   Clock,
   Play,
-  RotateCcw,
   Save,
   XCircle,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
 const MCQTestPage = () => {
@@ -48,31 +47,7 @@ const MCQTestPage = () => {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
 
-  useEffect(() => {
-    if (packId) {
-      fetchMCQData();
-    }
-  }, [packId]);
-
-  useEffect(() => {
-    let interval: NodeJS.Timeout;
-
-    if (testStarted && timeLeft > 0) {
-      interval = setInterval(() => {
-        setTimeLeft((prev) => {
-          if (prev <= 1) {
-            handleSubmitTest();
-            return 0;
-          }
-          return prev - 1;
-        });
-      }, 1000);
-    }
-
-    return () => clearInterval(interval);
-  }, [testStarted, timeLeft]);
-
-  const fetchMCQData = async () => {
+  const fetchMCQData = useCallback(async () => {
     try {
       if (!currentUserData?.uid) {
         toast({
@@ -146,42 +121,9 @@ const MCQTestPage = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [currentUserData, packId, navigate]);
 
-  const startTest = () => {
-    if (!pack || !currentUserData) return;
-
-    setTestStarted(true);
-    setTimeLeft(pack.timeLimit * 60); // Convert minutes to seconds
-    setCurrentQuestionIndex(0);
-    setAnswers({});
-    setTestCompleted(false);
-  };
-
-  const handleAnswerSelect = (questionId: string, optionId: string) => {
-    setAnswers((prev) => ({
-      ...prev,
-      [questionId]: optionId,
-    }));
-  };
-
-  const nextQuestion = () => {
-    if (currentQuestionIndex < questions.length - 1) {
-      setCurrentQuestionIndex(currentQuestionIndex + 1);
-    }
-  };
-
-  const previousQuestion = () => {
-    if (currentQuestionIndex > 0) {
-      setCurrentQuestionIndex(currentQuestionIndex - 1);
-    }
-  };
-
-  const goToQuestion = (index: number) => {
-    setCurrentQuestionIndex(index);
-  };
-
-  const handleSubmitTest = async () => {
+  const handleSubmitTest = useCallback(async () => {
     if (!pack || !currentUserData || submitting) return;
 
     setSubmitting(true);
@@ -250,6 +192,63 @@ const MCQTestPage = () => {
     } finally {
       setSubmitting(false);
     }
+  }, [pack, currentUserData, submitting, questions, answers, timeLeft]);
+
+  useEffect(() => {
+    if (packId) {
+      fetchMCQData();
+    }
+  }, [packId, fetchMCQData]);
+
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+
+    if (testStarted && timeLeft > 0) {
+      interval = setInterval(() => {
+        setTimeLeft((prev) => {
+          if (prev <= 1) {
+            handleSubmitTest();
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    }
+
+    return () => clearInterval(interval);
+  }, [testStarted, timeLeft, handleSubmitTest]);
+
+  const startTest = () => {
+    if (!pack || !currentUserData) return;
+
+    setTestStarted(true);
+    setTimeLeft(pack.timeLimit * 60); // Convert minutes to seconds
+    setCurrentQuestionIndex(0);
+    setAnswers({});
+    setTestCompleted(false);
+  };
+
+  const handleAnswerSelect = (questionId: string, optionId: string) => {
+    setAnswers((prev) => ({
+      ...prev,
+      [questionId]: optionId,
+    }));
+  };
+
+  const nextQuestion = () => {
+    if (currentQuestionIndex < questions.length - 1) {
+      setCurrentQuestionIndex(currentQuestionIndex + 1);
+    }
+  };
+
+  const previousQuestion = () => {
+    if (currentQuestionIndex > 0) {
+      setCurrentQuestionIndex(currentQuestionIndex - 1);
+    }
+  };
+
+  const goToQuestion = (index: number) => {
+    setCurrentQuestionIndex(index);
   };
 
   const formatTime = (seconds: number) => {
@@ -437,18 +436,6 @@ const MCQTestPage = () => {
         <div className="flex gap-4 justify-center">
           <Button onClick={() => navigate("/dashboard/mcq")} variant="outline">
             Back to MCQ Tests
-          </Button>
-          <Button
-            onClick={() => {
-              setTestCompleted(false);
-              setTestStarted(false);
-              setCurrentQuestionIndex(0);
-              setAnswers({});
-            }}
-            className="bg-blue-600 hover:bg-blue-700"
-          >
-            <RotateCcw className="h-4 w-4 mr-2" />
-            Retake Test
           </Button>
         </div>
       </div>
