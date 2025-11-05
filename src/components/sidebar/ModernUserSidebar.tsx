@@ -55,7 +55,12 @@ export default function ModernUserSidebar() {
         >
           {/* Header */}
           <div className="flex h-16 items-center justify-between px-4 border-b border-gray-200">
-            <h1 className="text-xl font-bold text-blue-600">PHY6LK Student</h1>
+            <Link
+              to="/"
+              className="text-xl font-bold text-blue-600 hover:text-blue-700 transition-colors"
+            >
+              PHY6LK
+            </Link>
             <button
               type="button"
               className="text-gray-400 hover:text-gray-600 p-2 rounded-md hover:bg-gray-100 transition-colors"
@@ -105,9 +110,12 @@ export default function ModernUserSidebar() {
           {/* Header with collapse button */}
           <div className="flex h-16 items-center justify-between px-4 border-b border-gray-200">
             {!isCollapsed && (
-              <h1 className="text-xl font-bold text-blue-600 transition-opacity duration-200">
-                PHY6LK Student
-              </h1>
+              <Link
+                to="/"
+                className="text-xl font-bold text-blue-600 hover:text-blue-700 transition-colors"
+              >
+                PHY6LK
+              </Link>
             )}
             <button
               type="button"
