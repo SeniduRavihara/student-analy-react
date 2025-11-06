@@ -117,7 +117,9 @@ export type MCQOption = {
 export type MCQQuestion = {
   id: string;
   question?: string; // Optional text question
-  questionImageUrl?: string; // Optional question image URL
+  questionImageBeforeUrl?: string; // Optional image before question text
+  questionImageAfterUrl?: string; // Optional image after question text
+   questionImageUrl?: string;
   questionContentType: "text" | "image"; // Type of question content
   options: MCQOption[];
   explanation?: string;

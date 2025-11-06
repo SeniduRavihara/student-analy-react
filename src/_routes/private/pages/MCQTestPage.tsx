@@ -506,19 +506,36 @@ const MCQTestPage = () => {
         </CardHeader>
         <CardContent className="space-y-4">
           {/* Question Content */}
-          {currentQuestion.questionContentType === "text" ? (
-            <p className="text-lg font-medium">{currentQuestion.question}</p>
-          ) : (
-            <div className="space-y-2">
-              {currentQuestion.questionImageUrl && (
+          <div className="space-y-4">
+            {currentQuestion.questionImageBeforeUrl && (
+              <img
+                src={currentQuestion.questionImageBeforeUrl}
+                alt="Question diagram before"
+                className="max-w-full h-auto max-h-64 border rounded-lg"
+              />
+            )}
+            {currentQuestion.questionContentType === "text" &&
+              currentQuestion.question && (
+                <p className="text-lg font-medium">
+                  {currentQuestion.question}
+                </p>
+              )}
+            {currentQuestion.questionContentType === "image" &&
+              currentQuestion.questionImageUrl && (
                 <img
                   src={currentQuestion.questionImageUrl}
                   alt="Question"
                   className="max-w-full h-auto max-h-96 border rounded-lg"
                 />
               )}
-            </div>
-          )}
+            {currentQuestion.questionImageAfterUrl && (
+              <img
+                src={currentQuestion.questionImageAfterUrl}
+                alt="Question diagram after"
+                className="max-w-full h-auto max-h-64 border rounded-lg"
+              />
+            )}
+          </div>
 
           <div className="space-y-3">
             {currentQuestion.options.map((option, index) => (

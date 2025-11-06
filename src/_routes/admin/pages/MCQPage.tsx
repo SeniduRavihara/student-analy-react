@@ -81,11 +81,39 @@ const MockDataButton = () => {
             {
               question:
                 "A ball is thrown vertically upward with an initial velocity of 20 m/s. What is the maximum height it will reach? (Take g = 10 m/s²)",
+              questionImageBeforeUrl: undefined,
+              questionImageAfterUrl: undefined,
+              questionImageUrl: undefined,
+              questionContentType: "text" as const,
               options: [
-                { id: "opt1", text: "20 m", isCorrect: true },
-                { id: "opt2", text: "40 m", isCorrect: false },
-                { id: "opt3", text: "10 m", isCorrect: false },
-                { id: "opt4", text: "30 m", isCorrect: false },
+                {
+                  id: "opt1",
+                  text: "20 m",
+                  imageUrl: undefined,
+                  isCorrect: true,
+                  contentType: "text" as const,
+                },
+                {
+                  id: "opt2",
+                  text: "40 m",
+                  imageUrl: undefined,
+                  isCorrect: false,
+                  contentType: "text" as const,
+                },
+                {
+                  id: "opt3",
+                  text: "10 m",
+                  imageUrl: undefined,
+                  isCorrect: false,
+                  contentType: "text" as const,
+                },
+                {
+                  id: "opt4",
+                  text: "30 m",
+                  imageUrl: undefined,
+                  isCorrect: false,
+                  contentType: "text" as const,
+                },
               ],
               explanation:
                 "Using the equation v² = u² - 2gh, where v = 0 at maximum height, u = 20 m/s, and g = 10 m/s². Solving: 0 = 400 - 20h, so h = 20 m.",
@@ -97,11 +125,39 @@ const MockDataButton = () => {
             },
             {
               question: "What is the unit of force in the SI system?",
+              questionImageBeforeUrl: undefined,
+              questionImageAfterUrl: undefined,
+              questionImageUrl: undefined,
+              questionContentType: "text" as const,
               options: [
-                { id: "opt1", text: "Newton (N)", isCorrect: true },
-                { id: "opt2", text: "Joule (J)", isCorrect: false },
-                { id: "opt3", text: "Watt (W)", isCorrect: false },
-                { id: "opt4", text: "Pascal (Pa)", isCorrect: false },
+                {
+                  id: "opt1",
+                  text: "Newton (N)",
+                  imageUrl: undefined,
+                  isCorrect: true,
+                  contentType: "text" as const,
+                },
+                {
+                  id: "opt2",
+                  text: "Joule (J)",
+                  imageUrl: undefined,
+                  isCorrect: false,
+                  contentType: "text" as const,
+                },
+                {
+                  id: "opt3",
+                  text: "Watt (W)",
+                  imageUrl: undefined,
+                  isCorrect: false,
+                  contentType: "text" as const,
+                },
+                {
+                  id: "opt4",
+                  text: "Pascal (Pa)",
+                  imageUrl: undefined,
+                  isCorrect: false,
+                  contentType: "text" as const,
+                },
               ],
               explanation:
                 "Force is measured in Newtons (N) in the SI system. 1 N = 1 kg⋅m/s²",
@@ -114,11 +170,39 @@ const MockDataButton = () => {
             {
               question:
                 "A car accelerates from rest to 20 m/s in 5 seconds. What is its acceleration?",
+              questionImageBeforeUrl: undefined,
+              questionImageAfterUrl: undefined,
+              questionImageUrl: undefined,
+              questionContentType: "text" as const,
               options: [
-                { id: "opt1", text: "4 m/s²", isCorrect: true },
-                { id: "opt2", text: "100 m/s²", isCorrect: false },
-                { id: "opt3", text: "15 m/s²", isCorrect: false },
-                { id: "opt4", text: "25 m/s²", isCorrect: false },
+                {
+                  id: "opt1",
+                  text: "4 m/s²",
+                  imageUrl: undefined,
+                  isCorrect: true,
+                  contentType: "text" as const,
+                },
+                {
+                  id: "opt2",
+                  text: "100 m/s²",
+                  imageUrl: undefined,
+                  isCorrect: false,
+                  contentType: "text" as const,
+                },
+                {
+                  id: "opt3",
+                  text: "15 m/s²",
+                  imageUrl: undefined,
+                  isCorrect: false,
+                  contentType: "text" as const,
+                },
+                {
+                  id: "opt4",
+                  text: "25 m/s²",
+                  imageUrl: undefined,
+                  isCorrect: false,
+                  contentType: "text" as const,
+                },
               ],
               explanation: "Using a = (v - u)/t: a = (20 - 0)/5 = 4 m/s²",
               difficulty: "easy" as const,
@@ -130,11 +214,39 @@ const MockDataButton = () => {
             {
               question:
                 "What is the kinetic energy of a 2 kg object moving at 10 m/s?",
+              questionImageBeforeUrl: undefined,
+              questionImageAfterUrl: undefined,
+              questionImageUrl: undefined,
+              questionContentType: "text" as const,
               options: [
-                { id: "opt1", text: "100 J", isCorrect: true },
-                { id: "opt2", text: "200 J", isCorrect: false },
-                { id: "opt3", text: "50 J", isCorrect: false },
-                { id: "opt4", text: "20 J", isCorrect: false },
+                {
+                  id: "opt1",
+                  text: "100 J",
+                  imageUrl: undefined,
+                  isCorrect: true,
+                  contentType: "text" as const,
+                },
+                {
+                  id: "opt2",
+                  text: "200 J",
+                  imageUrl: undefined,
+                  isCorrect: false,
+                  contentType: "text" as const,
+                },
+                {
+                  id: "opt3",
+                  text: "50 J",
+                  imageUrl: undefined,
+                  isCorrect: false,
+                  contentType: "text" as const,
+                },
+                {
+                  id: "opt4",
+                  text: "20 J",
+                  imageUrl: undefined,
+                  isCorrect: false,
+                  contentType: "text" as const,
+                },
               ],
               explanation:
                 "Using KE = ½mv²: KE = ½ × 2 × 10² = ½ × 2 × 100 = 100 J",
@@ -147,14 +259,38 @@ const MockDataButton = () => {
             {
               question:
                 "Which law states that every action has an equal and opposite reaction?",
+              questionImageBeforeUrl: undefined,
+              questionImageAfterUrl: undefined,
+              questionImageUrl: undefined,
+              questionContentType: "text" as const,
               options: [
-                { id: "opt1", text: "Newton's Third Law", isCorrect: true },
-                { id: "opt2", text: "Newton's First Law", isCorrect: false },
-                { id: "opt3", text: "Newton's Second Law", isCorrect: false },
+                {
+                  id: "opt1",
+                  text: "Newton's Third Law",
+                  imageUrl: undefined,
+                  isCorrect: true,
+                  contentType: "text" as const,
+                },
+                {
+                  id: "opt2",
+                  text: "Newton's First Law",
+                  imageUrl: undefined,
+                  isCorrect: false,
+                  contentType: "text" as const,
+                },
+                {
+                  id: "opt3",
+                  text: "Newton's Second Law",
+                  imageUrl: undefined,
+                  isCorrect: false,
+                  contentType: "text" as const,
+                },
                 {
                   id: "opt4",
                   text: "Law of Conservation of Energy",
+                  imageUrl: undefined,
                   isCorrect: false,
+                  contentType: "text" as const,
                 },
               ],
               explanation:
@@ -183,26 +319,38 @@ const MockDataButton = () => {
             {
               question:
                 "A gas undergoes an isothermal process. Which statement is correct?",
+              questionImageBeforeUrl: undefined,
+              questionImageAfterUrl: undefined,
+              questionImageUrl: undefined,
+              questionContentType: "text" as const,
               options: [
                 {
                   id: "opt1",
                   text: "Temperature remains constant",
+                  imageUrl: undefined,
                   isCorrect: true,
+                  contentType: "text" as const,
                 },
                 {
                   id: "opt2",
                   text: "Pressure remains constant",
+                  imageUrl: undefined,
                   isCorrect: false,
+                  contentType: "text" as const,
                 },
                 {
                   id: "opt3",
                   text: "Volume remains constant",
+                  imageUrl: undefined,
                   isCorrect: false,
+                  contentType: "text" as const,
                 },
                 {
                   id: "opt4",
                   text: "Internal energy remains constant",
+                  imageUrl: undefined,
                   isCorrect: false,
+                  contentType: "text" as const,
                 },
               ],
               explanation:
@@ -215,26 +363,38 @@ const MockDataButton = () => {
             },
             {
               question: "What is the first law of thermodynamics?",
+              questionImageBeforeUrl: undefined,
+              questionImageAfterUrl: undefined,
+              questionImageUrl: undefined,
+              questionContentType: "text" as const,
               options: [
                 {
                   id: "opt1",
                   text: "Energy cannot be created or destroyed",
+                  imageUrl: undefined,
                   isCorrect: true,
+                  contentType: "text" as const,
                 },
                 {
                   id: "opt2",
                   text: "Entropy always increases",
+                  imageUrl: undefined,
                   isCorrect: false,
+                  contentType: "text" as const,
                 },
                 {
                   id: "opt3",
                   text: "Heat flows from hot to cold",
+                  imageUrl: undefined,
                   isCorrect: false,
+                  contentType: "text" as const,
                 },
                 {
                   id: "opt4",
                   text: "Pressure and volume are inversely related",
+                  imageUrl: undefined,
                   isCorrect: false,
+                  contentType: "text" as const,
                 },
               ],
               explanation:
@@ -248,11 +408,39 @@ const MockDataButton = () => {
             {
               question:
                 "At what temperature does water boil at standard atmospheric pressure?",
+              questionImageBeforeUrl: undefined,
+              questionImageAfterUrl: undefined,
+              questionImageUrl: undefined,
+              questionContentType: "text" as const,
               options: [
-                { id: "opt1", text: "100°C", isCorrect: true },
-                { id: "opt2", text: "0°C", isCorrect: false },
-                { id: "opt3", text: "50°C", isCorrect: false },
-                { id: "opt4", text: "200°C", isCorrect: false },
+                {
+                  id: "opt1",
+                  text: "100°C",
+                  imageUrl: undefined,
+                  isCorrect: true,
+                  contentType: "text" as const,
+                },
+                {
+                  id: "opt2",
+                  text: "0°C",
+                  imageUrl: undefined,
+                  isCorrect: false,
+                  contentType: "text" as const,
+                },
+                {
+                  id: "opt3",
+                  text: "50°C",
+                  imageUrl: undefined,
+                  isCorrect: false,
+                  contentType: "text" as const,
+                },
+                {
+                  id: "opt4",
+                  text: "200°C",
+                  imageUrl: undefined,
+                  isCorrect: false,
+                  contentType: "text" as const,
+                },
               ],
               explanation:
                 "Water boils at 100°C (212°F) at standard atmospheric pressure (1 atm).",
@@ -265,11 +453,39 @@ const MockDataButton = () => {
             {
               question:
                 "What is the efficiency of a heat engine operating between 500K and 300K?",
+              questionImageBeforeUrl: undefined,
+              questionImageAfterUrl: undefined,
+              questionImageUrl: undefined,
+              questionContentType: "text" as const,
               options: [
-                { id: "opt1", text: "40%", isCorrect: true },
-                { id: "opt2", text: "60%", isCorrect: false },
-                { id: "opt3", text: "20%", isCorrect: false },
-                { id: "opt4", text: "80%", isCorrect: false },
+                {
+                  id: "opt1",
+                  text: "40%",
+                  imageUrl: undefined,
+                  isCorrect: true,
+                  contentType: "text" as const,
+                },
+                {
+                  id: "opt2",
+                  text: "60%",
+                  imageUrl: undefined,
+                  isCorrect: false,
+                  contentType: "text" as const,
+                },
+                {
+                  id: "opt3",
+                  text: "20%",
+                  imageUrl: undefined,
+                  isCorrect: false,
+                  contentType: "text" as const,
+                },
+                {
+                  id: "opt4",
+                  text: "80%",
+                  imageUrl: undefined,
+                  isCorrect: false,
+                  contentType: "text" as const,
+                },
               ],
               explanation:
                 "Using η = 1 - T_cold/T_hot: η = 1 - 300/500 = 1 - 0.6 = 0.4 = 40%",
@@ -281,18 +497,38 @@ const MockDataButton = () => {
             },
             {
               question: "Which process has the highest entropy change?",
+              questionImageBeforeUrl: undefined,
+              questionImageAfterUrl: undefined,
+              questionImageUrl: undefined,
+              questionContentType: "text" as const,
               options: [
-                { id: "opt1", text: "Ice melting to water", isCorrect: true },
-                { id: "opt2", text: "Water freezing to ice", isCorrect: false },
+                {
+                  id: "opt1",
+                  text: "Ice melting to water",
+                  imageUrl: undefined,
+                  isCorrect: true,
+                  contentType: "text" as const,
+                },
+                {
+                  id: "opt2",
+                  text: "Water freezing to ice",
+                  imageUrl: undefined,
+                  isCorrect: false,
+                  contentType: "text" as const,
+                },
                 {
                   id: "opt3",
                   text: "Water heating from 20°C to 30°C",
+                  imageUrl: undefined,
                   isCorrect: false,
+                  contentType: "text" as const,
                 },
                 {
                   id: "opt4",
                   text: "Gas compressing isothermally",
+                  imageUrl: undefined,
                   isCorrect: false,
+                  contentType: "text" as const,
                 },
               ],
               explanation:
@@ -300,713 +536,6 @@ const MockDataButton = () => {
               difficulty: "medium" as const,
               subject: "Thermodynamics",
               topic: "Entropy",
-              order: 5,
-              marks: 2,
-            },
-          ],
-        },
-        {
-          title: "Electromagnetism Fundamentals",
-          description:
-            "Basic concepts of electricity and magnetism including fields, forces, and circuits.",
-          examYear: "2027",
-          classType: ["PAPER"],
-          timeLimit: 55,
-          passingMarks: 50,
-          status: "published" as const,
-          totalQuestions: 5,
-          totalMarks: 12,
-          createdBy: "admin",
-          questions: [
-            {
-              question:
-                "What is the electric field strength at a distance of 2m from a point charge of 4μC? (k = 9×10⁹ Nm²/C²)",
-              options: [
-                { id: "opt1", text: "9×10³ N/C", isCorrect: true },
-                { id: "opt2", text: "18×10³ N/C", isCorrect: false },
-                { id: "opt3", text: "4.5×10³ N/C", isCorrect: false },
-                { id: "opt4", text: "36×10³ N/C", isCorrect: false },
-              ],
-              explanation:
-                "Using E = kQ/r²: E = (9×10⁹ × 4×10⁻⁶)/(2)² = (36×10³)/4 = 9×10³ N/C",
-              difficulty: "hard" as const,
-              subject: "Electromagnetism",
-              topic: "Electric Fields",
-              order: 1,
-              marks: 3,
-            },
-            {
-              question: "What is the unit of electric current?",
-              options: [
-                { id: "opt1", text: "Ampere (A)", isCorrect: true },
-                { id: "opt2", text: "Volt (V)", isCorrect: false },
-                { id: "opt3", text: "Ohm (Ω)", isCorrect: false },
-                { id: "opt4", text: "Coulomb (C)", isCorrect: false },
-              ],
-              explanation:
-                "Electric current is measured in Amperes (A). 1 A = 1 C/s",
-              difficulty: "easy" as const,
-              subject: "Electromagnetism",
-              topic: "Electric Current",
-              order: 2,
-              marks: 1,
-            },
-            {
-              question:
-                "What is the resistance of a conductor if 2A current flows through it when 10V is applied?",
-              options: [
-                { id: "opt1", text: "5 Ω", isCorrect: true },
-                { id: "opt2", text: "20 Ω", isCorrect: false },
-                { id: "opt3", text: "0.2 Ω", isCorrect: false },
-                { id: "opt4", text: "12 Ω", isCorrect: false },
-              ],
-              explanation: "Using V = IR: R = V/I = 10/2 = 5 Ω",
-              difficulty: "easy" as const,
-              subject: "Electromagnetism",
-              topic: "Ohm's Law",
-              order: 3,
-              marks: 2,
-            },
-            {
-              question: "Which of the following is NOT a fundamental force?",
-              options: [
-                { id: "opt1", text: "Centripetal force", isCorrect: true },
-                { id: "opt2", text: "Gravitational force", isCorrect: false },
-                { id: "opt3", text: "Electromagnetic force", isCorrect: false },
-                { id: "opt4", text: "Strong nuclear force", isCorrect: false },
-              ],
-              explanation:
-                "Centripetal force is not a fundamental force but rather a description of the net force required for circular motion.",
-              difficulty: "medium" as const,
-              subject: "Electromagnetism",
-              topic: "Forces",
-              order: 4,
-              marks: 2,
-            },
-            {
-              question:
-                "What happens to the magnetic field around a current-carrying wire when the current is doubled?",
-              options: [
-                { id: "opt1", text: "It doubles", isCorrect: true },
-                { id: "opt2", text: "It halves", isCorrect: false },
-                { id: "opt3", text: "It quadruples", isCorrect: false },
-                { id: "opt4", text: "It remains the same", isCorrect: false },
-              ],
-              explanation:
-                "The magnetic field around a current-carrying wire is directly proportional to the current (B ∝ I).",
-              difficulty: "medium" as const,
-              subject: "Electromagnetism",
-              topic: "Magnetic Fields",
-              order: 5,
-              marks: 4,
-            },
-          ],
-        },
-        {
-          title: "Waves and Oscillations",
-          description:
-            "Understanding wave properties, sound, and harmonic motion.",
-          examYear: "2027",
-          classType: ["REVISION"],
-          timeLimit: 40,
-          passingMarks: 35,
-          status: "published" as const,
-          totalQuestions: 5,
-          totalMarks: 9,
-          createdBy: "admin",
-          questions: [
-            {
-              question:
-                "A wave has a frequency of 50 Hz and a wavelength of 4 m. What is its speed?",
-              options: [
-                { id: "opt1", text: "200 m/s", isCorrect: true },
-                { id: "opt2", text: "12.5 m/s", isCorrect: false },
-                { id: "opt3", text: "54 m/s", isCorrect: false },
-                { id: "opt4", text: "46 m/s", isCorrect: false },
-              ],
-              explanation:
-                "Using the wave equation v = fλ: v = 50 Hz × 4 m = 200 m/s",
-              difficulty: "easy" as const,
-              subject: "Waves",
-              topic: "Wave Properties",
-              order: 1,
-              marks: 1,
-            },
-            {
-              question:
-                "What is the frequency of a pendulum that completes 20 oscillations in 10 seconds?",
-              options: [
-                { id: "opt1", text: "2 Hz", isCorrect: true },
-                { id: "opt2", text: "0.5 Hz", isCorrect: false },
-                { id: "opt3", text: "200 Hz", isCorrect: false },
-                { id: "opt4", text: "10 Hz", isCorrect: false },
-              ],
-              explanation:
-                "Frequency = number of oscillations / time = 20 / 10 = 2 Hz",
-              difficulty: "easy" as const,
-              subject: "Waves",
-              topic: "Simple Harmonic Motion",
-              order: 2,
-              marks: 2,
-            },
-            {
-              question: "What type of wave requires a medium to travel?",
-              options: [
-                { id: "opt1", text: "Mechanical wave", isCorrect: true },
-                { id: "opt2", text: "Electromagnetic wave", isCorrect: false },
-                { id: "opt3", text: "Light wave", isCorrect: false },
-                { id: "opt4", text: "Radio wave", isCorrect: false },
-              ],
-              explanation:
-                "Mechanical waves (like sound) require a medium to travel, while electromagnetic waves can travel through vacuum.",
-              difficulty: "easy" as const,
-              subject: "Waves",
-              topic: "Wave Types",
-              order: 3,
-              marks: 1,
-            },
-            {
-              question:
-                "What is the speed of sound in air at room temperature?",
-              options: [
-                { id: "opt1", text: "343 m/s", isCorrect: true },
-                { id: "opt2", text: "300 m/s", isCorrect: false },
-                { id: "opt3", text: "400 m/s", isCorrect: false },
-                { id: "opt4", text: "500 m/s", isCorrect: false },
-              ],
-              explanation:
-                "The speed of sound in air at 20°C is approximately 343 m/s (or 1235 km/h).",
-              difficulty: "medium" as const,
-              subject: "Waves",
-              topic: "Sound Waves",
-              order: 4,
-              marks: 2,
-            },
-            {
-              question:
-                "What happens to the wavelength when frequency increases?",
-              options: [
-                { id: "opt1", text: "It decreases", isCorrect: true },
-                { id: "opt2", text: "It increases", isCorrect: false },
-                { id: "opt3", text: "It remains constant", isCorrect: false },
-                {
-                  id: "opt4",
-                  text: "It depends on the medium",
-                  isCorrect: false,
-                },
-              ],
-              explanation:
-                "Since v = fλ, if frequency increases and speed remains constant, wavelength must decrease.",
-              difficulty: "medium" as const,
-              subject: "Waves",
-              topic: "Wave Relationships",
-              order: 5,
-              marks: 3,
-            },
-          ],
-        },
-        {
-          title: "Modern Physics - Quantum Mechanics",
-          description:
-            "Introduction to quantum physics, atomic structure, and nuclear physics.",
-          examYear: "2027",
-          classType: ["PAPER"],
-          timeLimit: 60,
-          passingMarks: 55,
-          status: "published" as const,
-          totalQuestions: 5,
-          totalMarks: 11,
-          createdBy: "admin",
-          questions: [
-            {
-              question: "What is the smallest unit of light energy?",
-              options: [
-                { id: "opt1", text: "Photon", isCorrect: true },
-                { id: "opt2", text: "Electron", isCorrect: false },
-                { id: "opt3", text: "Proton", isCorrect: false },
-                { id: "opt4", text: "Neutron", isCorrect: false },
-              ],
-              explanation:
-                "A photon is the smallest unit of light energy, representing a quantum of electromagnetic radiation.",
-              difficulty: "medium" as const,
-              subject: "Modern Physics",
-              topic: "Quantum Mechanics",
-              order: 1,
-              marks: 2,
-            },
-            {
-              question: "What is the atomic number of an element?",
-              options: [
-                { id: "opt1", text: "Number of protons", isCorrect: true },
-                { id: "opt2", text: "Number of neutrons", isCorrect: false },
-                { id: "opt3", text: "Number of electrons", isCorrect: false },
-                {
-                  id: "opt4",
-                  text: "Total number of nucleons",
-                  isCorrect: false,
-                },
-              ],
-              explanation:
-                "The atomic number is the number of protons in the nucleus, which determines the element's identity.",
-              difficulty: "easy" as const,
-              subject: "Modern Physics",
-              topic: "Atomic Structure",
-              order: 2,
-              marks: 1,
-            },
-            {
-              question:
-                "What type of radiation has the highest penetrating power?",
-              options: [
-                { id: "opt1", text: "Gamma rays", isCorrect: true },
-                { id: "opt2", text: "Alpha particles", isCorrect: false },
-                { id: "opt3", text: "Beta particles", isCorrect: false },
-                { id: "opt4", text: "X-rays", isCorrect: false },
-              ],
-              explanation:
-                "Gamma rays have the highest penetrating power and can pass through several centimeters of lead.",
-              difficulty: "medium" as const,
-              subject: "Modern Physics",
-              topic: "Nuclear Physics",
-              order: 3,
-              marks: 2,
-            },
-            {
-              question:
-                "What is the energy of a photon with frequency 6×10¹⁴ Hz? (h = 6.63×10⁻³⁴ J⋅s)",
-              options: [
-                { id: "opt1", text: "3.98×10⁻¹⁹ J", isCorrect: true },
-                { id: "opt2", text: "1.99×10⁻¹⁹ J", isCorrect: false },
-                { id: "opt3", text: "7.96×10⁻¹⁹ J", isCorrect: false },
-                { id: "opt4", text: "2.49×10⁻¹⁹ J", isCorrect: false },
-              ],
-              explanation:
-                "Using E = hf: E = 6.63×10⁻³⁴ × 6×10¹⁴ = 3.978×10⁻¹⁹ J ≈ 3.98×10⁻¹⁹ J",
-              difficulty: "hard" as const,
-              subject: "Modern Physics",
-              topic: "Quantum Energy",
-              order: 4,
-              marks: 3,
-            },
-            {
-              question: "What is the half-life of a radioactive element?",
-              options: [
-                {
-                  id: "opt1",
-                  text: "Time for half the nuclei to decay",
-                  isCorrect: true,
-                },
-                {
-                  id: "opt2",
-                  text: "Time for all nuclei to decay",
-                  isCorrect: false,
-                },
-                {
-                  id: "opt3",
-                  text: "Time for one nucleus to decay",
-                  isCorrect: false,
-                },
-                {
-                  id: "opt4",
-                  text: "Time for quarter of nuclei to decay",
-                  isCorrect: false,
-                },
-              ],
-              explanation:
-                "Half-life is the time required for half of the radioactive nuclei in a sample to decay.",
-              difficulty: "easy" as const,
-              subject: "Modern Physics",
-              topic: "Radioactivity",
-              order: 5,
-              marks: 3,
-            },
-          ],
-        },
-        {
-          title: "Chemistry Basics - Atomic Structure",
-          description:
-            "Fundamental chemistry concepts including atomic theory, bonding, and periodic trends.",
-          examYear: "2027",
-          classType: ["REVISION"],
-          timeLimit: 45,
-          passingMarks: 40,
-          status: "published" as const,
-          totalQuestions: 5,
-          totalMarks: 8,
-          createdBy: "admin",
-          questions: [
-            {
-              question:
-                "What is the maximum number of electrons in the first energy level?",
-              options: [
-                { id: "opt1", text: "2", isCorrect: true },
-                { id: "opt2", text: "8", isCorrect: false },
-                { id: "opt3", text: "18", isCorrect: false },
-                { id: "opt4", text: "32", isCorrect: false },
-              ],
-              explanation:
-                "The first energy level (n=1) can hold a maximum of 2 electrons according to the formula 2n².",
-              difficulty: "easy" as const,
-              subject: "Chemistry",
-              topic: "Atomic Structure",
-              order: 1,
-              marks: 1,
-            },
-            {
-              question:
-                "What type of bond forms between a metal and a non-metal?",
-              options: [
-                { id: "opt1", text: "Ionic bond", isCorrect: true },
-                { id: "opt2", text: "Covalent bond", isCorrect: false },
-                { id: "opt3", text: "Metallic bond", isCorrect: false },
-                { id: "opt4", text: "Hydrogen bond", isCorrect: false },
-              ],
-              explanation:
-                "Ionic bonds form between metals and non-metals through the transfer of electrons.",
-              difficulty: "easy" as const,
-              subject: "Chemistry",
-              topic: "Chemical Bonding",
-              order: 2,
-              marks: 2,
-            },
-            {
-              question: "What is the pH of a neutral solution?",
-              options: [
-                { id: "opt1", text: "7", isCorrect: true },
-                { id: "opt2", text: "0", isCorrect: false },
-                { id: "opt3", text: "14", isCorrect: false },
-                { id: "opt4", text: "1", isCorrect: false },
-              ],
-              explanation:
-                "A neutral solution has a pH of 7, where [H⁺] = [OH⁻] = 10⁻⁷ M.",
-              difficulty: "easy" as const,
-              subject: "Chemistry",
-              topic: "Acids and Bases",
-              order: 3,
-              marks: 1,
-            },
-            {
-              question: "Which element has the highest electronegativity?",
-              options: [
-                { id: "opt1", text: "Fluorine", isCorrect: true },
-                { id: "opt2", text: "Oxygen", isCorrect: false },
-                { id: "opt3", text: "Chlorine", isCorrect: false },
-                { id: "opt4", text: "Nitrogen", isCorrect: false },
-              ],
-              explanation:
-                "Fluorine has the highest electronegativity value of 4.0 on the Pauling scale.",
-              difficulty: "medium" as const,
-              subject: "Chemistry",
-              topic: "Periodic Trends",
-              order: 4,
-              marks: 2,
-            },
-            {
-              question: "What is the molecular formula of methane?",
-              options: [
-                { id: "opt1", text: "CH₄", isCorrect: true },
-                { id: "opt2", text: "C₂H₆", isCorrect: false },
-                { id: "opt3", text: "CH₃", isCorrect: false },
-                { id: "opt4", text: "C₄H₁₀", isCorrect: false },
-              ],
-              explanation:
-                "Methane is the simplest hydrocarbon with one carbon atom bonded to four hydrogen atoms: CH₄.",
-              difficulty: "easy" as const,
-              subject: "Chemistry",
-              topic: "Organic Chemistry",
-              order: 5,
-              marks: 2,
-            },
-          ],
-        },
-        {
-          title: "Mathematics - Calculus Applications",
-          description:
-            "Calculus concepts applied to physics problems including derivatives and integrals.",
-          examYear: "2027",
-          classType: ["PAPER"],
-          timeLimit: 50,
-          passingMarks: 45,
-          status: "published" as const,
-          totalQuestions: 5,
-          totalMarks: 10,
-          createdBy: "admin",
-          questions: [
-            {
-              question: "What is the derivative of x²?",
-              options: [
-                { id: "opt1", text: "2x", isCorrect: true },
-                { id: "opt2", text: "x", isCorrect: false },
-                { id: "opt3", text: "2x²", isCorrect: false },
-                { id: "opt4", text: "x²/2", isCorrect: false },
-              ],
-              explanation: "Using the power rule: d/dx(x²) = 2x¹ = 2x",
-              difficulty: "easy" as const,
-              subject: "Mathematics",
-              topic: "Calculus",
-              order: 1,
-              marks: 1,
-            },
-            {
-              question: "What is the integral of 2x with respect to x?",
-              options: [
-                { id: "opt1", text: "x² + C", isCorrect: true },
-                { id: "opt2", text: "2x² + C", isCorrect: false },
-                { id: "opt3", text: "x + C", isCorrect: false },
-                { id: "opt4", text: "2x + C", isCorrect: false },
-              ],
-              explanation:
-                "Using the power rule for integration: ∫2x dx = 2(x²/2) + C = x² + C",
-              difficulty: "easy" as const,
-              subject: "Mathematics",
-              topic: "Calculus",
-              order: 2,
-              marks: 2,
-            },
-            {
-              question: "What is the derivative of sin(x)?",
-              options: [
-                { id: "opt1", text: "cos(x)", isCorrect: true },
-                { id: "opt2", text: "-cos(x)", isCorrect: false },
-                { id: "opt3", text: "sin(x)", isCorrect: false },
-                { id: "opt4", text: "-sin(x)", isCorrect: false },
-              ],
-              explanation:
-                "The derivative of sin(x) is cos(x). This is a fundamental trigonometric derivative.",
-              difficulty: "medium" as const,
-              subject: "Mathematics",
-              topic: "Calculus",
-              order: 3,
-              marks: 2,
-            },
-            {
-              question:
-                "What is the limit of (x² - 4)/(x - 2) as x approaches 2?",
-              options: [
-                { id: "opt1", text: "4", isCorrect: true },
-                { id: "opt2", text: "0", isCorrect: false },
-                { id: "opt3", text: "∞", isCorrect: false },
-                { id: "opt4", text: "2", isCorrect: false },
-              ],
-              explanation:
-                "Factorizing: (x² - 4)/(x - 2) = (x + 2)(x - 2)/(x - 2) = x + 2. As x → 2, this approaches 4.",
-              difficulty: "medium" as const,
-              subject: "Mathematics",
-              topic: "Calculus",
-              order: 4,
-              marks: 3,
-            },
-            {
-              question:
-                "What is the area under the curve y = x from x = 0 to x = 3?",
-              options: [
-                { id: "opt1", text: "4.5", isCorrect: true },
-                { id: "opt2", text: "9", isCorrect: false },
-                { id: "opt3", text: "3", isCorrect: false },
-                { id: "opt4", text: "6", isCorrect: false },
-              ],
-              explanation:
-                "Using integration: ∫₀³ x dx = [x²/2]₀³ = 9/2 - 0 = 4.5",
-              difficulty: "hard" as const,
-              subject: "Mathematics",
-              topic: "Calculus",
-              order: 5,
-              marks: 2,
-            },
-          ],
-        },
-        {
-          title: "Biology - Cell Structure",
-          description:
-            "Understanding cellular biology, organelles, and basic life processes.",
-          examYear: "2027",
-          classType: ["REVISION"],
-          timeLimit: 40,
-          passingMarks: 35,
-          status: "published" as const,
-          totalQuestions: 5,
-          totalMarks: 7,
-          createdBy: "admin",
-          questions: [
-            {
-              question: "What is the powerhouse of the cell?",
-              options: [
-                { id: "opt1", text: "Mitochondria", isCorrect: true },
-                { id: "opt2", text: "Nucleus", isCorrect: false },
-                { id: "opt3", text: "Ribosome", isCorrect: false },
-                { id: "opt4", text: "Chloroplast", isCorrect: false },
-              ],
-              explanation:
-                "Mitochondria are called the powerhouse of the cell because they produce ATP through cellular respiration.",
-              difficulty: "easy" as const,
-              subject: "Biology",
-              topic: "Cell Organelles",
-              order: 1,
-              marks: 1,
-            },
-            {
-              question: "What type of cell has a nucleus?",
-              options: [
-                { id: "opt1", text: "Eukaryotic cell", isCorrect: true },
-                { id: "opt2", text: "Prokaryotic cell", isCorrect: false },
-                { id: "opt3", text: "Bacterial cell", isCorrect: false },
-                { id: "opt4", text: "Viral cell", isCorrect: false },
-              ],
-              explanation:
-                "Eukaryotic cells have a true nucleus enclosed by a nuclear membrane, unlike prokaryotic cells.",
-              difficulty: "easy" as const,
-              subject: "Biology",
-              topic: "Cell Types",
-              order: 2,
-              marks: 1,
-            },
-            {
-              question:
-                "What is the process by which plants make their own food?",
-              options: [
-                { id: "opt1", text: "Photosynthesis", isCorrect: true },
-                { id: "opt2", text: "Respiration", isCorrect: false },
-                { id: "opt3", text: "Digestion", isCorrect: false },
-                { id: "opt4", text: "Fermentation", isCorrect: false },
-              ],
-              explanation:
-                "Photosynthesis is the process by which plants convert light energy, CO₂, and water into glucose and oxygen.",
-              difficulty: "easy" as const,
-              subject: "Biology",
-              topic: "Plant Processes",
-              order: 3,
-              marks: 1,
-            },
-            {
-              question: "What is the basic unit of heredity?",
-              options: [
-                { id: "opt1", text: "Gene", isCorrect: true },
-                { id: "opt2", text: "Chromosome", isCorrect: false },
-                { id: "opt3", text: "DNA", isCorrect: false },
-                { id: "opt4", text: "Protein", isCorrect: false },
-              ],
-              explanation:
-                "A gene is the basic unit of heredity, containing the instructions for making specific proteins.",
-              difficulty: "medium" as const,
-              subject: "Biology",
-              topic: "Genetics",
-              order: 4,
-              marks: 2,
-            },
-            {
-              question:
-                "What is the process by which cells divide to produce identical daughter cells?",
-              options: [
-                { id: "opt1", text: "Mitosis", isCorrect: true },
-                { id: "opt2", text: "Meiosis", isCorrect: false },
-                { id: "opt3", text: "Fertilization", isCorrect: false },
-                { id: "opt4", text: "Mutation", isCorrect: false },
-              ],
-              explanation:
-                "Mitosis is the process of cell division that produces two identical daughter cells with the same number of chromosomes.",
-              difficulty: "medium" as const,
-              subject: "Biology",
-              topic: "Cell Division",
-              order: 5,
-              marks: 2,
-            },
-          ],
-        },
-        {
-          title: "Environmental Science",
-          description:
-            "Environmental concepts including ecosystems, pollution, and sustainability.",
-          examYear: "2027",
-          classType: ["PAPER"],
-          timeLimit: 35,
-          passingMarks: 30,
-          status: "published" as const,
-          totalQuestions: 5,
-          totalMarks: 6,
-          createdBy: "admin",
-          questions: [
-            {
-              question: "What is the primary cause of global warming?",
-              options: [
-                { id: "opt1", text: "Greenhouse gases", isCorrect: true },
-                { id: "opt2", text: "Ozone depletion", isCorrect: false },
-                { id: "opt3", text: "Solar radiation", isCorrect: false },
-                { id: "opt4", text: "Ocean currents", isCorrect: false },
-              ],
-              explanation:
-                "Greenhouse gases like CO₂ trap heat in the atmosphere, causing global temperatures to rise.",
-              difficulty: "easy" as const,
-              subject: "Environmental Science",
-              topic: "Climate Change",
-              order: 1,
-              marks: 1,
-            },
-            {
-              question: "What is the largest carbon sink on Earth?",
-              options: [
-                { id: "opt1", text: "Oceans", isCorrect: true },
-                { id: "opt2", text: "Forests", isCorrect: false },
-                { id: "opt3", text: "Soil", isCorrect: false },
-                { id: "opt4", text: "Atmosphere", isCorrect: false },
-              ],
-              explanation:
-                "Oceans absorb about 25% of the CO₂ emitted by human activities, making them the largest carbon sink.",
-              difficulty: "medium" as const,
-              subject: "Environmental Science",
-              topic: "Carbon Cycle",
-              order: 2,
-              marks: 1,
-            },
-            {
-              question: "What is biodiversity?",
-              options: [
-                {
-                  id: "opt1",
-                  text: "Variety of life on Earth",
-                  isCorrect: true,
-                },
-                { id: "opt2", text: "Number of species", isCorrect: false },
-                { id: "opt3", text: "Size of ecosystems", isCorrect: false },
-                { id: "opt4", text: "Amount of biomass", isCorrect: false },
-              ],
-              explanation:
-                "Biodiversity refers to the variety of life on Earth, including species diversity, genetic diversity, and ecosystem diversity.",
-              difficulty: "easy" as const,
-              subject: "Environmental Science",
-              topic: "Biodiversity",
-              order: 3,
-              marks: 1,
-            },
-            {
-              question: "What is the main source of renewable energy?",
-              options: [
-                { id: "opt1", text: "Solar energy", isCorrect: true },
-                { id: "opt2", text: "Nuclear energy", isCorrect: false },
-                { id: "opt3", text: "Fossil fuels", isCorrect: false },
-                { id: "opt4", text: "Coal", isCorrect: false },
-              ],
-              explanation:
-                "Solar energy is the most abundant renewable energy source, providing clean and sustainable power.",
-              difficulty: "easy" as const,
-              subject: "Environmental Science",
-              topic: "Renewable Energy",
-              order: 4,
-              marks: 1,
-            },
-            {
-              question:
-                "What is the process by which plants and animals break down organic matter?",
-              options: [
-                { id: "opt1", text: "Decomposition", isCorrect: true },
-                { id: "opt2", text: "Photosynthesis", isCorrect: false },
-                { id: "opt3", text: "Respiration", isCorrect: false },
-                { id: "opt4", text: "Fermentation", isCorrect: false },
-              ],
-              explanation:
-                "Decomposition is the process by which decomposers break down dead organic matter, returning nutrients to the ecosystem.",
-              difficulty: "medium" as const,
-              subject: "Environmental Science",
-              topic: "Nutrient Cycling",
               order: 5,
               marks: 2,
             },
@@ -1040,8 +569,38 @@ const MockDataButton = () => {
 
           // Add questions to the pack
           for (const question of testData.questions) {
+            // Clean function to remove undefined values and prepare for Firestore
+            const cleanObject = (
+              obj: Record<string, unknown>
+            ): Record<string, unknown> => {
+              const cleaned: Record<string, unknown> = {};
+              for (const [key, value] of Object.entries(obj)) {
+                if (value !== undefined) {
+                  if (Array.isArray(value)) {
+                    cleaned[key] = value
+                      .map((item) =>
+                        typeof item === "object" && item !== null
+                          ? cleanObject(item as Record<string, unknown>)
+                          : item
+                      )
+                      .filter((item) => item !== undefined);
+                  } else if (typeof value === "object" && value !== null) {
+                    cleaned[key] = cleanObject(
+                      value as Record<string, unknown>
+                    );
+                  } else {
+                    cleaned[key] = value;
+                  }
+                }
+              }
+              return cleaned;
+            };
+
+            const cleanQuestion = cleanObject(
+              question as Record<string, unknown>
+            );
             await addDoc(collection(db, "mcqTests", packRef.id, "questions"), {
-              ...question,
+              ...cleanQuestion,
               createdAt: serverTimestamp(),
             });
           }
@@ -1182,8 +741,16 @@ const MCQPage = () => {
 
     if (confirmed) {
       try {
-        // Delete all images from Firebase Storage first
-        await StorageService.deleteMCQTestFolder(packId);
+        // Try to delete all images from Firebase Storage first (optional)
+        // try {
+        //   await StorageService.deleteMCQTestFolder(packId);
+        // } catch (storageError) {
+        //   console.warn(
+        //     "Failed to delete storage files (CORS issue in development):",
+        //     storageError
+        //   );
+        //   // Continue with Firestore deletion even if storage deletion fails
+        // }
 
         // Create a batch to delete both the main document and subcollection
         const batch = writeBatch(db);
@@ -1274,11 +841,11 @@ const MCQPage = () => {
       ),
     },
     {
-    accessorKey: "description",
-    header: "Description",
-    cell: ({ row }: any) => (
-    <div className="max-w-xs truncate">{row.getValue("description")}</div>
-    ),
+      accessorKey: "description",
+      header: "Description",
+      cell: ({ row }: any) => (
+        <div className="max-w-xs truncate">{row.getValue("description")}</div>
+      ),
       enableHiding: true,
     },
     {

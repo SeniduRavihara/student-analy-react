@@ -18,7 +18,6 @@ import { Label } from "@/components/ui/label";
 import { QuestionCardSkeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
 import { db } from "@/firebase/config";
-import { StorageService } from "@/firebase/services/StorageService";
 import { StorageTest } from "@/firebase/services/StorageTest";
 import { toast } from "@/hooks/use-toast";
 import { useData } from "@/hooks/useData";
@@ -34,7 +33,18 @@ import {
   query,
   updateDoc,
 } from "firebase/firestore";
-import { Edit, Globe, Lock, Plus, Save, Trash2 } from "lucide-react";
+import {
+  Edit,
+  FileText,
+  Globe,
+  Image,
+  Loader2,
+  Lock,
+  Plus,
+  Save,
+  Trash2,
+  X,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
@@ -45,6 +55,8 @@ const MCQEditPage = () => {
   const [pack, setPack] = useState<MCQPack | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [addingQuestion, setAddingQuestion] = useState(false);
+  const [updatingQuestion, setUpdatingQuestion] = useState(false);
   const [isQuestionDialogOpen, setIsQuestionDialogOpen] = useState(false);
   const [editingQuestion, setEditingQuestion] = useState<MCQQuestion | null>(
     null
@@ -60,6 +72,8 @@ const MCQEditPage = () => {
   // Question form state
   const [questionText, setQuestionText] = useState("");
   const [questionImageUrl, setQuestionImageUrl] = useState("");
+  const [questionImageBeforeUrl, setQuestionImageBeforeUrl] = useState("");
+  const [questionImageAfterUrl, setQuestionImageAfterUrl] = useState("");
   const [questionContentType, setQuestionContentType] = useState<
     "text" | "image"
   >("text");
@@ -73,6 +87,7 @@ const MCQEditPage = () => {
   const [difficulty, setDifficulty] = useState<"easy" | "medium" | "hard">(
     "medium"
   );
+  const [marks, setMarks] = useState(1);
 
   // Image upload functions using Firebase Storage
   const handleQuestionImageUpload = async (
@@ -95,8 +110,9 @@ const MCQEditPage = () => {
         const reader = new FileReader();
         reader.onload = (e) => {
           const imageUrl = e.target?.result as string;
-          setQuestionImageUrl(imageUrl);
-          setQuestionContentType("image");
+          if (questionContentType === "image") {
+            setQuestionImageUrl(imageUrl);
+          }
           toast({
             title: "Success",
             description: "Question image uploaded successfully (base64)",
@@ -110,6 +126,78 @@ const MCQEditPage = () => {
           title: "Error",
           description:
             "Failed to upload image. Please check your internet connection and try again.",
+          variant: "destructive",
+        });
+      }
+    }
+  };
+
+  const handleQuestionImageBeforeUpload = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = event.target.files?.[0];
+    if (file && pack) {
+      try {
+        if (!currentUserData?.uid) {
+          toast({
+            title: "Error",
+            description: "You must be logged in to upload images",
+            variant: "destructive",
+          });
+          return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const imageUrl = e.target?.result as string;
+          setQuestionImageBeforeUrl(imageUrl);
+          toast({
+            title: "Success",
+            description: "Image before question uploaded successfully",
+          });
+        };
+        reader.readAsDataURL(file);
+      } catch (error) {
+        console.error("Upload error:", error);
+        toast({
+          title: "Error",
+          description: "Failed to upload image",
+          variant: "destructive",
+        });
+      }
+    }
+  };
+
+  const handleQuestionImageAfterUpload = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = event.target.files?.[0];
+    if (file && pack) {
+      try {
+        if (!currentUserData?.uid) {
+          toast({
+            title: "Error",
+            description: "You must be logged in to upload images",
+            variant: "destructive",
+          });
+          return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const imageUrl = e.target?.result as string;
+          setQuestionImageAfterUrl(imageUrl);
+          toast({
+            title: "Success",
+            description: "Image after question uploaded successfully",
+          });
+        };
+        reader.readAsDataURL(file);
+      } catch (error) {
+        console.error("Upload error:", error);
+        toast({
+          title: "Error",
+          description: "Failed to upload image",
           variant: "destructive",
         });
       }
@@ -164,57 +252,57 @@ const MCQEditPage = () => {
   };
 
   useEffect(() => {
+    const fetchPack = async () => {
+      try {
+        const packDoc = await getDoc(doc(db, "mcqTests", packId!));
+        if (packDoc.exists()) {
+          const packData = {
+            id: packDoc.id,
+            ...packDoc.data(),
+            createdAt: packDoc.data().createdAt?.toDate() || new Date(),
+            updatedAt: packDoc.data().updatedAt?.toDate() || new Date(),
+          } as MCQPack;
+
+          // Fetch questions from sub-collection
+          const questionsQuery = query(
+            collection(db, "mcqTests", packId!, "questions"),
+            orderBy("order", "asc")
+          );
+          const questionsSnapshot = await getDocs(questionsQuery);
+
+          const questionsData = questionsSnapshot.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+            createdAt: doc.data().createdAt?.toDate() || new Date(),
+          })) as MCQQuestion[];
+
+          // Add questions to pack data
+          packData.questions = questionsData;
+          setPack(packData);
+        } else {
+          toast({
+            title: "Error",
+            description: "Pack not found",
+            variant: "destructive",
+          });
+          navigate("/admin/mcq");
+        }
+      } catch (error) {
+        console.error("Error fetching pack:", error);
+        toast({
+          title: "Error",
+          description: "Failed to load pack",
+          variant: "destructive",
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
     if (packId) {
       fetchPack();
     }
-  }, [packId]);
-
-  const fetchPack = async () => {
-    try {
-      const packDoc = await getDoc(doc(db, "mcqTests", packId!));
-      if (packDoc.exists()) {
-        const packData = {
-          id: packDoc.id,
-          ...packDoc.data(),
-          createdAt: packDoc.data().createdAt?.toDate() || new Date(),
-          updatedAt: packDoc.data().updatedAt?.toDate() || new Date(),
-        } as MCQPack;
-
-        // Fetch questions from sub-collection
-        const questionsQuery = query(
-          collection(db, "mcqTests", packId!, "questions"),
-          orderBy("order", "asc")
-        );
-        const questionsSnapshot = await getDocs(questionsQuery);
-
-        const questionsData = questionsSnapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-          createdAt: doc.data().createdAt?.toDate() || new Date(),
-        })) as MCQQuestion[];
-
-        // Add questions to pack data
-        packData.questions = questionsData;
-        setPack(packData);
-      } else {
-        toast({
-          title: "Error",
-          description: "Pack not found",
-          variant: "destructive",
-        });
-        navigate("/admin/mcq");
-      }
-    } catch (error) {
-      console.error("Error fetching pack:", error);
-      toast({
-        title: "Error",
-        description: "Failed to load pack",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
+  }, [packId, navigate]);
 
   const handlePublishPack = async () => {
     if (!pack) return;
@@ -318,27 +406,50 @@ const MCQEditPage = () => {
       return;
     }
 
+    setAddingQuestion(true);
     try {
-      // Clean options to remove undefined values
+      // Clean options to remove undefined values and ensure valid structure
       const cleanOptions = options.map((option) => {
-        const cleanOption: any = {
+        // Ensure contentType is valid
+        const validContentType = option.contentType || "text";
+
+        // Build clean option object
+        const cleanOption: Partial<MCQOption> = {
           id: option.id,
-          isCorrect: option.isCorrect,
-          contentType: option.contentType,
+          isCorrect: Boolean(option.isCorrect),
+          contentType: validContentType,
         };
 
-        // Only add text or imageUrl if they have values
-        if (option.contentType === "text" && option.text) {
-          cleanOption.text = option.text;
-        } else if (option.contentType === "image" && option.imageUrl) {
-          cleanOption.imageUrl = option.imageUrl;
+        // Only add text or imageUrl if they have valid values and match contentType
+        if (validContentType === "text" && option.text && option.text.trim()) {
+          cleanOption.text = option.text.trim();
+        } else if (validContentType === "image" && option.imageUrl && option.imageUrl.trim()) {
+          cleanOption.imageUrl = option.imageUrl.trim();
         }
 
-        return cleanOption;
-      });
+        return cleanOption as MCQOption;
+      }).filter((option) => option.id); // Ensure option has an id
 
-      // Build question data object without undefined fields
-      const newQuestionData: any = {
+      // Deep clean function to remove undefined values
+      const deepClean = (obj: unknown): Record<string, unknown> | undefined => {
+        if (obj === null || obj === undefined) return undefined;
+        if (typeof obj !== 'object') return obj as Record<string, unknown>;
+        if (Array.isArray(obj)) {
+          const cleanedArray = obj.map(deepClean).filter(item => item !== undefined);
+          return cleanedArray.length > 0 ? cleanedArray : undefined;
+        }
+        const cleaned: Record<string, unknown> = {};
+        for (const [key, value] of Object.entries(obj as Record<string, unknown>)) {
+          const cleanedValue = deepClean(value);
+          if (cleanedValue !== undefined) {
+            cleaned[key] = cleanedValue;
+          }
+        }
+        return Object.keys(cleaned).length > 0 ? cleaned : undefined;
+      };
+
+      // Build question data object and clean it
+      const rawQuestionData: Record<string, unknown> = {
         questionContentType,
         options: cleanOptions,
         explanation,
@@ -348,12 +459,25 @@ const MCQEditPage = () => {
         createdAt: new Date(),
       };
 
-      // Only add text or image fields based on content type
-      if (questionContentType === "text") {
-        newQuestionData.question = questionText;
-      } else if (questionContentType === "image") {
-        newQuestionData.questionImageUrl = questionImageUrl;
+      // Set question content based on type
+      if (questionContentType === "text" && questionText.trim()) {
+        rawQuestionData.question = questionText.trim();
+      } else if (questionContentType === "image" && questionImageUrl) {
+        rawQuestionData.questionImageUrl = questionImageUrl;
       }
+
+      // Always include before/after images if they exist
+      if (questionImageBeforeUrl) {
+        rawQuestionData.questionImageBeforeUrl = questionImageBeforeUrl;
+      }
+      if (questionImageAfterUrl) {
+        rawQuestionData.questionImageAfterUrl = questionImageAfterUrl;
+      }
+
+      // Deep clean the data to remove all undefined values
+      const newQuestionData = deepClean(rawQuestionData) as Partial<MCQQuestion>;
+
+      console.log("Final cleaned question data for add:", newQuestionData);
 
       // Save question to sub-collection
       const docRef = await addDoc(
@@ -363,7 +487,16 @@ const MCQEditPage = () => {
 
       const newQuestion: MCQQuestion = {
         id: docRef.id,
-        ...newQuestionData,
+        question: newQuestionData.question,
+        questionImageBeforeUrl: newQuestionData.questionImageBeforeUrl,
+        questionImageAfterUrl: newQuestionData.questionImageAfterUrl,
+        questionContentType: newQuestionData.questionContentType || "text",
+        options: newQuestionData.options || [],
+        explanation: newQuestionData.explanation,
+        difficulty: newQuestionData.difficulty || "medium",
+        marks: newQuestionData.marks || 1,
+        order: newQuestionData.order || 1,
+        createdAt: newQuestionData.createdAt || new Date(),
       };
 
       // Update pack data
@@ -389,6 +522,8 @@ const MCQEditPage = () => {
         description: "Failed to add question. Please try again.",
         variant: "destructive",
       });
+    } finally {
+      setAddingQuestion(false);
     }
   };
 
@@ -399,6 +534,8 @@ const MCQEditPage = () => {
     setEditingQuestion(question);
     setQuestionText(question.question || "");
     setQuestionImageUrl(question.questionImageUrl || "");
+    setQuestionImageBeforeUrl(question.questionImageBeforeUrl || "");
+    setQuestionImageAfterUrl(question.questionImageAfterUrl || "");
     setQuestionContentType(question.questionContentType || "text");
 
     // Ensure options have contentType field (for backward compatibility)
@@ -417,31 +554,54 @@ const MCQEditPage = () => {
   const handleUpdateQuestion = async () => {
     if (!editingQuestion || !pack) return;
 
+    setUpdatingQuestion(true);
     try {
       console.log("Updating question with options:", options);
 
-      // Clean options to remove undefined values
+      // Clean options to remove undefined values and ensure valid structure
       const cleanOptions = options.map((option) => {
-        const cleanOption: any = {
+        // Ensure contentType is valid
+        const validContentType = option.contentType || "text";
+
+        // Build clean option object
+        const cleanOption: Partial<MCQOption> = {
           id: option.id,
-          isCorrect: option.isCorrect,
-          contentType: option.contentType,
+          isCorrect: Boolean(option.isCorrect),
+          contentType: validContentType,
         };
 
-        // Only add text or imageUrl if they have values
-        if (option.contentType === "text" && option.text) {
-          cleanOption.text = option.text;
-        } else if (option.contentType === "image" && option.imageUrl) {
-          cleanOption.imageUrl = option.imageUrl;
+        // Only add text or imageUrl if they have valid values and match contentType
+        if (validContentType === "text" && option.text && option.text.trim()) {
+          cleanOption.text = option.text.trim();
+        } else if (validContentType === "image" && option.imageUrl && option.imageUrl.trim()) {
+          cleanOption.imageUrl = option.imageUrl.trim();
         }
 
-        return cleanOption;
-      });
+        return cleanOption as MCQOption;
+      }).filter((option) => option.id); // Ensure option has an id
 
       console.log("Cleaned options:", cleanOptions);
 
-      // Build updated question data object without undefined fields
-      const updatedQuestionData: any = {
+      // Deep clean function to remove undefined values
+      const deepClean = (obj: unknown): Record<string, unknown> | undefined => {
+        if (obj === null || obj === undefined) return undefined;
+        if (typeof obj !== 'object') return obj as Record<string, unknown>;
+        if (Array.isArray(obj)) {
+          const cleanedArray = obj.map(deepClean).filter(item => item !== undefined);
+          return cleanedArray.length > 0 ? cleanedArray : undefined;
+        }
+        const cleaned: Record<string, unknown> = {};
+        for (const [key, value] of Object.entries(obj as Record<string, unknown>)) {
+          const cleanedValue = deepClean(value);
+          if (cleanedValue !== undefined) {
+            cleaned[key] = cleanedValue;
+          }
+        }
+        return Object.keys(cleaned).length > 0 ? cleaned : undefined;
+      };
+
+      // Build updated question data object and clean it
+      const rawQuestionData: Record<string, unknown> = {
         questionContentType,
         options: cleanOptions,
         explanation,
@@ -450,22 +610,25 @@ const MCQEditPage = () => {
         order: editingQuestion.order,
       };
 
-      // Only add text or image fields based on content type
-      if (questionContentType === "text") {
-        updatedQuestionData.question = questionText;
-        // Remove image field if switching to text
-        if (editingQuestion.questionImageUrl) {
-          await StorageService.deleteImageByUrl(
-            editingQuestion.questionImageUrl
-          );
-        }
-      } else if (questionContentType === "image") {
-        updatedQuestionData.questionImageUrl = questionImageUrl;
-        // Remove text field if switching to image
-        if (editingQuestion.question) {
-          // Text field will be automatically removed by not including it
-        }
+      // Set question content based on type
+      if (questionContentType === "text" && questionText.trim()) {
+        rawQuestionData.question = questionText.trim();
+      } else if (questionContentType === "image" && questionImageUrl) {
+        rawQuestionData.questionImageUrl = questionImageUrl;
       }
+
+      // Always include before/after images if they exist
+      if (questionImageBeforeUrl) {
+        rawQuestionData.questionImageBeforeUrl = questionImageBeforeUrl;
+      }
+      if (questionImageAfterUrl) {
+        rawQuestionData.questionImageAfterUrl = questionImageAfterUrl;
+      }
+
+      // Deep clean the data to remove all undefined values
+      const updatedQuestionData = deepClean(rawQuestionData);
+
+      console.log("Final cleaned question data:", updatedQuestionData);
 
       // Update question in sub-collection
       await updateDoc(
@@ -507,6 +670,8 @@ const MCQEditPage = () => {
         description: "Failed to update question. Please try again.",
         variant: "destructive",
       });
+    } finally {
+      setUpdatingQuestion(false);
     }
   };
 
@@ -514,8 +679,17 @@ const MCQEditPage = () => {
     if (!pack) return;
 
     try {
-      // Delete question images from Firebase Storage
-      await StorageService.deleteQuestionImage(pack.id, questionId);
+      // Delete question images from Firebase Storage (optional)
+      // Since we're using base64 images now, storage deletion is not needed
+      // try {
+      //   await StorageService.deleteQuestionImage(pack.id, questionId);
+      // } catch (storageError) {
+      //   console.warn(
+      //     "Failed to delete storage files (CORS issue in development):",
+      //     storageError
+      //   );
+      //   // Continue with Firestore deletion even if storage deletion fails
+      // }
 
       // Delete question from sub-collection
       await deleteDoc(doc(db, "mcqTests", pack.id, "questions", questionId));
@@ -547,20 +721,6 @@ const MCQEditPage = () => {
     }
   };
 
-  const resetQuestionForm = () => {
-    setQuestionText("");
-    setQuestionImageUrl("");
-    setQuestionContentType("text");
-    setOptions([
-      { id: "1", text: "", isCorrect: false, contentType: "text" },
-      { id: "2", text: "", isCorrect: false, contentType: "text" },
-      { id: "3", text: "", isCorrect: false, contentType: "text" },
-      { id: "4", text: "", isCorrect: false, contentType: "text" },
-    ]);
-    setExplanation("");
-    setDifficulty("medium");
-  };
-
   const handleOptionChange = (optionId: string, text: string) => {
     setOptions(
       options.map((opt) => (opt.id === optionId ? { ...opt, text } : opt))
@@ -582,6 +742,15 @@ const MCQEditPage = () => {
             }
           : opt
       )
+    );
+  };
+
+  const handleCorrectAnswerChange = (optionId: string) => {
+    setOptions(
+      options.map((opt) => ({
+        ...opt,
+        isCorrect: opt.id === optionId,
+      }))
     );
   };
 
@@ -620,12 +789,21 @@ const MCQEditPage = () => {
     }
   };
 
-  const handleCorrectAnswerChange = (optionId: string) => {
-    setOptions(
-      options.map((opt) =>
-        opt.id === optionId ? { ...opt, isCorrect: !opt.isCorrect } : opt
-      )
-    );
+  const resetQuestionForm = () => {
+    setQuestionText("");
+    setQuestionImageUrl("");
+    setQuestionImageBeforeUrl("");
+    setQuestionImageAfterUrl("");
+    setQuestionContentType("text");
+    setOptions([
+      { id: "1", text: "", isCorrect: false, contentType: "text" },
+      { id: "2", text: "", isCorrect: false, contentType: "text" },
+      { id: "3", text: "", isCorrect: false, contentType: "text" },
+      { id: "4", text: "", isCorrect: false, contentType: "text" },
+    ]);
+    setExplanation("");
+    setDifficulty("medium");
+    setMarks(1);
   };
 
   if (loading) {
@@ -792,110 +970,143 @@ const MCQEditPage = () => {
                 {(() => {
                   const questions = pack.questions || [];
                   const totalQuestions = questions.length;
-                  const totalPages = Math.ceil(totalQuestions / questionsPerPage);
+                  const totalPages = Math.ceil(
+                    totalQuestions / questionsPerPage
+                  );
                   const startIndex = (currentPage - 1) * questionsPerPage;
                   const endIndex = startIndex + questionsPerPage;
-                  const currentQuestions = questions.slice(startIndex, endIndex);
+                  const currentQuestions = questions.slice(
+                    startIndex,
+                    endIndex
+                  );
 
                   return (
                     <>
                       {currentQuestions.map((question, index) => (
-                  <Card
-                    key={question.id}
-                    className="border-l-4 border-l-blue-500"
-                  >
-                    <CardContent className="p-4">
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-2">
-                            <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2 py-1 rounded">
-                            Q{startIndex + index + 1}
-                            </span>
-                            <span
-                              className={`text-xs font-medium px-2 py-1 rounded ${
-                                question.difficulty === "easy"
-                                  ? "bg-green-100 text-green-800"
-                                  : question.difficulty === "medium"
-                                  ? "bg-yellow-100 text-yellow-800"
-                                  : "bg-red-100 text-red-800"
-                              }`}
-                            >
-                              {question.difficulty}
-                            </span>
-                          </div>
-                          <div className="font-medium mb-2">
-                          {question.questionContentType === "image" && question.questionImageUrl ? (
-                              <img
-                                src={question.questionImageUrl}
-                                alt="Question"
-                                className="max-w-full h-auto max-h-32 object-contain rounded border"
-                              />
-                            ) : (
-                              <p>{question.question}</p>
-                            )}
-                          </div>
-                          <div className="space-y-1">
-                            {question.options.map((option, optIndex) => (
-                              <div
-                                key={option.id}
-                                className="flex items-center gap-2"
-                              >
-                                <span className="text-sm text-gray-500 w-6">
-                                  {String.fromCharCode(65 + optIndex)}.
-                                </span>
-                                <div
-                                className={`text-sm ${
-                                option.isCorrect
-                                ? "font-medium text-green-600"
-                                : ""
-                                }`}
-                                >
-                                {option.contentType === "image" && option.imageUrl ? (
-                                    <img
-                                      src={option.imageUrl}
-                                      alt={`Option ${String.fromCharCode(65 + optIndex)}`}
-                                      className="max-w-16 max-h-16 object-contain rounded border inline-block"
-                                    />
-                                  ) : (
-                                    <span>{option.text}</span>
-                                  )}
-                                </div>
-                                {option.isCorrect && (
-                                  <span className="text-green-600 text-xs">
-                                    ✓
+                        <Card
+                          key={question.id}
+                          className="border-l-4 border-l-blue-500"
+                        >
+                          <CardContent className="p-4">
+                            <div className="flex items-start justify-between">
+                              <div className="flex-1">
+                                <div className="flex items-center gap-2 mb-2">
+                                  <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2 py-1 rounded">
+                                    Q{startIndex + index + 1}
                                   </span>
-                                )}
+                                  <span
+                                    className={`text-xs font-medium px-2 py-1 rounded ${
+                                      question.difficulty === "easy"
+                                        ? "bg-green-100 text-green-800"
+                                        : question.difficulty === "medium"
+                                        ? "bg-yellow-100 text-yellow-800"
+                                        : "bg-red-100 text-red-800"
+                                    }`}
+                                  >
+                                    {question.difficulty}
+                                  </span>
+                                </div>
+                                <div className="font-medium mb-2">
+                                  <div className="space-y-2">
+                                    {question.questionImageBeforeUrl && (
+                                      <img
+                                        src={question.questionImageBeforeUrl}
+                                        alt="Question diagram before"
+                                        className="max-w-full h-auto max-h-32 object-contain rounded border"
+                                      />
+                                    )}
+                                    {question.questionContentType === "text" &&
+                                      question.question && (
+                                        <p className="text-sm">
+                                          {question.question}
+                                        </p>
+                                      )}
+                                    {question.questionContentType === "image" &&
+                                      question.questionImageUrl && (
+                                        <img
+                                          src={question.questionImageUrl}
+                                          alt="Question"
+                                          className="max-w-full h-auto max-h-32 object-contain rounded border"
+                                        />
+                                      )}
+                                    {question.questionImageAfterUrl && (
+                                      <img
+                                        src={question.questionImageAfterUrl}
+                                        alt="Question diagram after"
+                                        className="max-w-full h-auto max-h-32 object-contain rounded border"
+                                      />
+                                    )}
+                                  </div>
+                                </div>
+                                <div className="space-y-1">
+                                  {question.options.map((option, optIndex) => (
+                                    <div
+                                      key={option.id}
+                                      className="flex items-center gap-2"
+                                    >
+                                      <span className="text-sm text-gray-500 w-6">
+                                        {String.fromCharCode(65 + optIndex)}.
+                                      </span>
+                                      <div
+                                        className={`text-sm ${
+                                          option.isCorrect
+                                            ? "font-medium text-green-600"
+                                            : ""
+                                        }`}
+                                      >
+                                        {option.contentType === "image" &&
+                                        option.imageUrl ? (
+                                          <img
+                                            src={option.imageUrl}
+                                            alt={`Option ${String.fromCharCode(
+                                              65 + optIndex
+                                            )}`}
+                                            className="max-w-16 max-h-16 object-contain rounded border inline-block"
+                                          />
+                                        ) : (
+                                          <span>{option.text}</span>
+                                        )}
+                                      </div>
+                                      {option.isCorrect && (
+                                        <span className="text-green-600 text-xs">
+                                          ✓
+                                        </span>
+                                      )}
+                                    </div>
+                                  ))}
+                                </div>
                               </div>
-                            ))}
-                          </div>
-                        </div>
-                        <div className="flex gap-1 ml-4">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleEditQuestion(question)}
-                          >
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleDeleteQuestion(question.id)}
-                            className="text-red-600 hover:text-red-700"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
+                              <div className="flex gap-1 ml-4">
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => handleEditQuestion(question)}
+                                >
+                                  <Edit className="h-4 w-4" />
+                                </Button>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() =>
+                                    handleDeleteQuestion(question.id)
+                                  }
+                                  className="text-red-600 hover:text-red-700"
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
 
-                          {/* Pagination Controls */}
+                      {/* Pagination Controls */}
                       {totalPages > 1 && (
                         <div className="flex items-center justify-between pt-4 border-t">
                           <div className="text-sm text-gray-600">
-                            Showing {startIndex + 1} to {Math.min(endIndex, totalQuestions)} of {totalQuestions} questions
+                            Showing {startIndex + 1} to{" "}
+                            {Math.min(endIndex, totalQuestions)} of{" "}
+                            {totalQuestions} questions
                           </div>
                           <div className="flex items-center space-x-2">
                             <Button
@@ -908,26 +1119,37 @@ const MCQEditPage = () => {
                             </Button>
 
                             <div className="flex items-center space-x-1">
-                              {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                                const pageNumber = Math.max(1, Math.min(totalPages - 4, currentPage - 2)) + i;
-                                if (pageNumber > totalPages) return null;
+                              {Array.from(
+                                { length: Math.min(5, totalPages) },
+                                (_, i) => {
+                                  const pageNumber =
+                                    Math.max(
+                                      1,
+                                      Math.min(totalPages - 4, currentPage - 2)
+                                    ) + i;
+                                  if (pageNumber > totalPages) return null;
 
-                                return (
-                                  <Button
-                                    key={pageNumber}
-                                    variant={pageNumber === currentPage ? "default" : "outline"}
-                                    size="sm"
-                                    onClick={() => setCurrentPage(pageNumber)}
-                                    className={`w-8 h-8 p-0 ${
-                                      pageNumber === currentPage
-                                        ? "bg-blue-600 hover:bg-blue-700 text-white"
-                                        : "bg-white border-gray-300 hover:bg-gray-50"
-                                    }`}
-                                  >
-                                    {pageNumber}
-                                  </Button>
-                                );
-                              })}
+                                  return (
+                                    <Button
+                                      key={pageNumber}
+                                      variant={
+                                        pageNumber === currentPage
+                                          ? "default"
+                                          : "outline"
+                                      }
+                                      size="sm"
+                                      onClick={() => setCurrentPage(pageNumber)}
+                                      className={`w-8 h-8 p-0 ${
+                                        pageNumber === currentPage
+                                          ? "bg-blue-600 hover:bg-blue-700 text-white"
+                                          : "bg-white border-gray-300 hover:bg-gray-50"
+                                      }`}
+                                    >
+                                      {pageNumber}
+                                    </Button>
+                                  );
+                                }
+                              )}
                             </div>
 
                             <Button
@@ -967,134 +1189,273 @@ const MCQEditPage = () => {
             </DialogDescription>
           </DialogHeader>
 
-          <div className="space-y-4">
-            {/* Question Content Type */}
-            <div>
-              <Label>Question Content Type *</Label>
-              <div className="flex gap-4 mt-2">
-                <label className="flex items-center gap-2">
-                  <input
-                    type="radio"
-                    value="text"
-                    checked={questionContentType === "text"}
-                    onChange={(e) =>
-                      setQuestionContentType(e.target.value as "text" | "image")
-                    }
-                    className="text-blue-600"
+          <div className="space-y-6">
+            {/* Question Content Section */}
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <h3 className="text-lg font-semibold text-gray-900">
+                  Question Content
+                </h3>
+                <div className="h-px bg-gray-200 flex-1"></div>
+              </div>
+
+              {/* Content Type Selection */}
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <Label className="text-sm font-medium text-gray-700">
+                  Question Type *
+                </Label>
+                <div className="flex gap-6 mt-2">
+                  <label className="flex items-center gap-3 cursor-pointer">
+                    <input
+                      type="radio"
+                      value="text"
+                      checked={questionContentType === "text"}
+                      onChange={(e) =>
+                        setQuestionContentType(
+                          e.target.value as "text" | "image"
+                        )
+                      }
+                      className="w-4 h-4 text-blue-600"
+                    />
+                    <div className="flex items-center gap-2">
+                      <FileText size={18} className="text-gray-600" />
+                      <span className="font-medium">Text Question</span>
+                    </div>
+                  </label>
+                  <label className="flex items-center gap-3 cursor-pointer">
+                    <input
+                      type="radio"
+                      value="image"
+                      checked={questionContentType === "image"}
+                      onChange={(e) =>
+                        setQuestionContentType(
+                          e.target.value as "text" | "image"
+                        )
+                      }
+                      className="w-4 h-4 text-blue-600"
+                    />
+                    <div className="flex items-center gap-2">
+                      <Image size={18} className="text-gray-600" />
+                      <span className="font-medium">Image Question</span>
+                    </div>
+                  </label>
+                </div>
+              </div>
+
+              {/* Question Input Area */}
+              <div className="bg-white border border-gray-200 rounded-lg p-4">
+                <div className="flex items-center justify-between mb-3">
+                  <Label className="text-sm font-medium text-gray-700">
+                    {questionContentType === "text"
+                      ? "Question Text *"
+                      : "Question Image *"}
+                  </Label>
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() =>
+                        document.getElementById("before-image-input")?.click()
+                      }
+                      className="inline-flex items-center gap-1 px-3 py-1 text-sm bg-blue-50 text-blue-700 border border-blue-200 rounded-md hover:bg-blue-100 transition-colors"
+                      title="Add diagram before question"
+                    >
+                      <Plus size={14} />
+                      Add Before Image
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        document.getElementById("after-image-input")?.click()
+                      }
+                      className="inline-flex items-center gap-1 px-3 py-1 text-sm bg-blue-50 text-blue-700 border border-blue-200 rounded-md hover:bg-blue-100 transition-colors"
+                      title="Add diagram after question"
+                    >
+                      <Plus size={14} />
+                      Add After Image
+                    </button>
+                  </div>
+                </div>
+
+                {/* Before Image Display */}
+                {questionImageBeforeUrl && (
+                  <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm font-medium text-blue-800">
+                        📷 Before Question
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setQuestionImageBeforeUrl("")}
+                        className="text-red-600 hover:text-red-800 p-1"
+                        title="Remove image"
+                      >
+                        <X size={16} />
+                      </button>
+                    </div>
+                    <img
+                      src={questionImageBeforeUrl}
+                      alt="Before question"
+                      className="max-w-full h-auto max-h-40 border border-blue-200 rounded"
+                    />
+                  </div>
+                )}
+
+                {/* Main Question Content */}
+                {questionContentType === "text" ? (
+                  <Textarea
+                    value={questionText}
+                    onChange={(e) => setQuestionText(e.target.value)}
+                    placeholder="Enter your question here..."
+                    className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    rows={4}
                   />
-                  <span className="text-sm">Text</span>
-                </label>
-                <label className="flex items-center gap-2">
-                  <input
-                    type="radio"
-                    value="image"
-                    checked={questionContentType === "image"}
-                    onChange={(e) =>
-                      setQuestionContentType(e.target.value as "text" | "image")
-                    }
-                    className="text-blue-600"
-                  />
-                  <span className="text-sm">Image</span>
-                </label>
+                ) : (
+                  <div className="space-y-3">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleQuestionImageUpload}
+                      className="block w-full text-sm text-gray-500 file:mr-4 file:py-3 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 file:cursor-pointer"
+                    />
+                    {questionImageUrl && (
+                      <div className="mt-3 p-3 bg-green-50 border border-green-200 rounded-lg">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-sm font-medium text-green-800">
+                            🖼️ Main Question Image
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => setQuestionImageUrl("")}
+                            className="text-red-600 hover:text-red-800 p-1"
+                            title="Remove image"
+                          >
+                            <X size={16} />
+                          </button>
+                        </div>
+                        <img
+                          src={questionImageUrl}
+                          alt="Question"
+                          className="max-w-full h-auto max-h-48 border rounded"
+                        />
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* After Image Display */}
+                {questionImageAfterUrl && (
+                  <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm font-medium text-blue-800">
+                        📷 After Question
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setQuestionImageAfterUrl("")}
+                        className="text-red-600 hover:text-red-800 p-1"
+                        title="Remove image"
+                      >
+                        <X size={16} />
+                      </button>
+                    </div>
+                    <img
+                      src={questionImageAfterUrl}
+                      alt="After question"
+                      className="max-w-full h-auto max-h-40 border border-blue-200 rounded"
+                    />
+                  </div>
+                )}
+
+                {/* Hidden file inputs */}
+                <input
+                  id="before-image-input"
+                  type="file"
+                  accept="image/*"
+                  onChange={handleQuestionImageBeforeUpload}
+                  className="hidden"
+                />
+                <input
+                  id="after-image-input"
+                  type="file"
+                  accept="image/*"
+                  onChange={handleQuestionImageAfterUpload}
+                  className="hidden"
+                />
               </div>
             </div>
 
-            {/* Question Content */}
-            <div>
-              <Label>Question *</Label>
-              {questionContentType === "text" ? (
-                <Textarea
-                  value={questionText}
-                  onChange={(e) => setQuestionText(e.target.value)}
-                  placeholder="Enter your question..."
-                  className="mt-1"
-                  rows={3}
-                />
-              ) : (
-                <div className="mt-1 space-y-2">
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleQuestionImageUpload}
-                    className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-                  />
-                  {questionImageUrl && (
-                    <div className="mt-2">
-                      <img
-                        src={questionImageUrl}
-                        alt="Question preview"
-                        className="max-w-full h-auto max-h-48 border rounded"
-                      />
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
+            {/* Answer Options Section */}
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <h3 className="text-lg font-semibold text-gray-900">
+                  Answer Options
+                </h3>
+                <div className="h-px bg-gray-200 flex-1"></div>
+              </div>
 
-            <div>
-              <Label>Difficulty</Label>
-              <select
-                value={difficulty}
-                onChange={(e) =>
-                  setDifficulty(e.target.value as "easy" | "medium" | "hard")
-                }
-                className="mt-1 w-full p-2 border border-gray-300 rounded-md"
-              >
-                <option value="easy">Easy</option>
-                <option value="medium">Medium</option>
-                <option value="hard">Hard</option>
-              </select>
-            </div>
-
-            <div>
-              <Label>Options *</Label>
-              <div className="space-y-3 mt-2">
+              <div className="space-y-3">
                 {options.map((option, index) => (
                   <div
                     key={option.id}
-                    className="border rounded-lg p-3 space-y-2"
+                    className="border border-gray-200 rounded-lg p-4 bg-white hover:border-gray-300 transition-colors"
                   >
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm font-medium w-6">
-                        {String.fromCharCode(65 + index)}.
-                      </span>
-                      <div className="flex gap-2">
-                        <label className="flex items-center gap-1">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 bg-blue-100 text-blue-800 rounded-full flex items-center justify-center font-semibold text-sm">
+                          {String.fromCharCode(65 + index)}
+                        </div>
+                        <span className="font-medium text-gray-900">
+                          Option {String.fromCharCode(65 + index)}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-2">
+                          <label className="flex items-center gap-2 cursor-pointer">
+                            <input
+                              type="radio"
+                              name={`option-type-${option.id}`}
+                              value="text"
+                              checked={option.contentType === "text"}
+                              onChange={() =>
+                                handleOptionContentTypeChange(option.id, "text")
+                              }
+                              className="w-4 h-4 text-blue-600"
+                            />
+                            <FileText size={16} className="text-gray-600" />
+                            <span className="text-sm">Text</span>
+                          </label>
+                          <label className="flex items-center gap-2 cursor-pointer">
+                            <input
+                              type="radio"
+                              name={`option-type-${option.id}`}
+                              value="image"
+                              checked={option.contentType === "image"}
+                              onChange={() =>
+                                handleOptionContentTypeChange(
+                                  option.id,
+                                  "image"
+                                )
+                              }
+                              className="w-4 h-4 text-blue-600"
+                            />
+                            <Image size={16} className="text-gray-600" />
+                            <span className="text-sm">Image</span>
+                          </label>
+                        </div>
+                        <label className="flex items-center gap-2 cursor-pointer bg-green-50 px-3 py-1 rounded-md border border-green-200">
                           <input
-                            type="radio"
-                            name={`option-type-${option.id}`}
-                            value="text"
-                            checked={option.contentType === "text"}
+                            type="checkbox"
+                            checked={option.isCorrect}
                             onChange={() =>
-                              handleOptionContentTypeChange(option.id, "text")
+                              handleCorrectAnswerChange(option.id)
                             }
-                            className="text-blue-600"
+                            className="w-4 h-4 text-green-600 rounded"
                           />
-                          <span className="text-xs">Text</span>
-                        </label>
-                        <label className="flex items-center gap-1">
-                          <input
-                            type="radio"
-                            name={`option-type-${option.id}`}
-                            value="image"
-                            checked={option.contentType === "image"}
-                            onChange={() =>
-                              handleOptionContentTypeChange(option.id, "image")
-                            }
-                            className="text-blue-600"
-                          />
-                          <span className="text-xs">Image</span>
+                          <span className="text-sm font-medium text-green-800">
+                            Correct Answer
+                          </span>
                         </label>
                       </div>
-                      <label className="flex items-center gap-1 ml-auto">
-                        <input
-                          type="checkbox"
-                          checked={option.isCorrect}
-                          onChange={() => handleCorrectAnswerChange(option.id)}
-                          className="rounded"
-                        />
-                        <span className="text-sm">Correct</span>
-                      </label>
                     </div>
 
                     {option.contentType === "text" ? (
@@ -1103,23 +1464,23 @@ const MCQEditPage = () => {
                         onChange={(e) =>
                           handleOptionChange(option.id, e.target.value)
                         }
-                        placeholder={`Option ${String.fromCharCode(
+                        placeholder={`Enter option ${String.fromCharCode(
                           65 + index
-                        )}`}
-                        className="w-full"
+                        )} text...`}
+                        className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       />
                     ) : (
-                      <div className="space-y-2">
+                      <div className="space-y-3">
                         <input
                           type="file"
                           accept="image/*"
                           onChange={(e) =>
                             handleOptionImageUpload(option.id, e)
                           }
-                          className="block w-full text-sm text-gray-500 file:mr-4 file:py-1 file:px-3 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                          className="block w-full text-sm text-gray-500 file:mr-4 file:py-3 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 file:cursor-pointer"
                         />
                         {option.imageUrl && (
-                          <div>
+                          <div className="p-3 bg-gray-50 border border-gray-200 rounded-lg">
                             <img
                               src={option.imageUrl}
                               alt={`Option ${String.fromCharCode(
@@ -1136,15 +1497,75 @@ const MCQEditPage = () => {
               </div>
             </div>
 
-            <div>
-              <Label>Explanation (Optional)</Label>
-              <Textarea
-                value={explanation}
-                onChange={(e) => setExplanation(e.target.value)}
-                placeholder="Explain why this is the correct answer..."
-                className="mt-1"
-                rows={2}
-              />
+            {/* Question Settings Section */}
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <h3 className="text-lg font-semibold text-gray-900">
+                  Question Settings
+                </h3>
+                <div className="h-px bg-gray-200 flex-1"></div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium text-gray-700">
+                    Difficulty Level
+                  </Label>
+                  <select
+                    value={difficulty}
+                    onChange={(e) =>
+                      setDifficulty(
+                        e.target.value as "easy" | "medium" | "hard"
+                      )
+                    }
+                    className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+                  >
+                    <option value="easy">🟢 Easy</option>
+                    <option value="medium">🟡 Medium</option>
+                    <option value="hard">🔴 Hard</option>
+                  </select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium text-gray-700">
+                    Marks
+                  </Label>
+                  <Input
+                    type="number"
+                    value={marks}
+                    onChange={(e) => setMarks(Number(e.target.value))}
+                    min="1"
+                    max="10"
+                    className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Explanation Section */}
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <h3 className="text-lg font-semibold text-gray-900">
+                  Explanation
+                </h3>
+                <div className="h-px bg-gray-200 flex-1"></div>
+              </div>
+
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <Label className="text-sm font-medium text-gray-700">
+                  Answer Explanation (Optional)
+                </Label>
+                <Textarea
+                  value={explanation}
+                  onChange={(e) => setExplanation(e.target.value)}
+                  placeholder="Provide an explanation for the correct answer to help students understand..."
+                  className="mt-2 w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  rows={3}
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  This will be shown to students after they submit their answer.
+                </p>
+              </div>
             </div>
           </div>
 
@@ -1163,9 +1584,22 @@ const MCQEditPage = () => {
               onClick={
                 editingQuestion ? handleUpdateQuestion : handleAddQuestion
               }
-              className="bg-blue-600 hover:bg-blue-700"
+              disabled={addingQuestion || updatingQuestion}
+              className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {editingQuestion ? "Update Question" : "Add Question"}
+              {addingQuestion ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Adding...
+                </>
+              ) : updatingQuestion ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Updating...
+                </>
+              ) : (
+                <>{editingQuestion ? "Update Question" : "Add Question"}</>
+              )}
             </Button>
           </div>
         </DialogContent>
