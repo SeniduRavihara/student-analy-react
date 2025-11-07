@@ -26,7 +26,6 @@ import {
   ClassesType as ClassesDataType,
   EXAM_YEARS,
 } from "@/constants";
-import { createExam, deleteExam } from "@/firebase/api";
 import { db } from "@/firebase/config";
 import { toast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
@@ -38,6 +37,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, useOutletContext } from "react-router-dom";
 import { ConfirmDialog } from "../components/ConfirmDialog";
 import { columns } from "../components/exams/Coloumns";
+import ExamService from "@/firebase/services/ExamService";
 
 type OutletContextType = {
   selectedYear: string;
@@ -135,7 +135,7 @@ const ExamsPage = () => {
     // }
 
     console.log({ examName, examDate, examYear, classTypes });
-    await createExam(examName, examDate, examYear, classTypes);
+    await ExamService.createExam(examName, examDate, examYear, classTypes);
 
     toast({
       title: "Exam created successfully",
@@ -287,7 +287,7 @@ const ExamsPage = () => {
         title="Confirm Delete"
         message="Are you sure you want to delete this exam? This action cannot be undone."
         onConfirm={() => {
-          deleteExam(confirmDialog.examId);
+          ExamService.deleteExam(confirmDialog.examId);
           setConfirmDialog({ isOpen: false, examId: "" });
         }}
         onCancel={() => setConfirmDialog({ isOpen: false, examId: "" })}

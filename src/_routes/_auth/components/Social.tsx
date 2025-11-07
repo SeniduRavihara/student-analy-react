@@ -1,15 +1,16 @@
 import { FaGoogle } from "react-icons/fa";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import { getRegisteredStatus, getUserRole, googleSignIn } from "@/firebase/api";
+import AuthService from "@/firebase/services/AuthService";
+import UserService from "@/firebase/services/UserService";
 
 const Social = () => {
   const navigate = useNavigate();
 
   const handleGooglesignin = async () => {
-    const user = await googleSignIn();
-    const roles = await getUserRole(user.uid);
-    const isRegistered = await getRegisteredStatus(user.uid);
+    const user = await AuthService.googleSignIn();
+    const roles = await UserService.getUserRole(user.uid);
+    const isRegistered = await UserService.getRegisteredStatus(user.uid);
 
     // console.log("REGISTERED", isRegistered);
 

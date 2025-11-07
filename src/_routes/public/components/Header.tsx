@@ -1,4 +1,4 @@
-import { logout } from "@/firebase/api";
+import AuthService from "@/firebase/services/AuthService";
 import { useAuth } from "@/hooks/useAuth";
 import { useData } from "@/hooks/useData";
 import { useEffect, useRef, useState } from "react";
@@ -90,7 +90,7 @@ const Header = ({
       setIsOpen(false); // Close dropdown immediately
       setMobileMenuOpen(false); // Close mobile menu
 
-      await logout();
+      await AuthService.logout();
     } catch (error) {
       console.error("Error signing out:", error);
       if (isMountedRef.current) {

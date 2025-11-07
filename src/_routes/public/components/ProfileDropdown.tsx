@@ -1,5 +1,4 @@
 import { useAuth } from "@/hooks/useAuth";
-import { logout } from "@/firebase/api";
 import { LogOut, SquareMenu, LogIn } from "lucide-react";
 import {
   DropdownMenu,
@@ -11,6 +10,7 @@ import {
 
 import { Link, useNavigate } from "react-router-dom";
 import { useData } from "@/hooks/useData";
+import AuthService from "@/firebase/services/AuthService";
 
 const ProfileDropdown = () => {
   const { currentUser } = useAuth();
@@ -66,7 +66,7 @@ const ProfileDropdown = () => {
                 </DropdownMenuItem>
               )}
               <DropdownMenuSeparator className="bg-[#d1d3e2]" />
-              <DropdownMenuItem onClick={logout}>
+              <DropdownMenuItem onClick={AuthService.logout}>
                 <LogOut className="mr-2 h-4 w-4 text-[#d1d3e2]" />
                 <span className="text-[#65656d]">Log out</span>
               </DropdownMenuItem>

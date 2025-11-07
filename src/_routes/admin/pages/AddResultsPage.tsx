@@ -10,8 +10,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { setExamResults } from "@/firebase/api";
 import { db } from "@/firebase/config";
+import ExamService from "@/firebase/services/ExamService";
 import { ExamDataType, UserDataType } from "@/types";
 import { collection, doc, onSnapshot } from "firebase/firestore";
 import { useEffect, useState } from "react";
@@ -149,7 +149,7 @@ const AddResultsPage = () => {
     // }, {} as Record<string, { examResult: number; isAbsent: boolean }>);
     console.log(marks);
 
-    await setExamResults(examId, marks);
+    await ExamService.setExamResults(examId, marks);
     setIsLoading(false);
     navigate("/admin/exams");
   };

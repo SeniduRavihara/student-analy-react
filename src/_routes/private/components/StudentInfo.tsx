@@ -28,7 +28,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { CLASSES, CLASSES_TO_YEARS, EXAM_YEARS } from "@/constants";
-import { fetchUserInfo, updateUserInfo } from "@/firebase/api";
+import UserService from "@/firebase/services/UserService";
 import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
 import { UserDataType } from "@/types";
@@ -62,7 +62,7 @@ const StudentInfo = () => {
       const fetchData = async () => {
         try {
           setDataLoading(true);
-          const userInfo = (await fetchUserInfo(
+          const userInfo = (await UserService.fetchUserInfo(
             currentUser.uid
           )) as UserDataType;
           setFirstName(userInfo.firstName);
@@ -116,7 +116,7 @@ const StudentInfo = () => {
         address,
         classes,
       };
-      await updateUserInfo(currentUser.uid, userInfo);
+      await UserService.updateUserInfo(currentUser.uid, userInfo);
       setLoading(false);
     } catch (error) {
       console.log(error);

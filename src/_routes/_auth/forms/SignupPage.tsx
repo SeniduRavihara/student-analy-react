@@ -16,8 +16,8 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
 import { registerSchema } from "@/schemas";
-import { signup } from "@/firebase/api";
 import { useNavigate } from "react-router-dom";
+import AuthService from "@/firebase/services/AuthService";
 
 const SignupPage = () => {
   // const submitButtonRef = useRef<HTMLInputElement>(null);
@@ -45,10 +45,10 @@ const SignupPage = () => {
   // 2. Define a submit handler.
   async function onSubmit(values: z.infer<typeof registerSchema>) {
     try {
-      await signup(values);
+      await AuthService.signup(values);
 
       // if (!user.emailVerified) {
-      //   await logout();
+      //   await AuthService.logout();
       //   form.reset();
       //   navigate("/login");
       //   return;

@@ -8,9 +8,9 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { LogOut, User, Settings, UserCircle } from "lucide-react";
-import { logout } from "@/firebase/api";
 import { useAuth } from "@/hooks/useAuth";
 import { useData } from "@/hooks/useData";
+import AuthService from "@/firebase/services/AuthService";
 
 function NavbarRoutes() {
   const { currentUser } = useAuth();
@@ -33,7 +33,7 @@ function NavbarRoutes() {
 
     try {
       setIsSigningOut(true);
-      await logout();
+      await AuthService.logout();
       navigate("/");
     } catch (error) {
       console.error("Error signing out:", error);
