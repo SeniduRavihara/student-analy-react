@@ -1,8 +1,8 @@
 import { db } from "@/firebase/config";
+import { StorageService } from "@/firebase/services/StorageService";
 import { toast } from "@/hooks/use-toast";
-import { MCQPack, MCQQuestion, MCQQuestionInput } from "@/types";
+import { MCQPack, MCQQuestion } from "@/types";
 import {
-  addDoc,
   collection,
   deleteDoc,
   doc,
@@ -28,8 +28,7 @@ const MCQEditPage = () => {
   const [editingQuestion, setEditingQuestion] = useState<MCQQuestion | null>(
     null
   );
-  const [addingQuestion, setAddingQuestion] = useState(false);
-  const [updatingQuestion, setUpdatingQuestion] = useState(false);
+
   const [currentPage, setCurrentPage] = useState(1);
   const questionsPerPage = 5;
 
@@ -159,222 +158,33 @@ const MCQEditPage = () => {
     }
   };
 
-  const handleQuestionAdded = async (questionData: MCQQuestionInput) => {
+  const handleQuestionSaved = (savedQuestion: MCQQuestion) => {
     if (!pack) return;
 
-    setAddingQuestion(true);
-    try {
-      // Validate
-      if (
-        questionData.questionContentType === "text" &&
-        !questionData.questionText?.trim()
-      ) {
-        toast({
-          title: "Error",
-          description: "Please enter a question text",
-          variant: "destructive",
-        });
-        return;
-      }
+    // Check if this is an update or new question
+    const existingIndex =
+      pack.questions?.findIndex((q) => q.id === savedQuestion.id) ?? -1;
 
-      if (
-        questionData.questionContentType === "image" &&
-        !questionData.questionImageUrl
-      ) {
-        toast({
-          title: "Error",
-          description: "Please upload a question image",
-          variant: "destructive",
-        });
-        return;
-      }
+    if (existingIndex >= 0) {
+      // Update existing question
+      const updatedQuestions = [...(pack.questions || [])];
+      updatedQuestions[existingIndex] = savedQuestion;
 
-      const hasCorrectAnswer = questionData.options.some(
-        (option) => option.isCorrect
-      );
-      if (!hasCorrectAnswer) {
-        toast({
-          title: "Error",
-          description: "Please select at least one correct answer",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      // Clean and prepare data
-      const cleanOptions = questionData.options.map((option) => {
-        const cleanOption: any = {
-          id: option.id,
-          isCorrect: Boolean(option.isCorrect),
-          contentType: option.contentType || "text",
-        };
-
-        if (option.contentType === "text" && option.text?.trim()) {
-          cleanOption.text = option.text.trim();
-        } else if (option.contentType === "image" && option.imageUrl?.trim()) {
-          cleanOption.imageUrl = option.imageUrl.trim();
-        }
-
-        return cleanOption;
-      });
-
-      const questionToSave: any = {
-        questionContentType: questionData.questionContentType,
-        options: cleanOptions,
-        explanation: questionData.explanation || "",
-        difficulty: questionData.difficulty,
-        marks: questionData.marks || 1,
-        order: (pack?.questions?.length || 0) + 1,
-        createdAt: new Date(),
-      };
-
-      if (
-        questionData.questionContentType === "text" &&
-        questionData.questionText?.trim()
-      ) {
-        questionToSave.question = questionData.questionText.trim();
-      } else if (
-        questionData.questionContentType === "image" &&
-        questionData.questionImageUrl
-      ) {
-        questionToSave.questionImageUrl = questionData.questionImageUrl;
-      }
-
-      if (questionData.questionImageBeforeUrl) {
-        questionToSave.questionImageBeforeUrl =
-          questionData.questionImageBeforeUrl;
-      }
-      if (questionData.questionImageAfterUrl) {
-        questionToSave.questionImageAfterUrl =
-          questionData.questionImageAfterUrl;
-      }
-
-      // Save to Firestore
-      const docRef = await addDoc(
-        collection(db, "mcqTests", pack.id, "questions"),
-        questionToSave
-      );
-
-      const newQuestion: MCQQuestion = {
-        id: docRef.id,
-        ...questionToSave,
-      };
-
-      // Update local state
       const updatedPack = {
         ...pack,
-        questions: [...(pack?.questions || []), newQuestion],
-        totalQuestions: (pack?.totalQuestions || 0) + 1,
-        totalMarks: (pack?.totalMarks || 0) + newQuestion.marks,
+        questions: updatedQuestions,
+        totalMarks: updatedQuestions.reduce((sum, q) => sum + q.marks, 0),
       };
       setPack(updatedPack);
-      setIsQuestionDialogOpen(false);
-      setEditingQuestion(null);
-
-      toast({
-        title: "Success",
-        description: "Question added successfully!",
-      });
-    } catch (error) {
-      console.error("Error adding question:", error);
-      toast({
-        title: "Error",
-        description: "Failed to add question. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setAddingQuestion(false);
-    }
-  };
-
-  const handleQuestionUpdated = async (questionData: MCQQuestionInput) => {
-    if (!pack || !editingQuestion) return;
-
-    setUpdatingQuestion(true);
-    try {
-      // Clean options
-      const cleanOptions = questionData.options.map((option) => {
-        const cleanOption: any = {
-          id: option.id,
-          isCorrect: Boolean(option.isCorrect),
-          contentType: option.contentType || "text",
-        };
-
-        if (option.contentType === "text" && option.text?.trim()) {
-          cleanOption.text = option.text.trim();
-        } else if (option.contentType === "image" && option.imageUrl?.trim()) {
-          cleanOption.imageUrl = option.imageUrl.trim();
-        }
-
-        return cleanOption;
-      });
-
-      const questionToUpdate: any = {
-        questionContentType: questionData.questionContentType,
-        options: cleanOptions,
-        explanation: questionData.explanation || "",
-        difficulty: questionData.difficulty,
-        marks: questionData.marks || editingQuestion.marks,
-        order: editingQuestion.order,
-      };
-
-      if (
-        questionData.questionContentType === "text" &&
-        questionData.questionText?.trim()
-      ) {
-        questionToUpdate.question = questionData.questionText.trim();
-      } else if (
-        questionData.questionContentType === "image" &&
-        questionData.questionImageUrl
-      ) {
-        questionToUpdate.questionImageUrl = questionData.questionImageUrl;
-      }
-
-      if (questionData.questionImageBeforeUrl) {
-        questionToUpdate.questionImageBeforeUrl =
-          questionData.questionImageBeforeUrl;
-      }
-      if (questionData.questionImageAfterUrl) {
-        questionToUpdate.questionImageAfterUrl =
-          questionData.questionImageAfterUrl;
-      }
-
-      // Update in Firestore
-      await updateDoc(
-        doc(db, "mcqTests", pack.id, "questions", editingQuestion.id),
-        questionToUpdate
-      );
-
-      const updatedQuestions = (pack.questions || []).map((q) =>
-        q.id === editingQuestion.id ? { ...q, ...questionToUpdate } : q
-      );
-
-      setPack({
+    } else {
+      // Add new question
+      const updatedPack = {
         ...pack,
-        questions: updatedQuestions,
-        totalQuestions: updatedQuestions.length,
-        totalMarks: updatedQuestions.reduce(
-          (sum, q) => sum + (q.marks || 1),
-          0
-        ),
-      });
-
-      setIsQuestionDialogOpen(false);
-      setEditingQuestion(null);
-
-      toast({
-        title: "Success",
-        description: "Question updated successfully!",
-      });
-    } catch (error) {
-      console.error("Error updating question:", error);
-      toast({
-        title: "Error",
-        description: "Failed to update question. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setUpdatingQuestion(false);
+        questions: [...(pack.questions || []), savedQuestion],
+        totalQuestions: (pack.totalQuestions || 0) + 1,
+        totalMarks: (pack.totalMarks || 0) + savedQuestion.marks,
+      };
+      setPack(updatedPack);
     }
   };
 
@@ -384,6 +194,9 @@ const MCQEditPage = () => {
     try {
       // Delete question from sub-collection
       await deleteDoc(doc(db, "mcqTests", pack.id, "questions", questionId));
+
+      // Delete associated storage files
+      await StorageService.deleteQuestionImage(pack.id, questionId);
 
       const updatedQuestions = (pack.questions || []).filter(
         (q) => q.id !== questionId
@@ -466,10 +279,7 @@ const MCQEditPage = () => {
         pack={pack}
         editingQuestion={editingQuestion}
         onOpenChange={setIsQuestionDialogOpen}
-        onQuestionAdded={handleQuestionAdded}
-        onQuestionUpdated={handleQuestionUpdated}
-        addingQuestion={addingQuestion}
-        updatingQuestion={updatingQuestion}
+        onQuestionSaved={handleQuestionSaved}
       />
     </div>
   );
