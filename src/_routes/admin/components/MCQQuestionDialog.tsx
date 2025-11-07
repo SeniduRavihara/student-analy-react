@@ -9,9 +9,17 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { db } from "@/firebase/config";
+import { StorageService } from "@/firebase/services/StorageService";
 import { toast } from "@/hooks/use-toast";
-import { useData } from "@/hooks/useData";
-import { MCQOption, MCQPack, MCQQuestion, MCQQuestionInput } from "@/types";
+import { MCQOption, MCQPack, MCQQuestion } from "@/types";
+import {
+  addDoc,
+  collection,
+  doc,
+  DocumentReference,
+  updateDoc,
+} from "firebase/firestore";
 import { FileText, Image, Loader2, Plus, X } from "lucide-react";
 import { useEffect, useState } from "react";
 
@@ -20,10 +28,7 @@ interface MCQQuestionDialogProps {
   pack: MCQPack | null;
   editingQuestion: MCQQuestion | null;
   onOpenChange: (open: boolean) => void;
-  onQuestionAdded: (question: MCQQuestionInput) => void;
-  onQuestionUpdated: (question: MCQQuestionInput) => void;
-  addingQuestion?: boolean;
-  updatingQuestion?: boolean;
+  onQuestionSaved: (question: MCQQuestion) => void; // Changed from onQuestionAdded/onQuestionUpdated
 }
 
 export const MCQQuestionDialog = ({
@@ -31,13 +36,8 @@ export const MCQQuestionDialog = ({
   pack,
   editingQuestion,
   onOpenChange,
-  onQuestionAdded,
-  onQuestionUpdated,
-  addingQuestion = false,
-  updatingQuestion = false,
+  onQuestionSaved,
 }: MCQQuestionDialogProps) => {
-  const { currentUserData } = useData();
-
   // Question form state
   const [questionText, setQuestionText] = useState("");
   const [questionImageUrl, setQuestionImageUrl] = useState("");
@@ -51,12 +51,26 @@ export const MCQQuestionDialog = ({
     { id: "2", text: "", isCorrect: false, contentType: "text" },
     { id: "3", text: "", isCorrect: false, contentType: "text" },
     { id: "4", text: "", isCorrect: false, contentType: "text" },
+    { id: "5", text: "", isCorrect: false, contentType: "text" },
   ]);
   const [explanation, setExplanation] = useState("");
   const [difficulty, setDifficulty] = useState<"easy" | "medium" | "hard">(
     "medium"
   );
   const [marks, setMarks] = useState(1);
+
+  // Loading state for save operation
+  const [isSaving, setIsSaving] = useState(false);
+
+  // File objects for upload (stored temporarily)
+  const [questionImageFile, setQuestionImageFile] = useState<File | null>(null);
+  const [questionImageBeforeFile, setQuestionImageBeforeFile] =
+    useState<File | null>(null);
+  const [questionImageAfterFile, setQuestionImageAfterFile] =
+    useState<File | null>(null);
+  const [optionImageFiles, setOptionImageFiles] = useState<
+    Record<string, File>
+  >({});
 
   // Load editing question data
   useEffect(() => {
@@ -76,8 +90,40 @@ export const MCQQuestionDialog = ({
       setExplanation(editingQuestion.explanation || "");
       setDifficulty(editingQuestion.difficulty);
       setMarks(editingQuestion.marks || 1);
+    } else if (open) {
+      // Reset form when opening dialog for new question
+      resetForm();
     }
-  }, [editingQuestion]);
+  }, [editingQuestion, open]);
+
+  // Cleanup object URLs on unmount
+  useEffect(() => {
+    return () => {
+      // Revoke object URLs to prevent memory leaks
+      if (questionImageUrl && questionImageUrl.startsWith("blob:")) {
+        URL.revokeObjectURL(questionImageUrl);
+      }
+      if (
+        questionImageBeforeUrl &&
+        questionImageBeforeUrl.startsWith("blob:")
+      ) {
+        URL.revokeObjectURL(questionImageBeforeUrl);
+      }
+      if (questionImageAfterUrl && questionImageAfterUrl.startsWith("blob:")) {
+        URL.revokeObjectURL(questionImageAfterUrl);
+      }
+      options.forEach((option) => {
+        if (option.imageUrl && option.imageUrl.startsWith("blob:")) {
+          URL.revokeObjectURL(option.imageUrl);
+        }
+      });
+    };
+  }, [
+    questionImageUrl,
+    questionImageBeforeUrl,
+    questionImageAfterUrl,
+    options,
+  ]);
 
   // Reset form
   const resetForm = () => {
@@ -91,46 +137,39 @@ export const MCQQuestionDialog = ({
       { id: "2", text: "", isCorrect: false, contentType: "text" },
       { id: "3", text: "", isCorrect: false, contentType: "text" },
       { id: "4", text: "", isCorrect: false, contentType: "text" },
+      { id: "5", text: "", isCorrect: false, contentType: "text" },
     ]);
     setExplanation("");
     setDifficulty("medium");
     setMarks(1);
+    // Reset file objects
+    setQuestionImageFile(null);
+    setQuestionImageBeforeFile(null);
+    setQuestionImageAfterFile(null);
+    setOptionImageFiles({});
   };
 
-  // Image upload handlers
+  // Image upload handlers (create local previews)
   const handleQuestionImageUpload = async (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
     const file = event.target.files?.[0];
     if (file && pack) {
       try {
-        if (!currentUserData?.uid) {
-          toast({
-            title: "Error",
-            description: "You must be logged in to upload images",
-            variant: "destructive",
-          });
-          return;
-        }
+        // Create local preview URL
+        const localUrl = URL.createObjectURL(file);
+        setQuestionImageUrl(localUrl);
+        setQuestionImageFile(file); // Store file for later upload
 
-        // TEMPORARY: Use base64 for testing
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          const imageUrl = e.target?.result as string;
-          if (questionContentType === "image") {
-            setQuestionImageUrl(imageUrl);
-          }
-          toast({
-            title: "Success",
-            description: "Question image uploaded successfully (base64)",
-          });
-        };
-        reader.readAsDataURL(file);
+        toast({
+          title: "Success",
+          description: "Question image selected successfully",
+        });
       } catch (error) {
-        console.error("Upload error:", error);
+        console.error("Preview error:", error);
         toast({
           title: "Error",
-          description: "Failed to upload image.",
+          description: "Failed to create image preview.",
           variant: "destructive",
         });
       }
@@ -143,30 +182,20 @@ export const MCQQuestionDialog = ({
     const file = event.target.files?.[0];
     if (file && pack) {
       try {
-        if (!currentUserData?.uid) {
-          toast({
-            title: "Error",
-            description: "You must be logged in to upload images",
-            variant: "destructive",
-          });
-          return;
-        }
+        // Create local preview URL
+        const localUrl = URL.createObjectURL(file);
+        setQuestionImageBeforeUrl(localUrl);
+        setQuestionImageBeforeFile(file); // Store file for later upload
 
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          const imageUrl = e.target?.result as string;
-          setQuestionImageBeforeUrl(imageUrl);
-          toast({
-            title: "Success",
-            description: "Image before question uploaded successfully",
-          });
-        };
-        reader.readAsDataURL(file);
+        toast({
+          title: "Success",
+          description: "Image before question selected successfully",
+        });
       } catch (error) {
-        console.error("Upload error:", error);
+        console.error("Preview error:", error);
         toast({
           title: "Error",
-          description: "Failed to upload image",
+          description: "Failed to create image preview",
           variant: "destructive",
         });
       }
@@ -179,30 +208,20 @@ export const MCQQuestionDialog = ({
     const file = event.target.files?.[0];
     if (file && pack) {
       try {
-        if (!currentUserData?.uid) {
-          toast({
-            title: "Error",
-            description: "You must be logged in to upload images",
-            variant: "destructive",
-          });
-          return;
-        }
+        // Create local preview URL
+        const localUrl = URL.createObjectURL(file);
+        setQuestionImageAfterUrl(localUrl);
+        setQuestionImageAfterFile(file); // Store file for later upload
 
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          const imageUrl = e.target?.result as string;
-          setQuestionImageAfterUrl(imageUrl);
-          toast({
-            title: "Success",
-            description: "Image after question uploaded successfully",
-          });
-        };
-        reader.readAsDataURL(file);
+        toast({
+          title: "Success",
+          description: "Image after question selected successfully",
+        });
       } catch (error) {
-        console.error("Upload error:", error);
+        console.error("Preview error:", error);
         toast({
           title: "Error",
-          description: "Failed to upload image",
+          description: "Failed to create image preview",
           variant: "destructive",
         });
       }
@@ -216,40 +235,31 @@ export const MCQQuestionDialog = ({
     const file = event.target.files?.[0];
     if (file && pack) {
       try {
-        if (!currentUserData?.uid) {
-          toast({
-            title: "Error",
-            description: "You must be logged in to upload images",
-            variant: "destructive",
-          });
-          return;
-        }
+        // Create local preview URL
+        const localUrl = URL.createObjectURL(file);
+        setOptions((prev) =>
+          prev.map((option) =>
+            option.id === optionId
+              ? {
+                  ...option,
+                  imageUrl: localUrl,
+                  contentType: "image" as const,
+                }
+              : option
+          )
+        );
+        // Store file for later upload
+        setOptionImageFiles((prev) => ({ ...prev, [optionId]: file }));
 
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          const imageUrl = e.target?.result as string;
-          setOptions((prev) =>
-            prev.map((option) =>
-              option.id === optionId
-                ? {
-                    ...option,
-                    imageUrl: imageUrl,
-                    contentType: "image" as const,
-                  }
-                : option
-            )
-          );
-          toast({
-            title: "Success",
-            description: "Option image uploaded successfully!",
-          });
-        };
-        reader.readAsDataURL(file);
+        toast({
+          title: "Success",
+          description: "Option image selected successfully!",
+        });
       } catch (error) {
-        console.error("Upload error:", error);
+        console.error("Preview error:", error);
         toast({
           title: "Error",
-          description: "Failed to upload image.",
+          description: "Failed to create image preview.",
           variant: "destructive",
         });
       }
@@ -267,16 +277,27 @@ export const MCQQuestionDialog = ({
     contentType: "text" | "image"
   ) => {
     setOptions(
-      options.map((opt) =>
-        opt.id === optionId
-          ? {
-              ...opt,
-              contentType,
-              text: contentType === "text" ? opt.text : undefined,
-              imageUrl: contentType === "image" ? opt.imageUrl : undefined,
-            }
-          : opt
-      )
+      options.map((opt) => {
+        if (opt.id === optionId) {
+          const updatedOption: MCQOption = {
+            ...opt,
+            contentType,
+          };
+
+          // Handle text field
+          if (contentType === "text") {
+            updatedOption.text = opt.text || "";
+            delete updatedOption.imageUrl; // Remove imageUrl for text options
+          } else {
+            // contentType === "image"
+            updatedOption.imageUrl = opt.imageUrl || "";
+            delete updatedOption.text; // Remove text for image options
+          }
+
+          return updatedOption;
+        }
+        return opt;
+      })
     );
   };
 
@@ -294,25 +315,167 @@ export const MCQQuestionDialog = ({
     onOpenChange(false);
   };
 
-  const handleSubmit = () => {
-    // Validation will be done in parent component
-    // This just passes data back
-    const questionData: MCQQuestionInput = {
-      questionText,
-      questionImageUrl,
-      questionImageBeforeUrl,
-      questionImageAfterUrl,
-      questionContentType,
-      options,
-      explanation,
-      difficulty,
-      marks,
-    };
+  const handleSubmit = async () => {
+    if (!pack) return;
 
-    if (editingQuestion) {
-      onQuestionUpdated({ ...editingQuestion, ...questionData });
-    } else {
-      onQuestionAdded(questionData);
+    setIsSaving(true);
+    try {
+      let questionId: string;
+      let docRef: DocumentReference;
+
+      // Step 1: Create or get document reference
+      if (editingQuestion) {
+        // For updating existing question
+        questionId = editingQuestion.id;
+        docRef = doc(db, "mcqTests", pack.id, "questions", questionId);
+      } else {
+        // For new question: Create document first to get real ID
+        const questionDataWithoutImages = {
+          question: questionText || "",
+          questionImageUrl: "",
+          questionImageBeforeUrl: "",
+          questionImageAfterUrl: "",
+          questionContentType,
+          options: options.map((opt) => {
+            const optionData: MCQOption = {
+              ...opt,
+            };
+            // Handle text field for text options
+            if (opt.contentType === "text") {
+              optionData.text = opt.text || "";
+              delete optionData.imageUrl; // Ensure imageUrl is not present for text options
+            } else {
+              // Handle imageUrl for image options
+              if (opt.imageUrl && !opt.imageUrl.startsWith("blob:")) {
+                optionData.imageUrl = opt.imageUrl;
+              } else {
+                delete optionData.imageUrl; // Remove if undefined or blob URL
+              }
+              delete optionData.text; // Ensure text is not present for image options
+            }
+            return optionData;
+          }),
+          explanation: explanation || "",
+          difficulty,
+          marks,
+          order: 0, // Default order, can be updated later
+          createdAt: new Date(),
+        };
+
+        docRef = await addDoc(
+          collection(db, "mcqTests", pack.id, "questions"),
+          questionDataWithoutImages
+        );
+        questionId = docRef.id;
+      }
+
+      // Step 2: Upload all images to Firebase Storage using real questionId
+      let finalQuestionImageUrl = questionImageUrl;
+      let finalQuestionImageBeforeUrl = questionImageBeforeUrl;
+      let finalQuestionImageAfterUrl = questionImageAfterUrl;
+      const finalOptions = [...options];
+
+      // Upload question image if file exists
+      if (questionImageFile) {
+        finalQuestionImageUrl = await StorageService.uploadQuestionImage(
+          questionImageFile,
+          pack.id,
+          questionId
+        );
+      }
+
+      // Upload before image if file exists
+      if (questionImageBeforeFile) {
+        finalQuestionImageBeforeUrl =
+          await StorageService.uploadBeforeQuestionImage(
+            questionImageBeforeFile,
+            pack.id,
+            questionId
+          );
+      }
+
+      // Upload after image if file exists
+      if (questionImageAfterFile) {
+        finalQuestionImageAfterUrl =
+          await StorageService.uploadAfterQuestionImage(
+            questionImageAfterFile,
+            pack.id,
+            questionId
+          );
+      }
+
+      // Upload option images
+      for (const [optionId, file] of Object.entries(optionImageFiles)) {
+        const optionLetter = String.fromCharCode(65 + parseInt(optionId) - 1); // 1 -> A, 2 -> B, etc.
+        const imageUrl = await StorageService.uploadOptionImage(
+          file,
+          pack.id,
+          questionId,
+          optionLetter
+        );
+
+        // Update the option with the Firebase URL
+        const optionIndex = finalOptions.findIndex(
+          (opt) => opt.id === optionId
+        );
+        if (optionIndex !== -1) {
+          finalOptions[optionIndex] = {
+            ...finalOptions[optionIndex],
+            imageUrl,
+          };
+        }
+      }
+
+      // Step 3: Update document with final image URLs
+      const updateData = {
+        question: questionText,
+        questionContentType,
+        questionImageUrl: finalQuestionImageUrl,
+        questionImageBeforeUrl: finalQuestionImageBeforeUrl,
+        questionImageAfterUrl: finalQuestionImageAfterUrl,
+        options: finalOptions,
+        ...(editingQuestion ? { updatedAt: new Date() } : {}),
+      };
+
+      await updateDoc(docRef, updateData);
+
+      // Step 4: Create complete question object for parent callback
+      const completeQuestion: MCQQuestion = {
+        id: questionId,
+        question: questionText, // Use questionText from state
+        questionImageUrl: finalQuestionImageUrl,
+        questionImageBeforeUrl: finalQuestionImageBeforeUrl,
+        questionImageAfterUrl: finalQuestionImageAfterUrl,
+        questionContentType,
+        options: finalOptions,
+        explanation,
+        difficulty,
+        marks,
+        order: editingQuestion?.order || 0,
+        createdAt: editingQuestion?.createdAt || new Date(),
+        ...(editingQuestion ? { updatedAt: new Date() } : {}),
+      };
+
+      // Step 5: Notify parent and close dialog
+      onQuestionSaved(completeQuestion);
+      onOpenChange(false);
+      resetForm();
+
+      toast({
+        title: "Success",
+        description: editingQuestion
+          ? "Question updated successfully!"
+          : "Question created successfully with images uploaded!",
+      });
+    } catch (error) {
+      console.error("Error saving question:", error);
+      toast({
+        title: "Error",
+        description: "Failed to save question. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -704,18 +867,13 @@ export const MCQQuestionDialog = ({
           </Button>
           <Button
             onClick={handleSubmit}
-            disabled={addingQuestion || updatingQuestion}
+            disabled={isSaving}
             className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {addingQuestion ? (
+            {isSaving ? (
               <>
                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                Adding...
-              </>
-            ) : updatingQuestion ? (
-              <>
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                Updating...
+                Saving...
               </>
             ) : (
               <>{editingQuestion ? "Update Question" : "Add Question"}</>

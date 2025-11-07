@@ -23,6 +23,7 @@ import { CLASSES_TO_YEARS, ClassesType, EXAM_YEARS } from "@/constants";
 import { useModal } from "@/context/ModalContext";
 import { useToast } from "@/context/ToastContext";
 import { db } from "@/firebase/config";
+import { StorageService } from "@/firebase/services/StorageService";
 import { cn } from "@/lib/utils";
 import MockDataButton from "@/test/MockDataButton";
 import { MCQPack } from "@/types";
@@ -153,16 +154,8 @@ const MCQPage = () => {
 
     if (confirmed) {
       try {
-        // Try to delete all images from Firebase Storage first (optional)
-        // try {
-        //   await StorageService.deleteMCQTestFolder(packId);
-        // } catch (storageError) {
-        //   console.warn(
-        //     "Failed to delete storage files (CORS issue in development):",
-        //     storageError
-        //   );
-        //   // Continue with Firestore deletion even if storage deletion fails
-        // }
+        // Delete all images from Firebase Storage first
+        await StorageService.deleteMCQTestFolder(packId);
 
         // Create a batch to delete both the main document and subcollection
         const batch = writeBatch(db);

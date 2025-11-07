@@ -52,8 +52,8 @@ export class StorageService {
   ): Promise<string> {
     try {
       const fileExtension = file.name.split(".").pop() || "jpg";
-      const fileName = `option-${optionLetter}.${fileExtension}`;
-      const storagePath = `mcqTests/${mcqTestId}/questions/${questionId}/options/${fileName}`;
+      const fileName = `option_${optionLetter}_Image.${fileExtension}`;
+      const storagePath = `mcqTests/${mcqTestId}/questions/${questionId}/${fileName}`;
 
       const storageRef = ref(storage, storagePath);
       const snapshot = await uploadBytes(storageRef, file);
@@ -63,6 +63,62 @@ export class StorageService {
     } catch (error) {
       console.error("Error uploading option image:", error);
       throw new Error("Failed to upload option image");
+    }
+  }
+
+  /**
+   * Upload before question image to Firebase Storage
+   * @param file - Image file to upload
+   * @param mcqTestId - MCQ test ID
+   * @param questionId - Question ID
+   * @returns Promise<string> - Download URL
+   */
+  static async uploadBeforeQuestionImage(
+    file: File,
+    mcqTestId: string,
+    questionId: string
+  ): Promise<string> {
+    try {
+      const fileExtension = file.name.split(".").pop() || "jpg";
+      const fileName = `before_questionImage.${fileExtension}`;
+      const storagePath = `mcqTests/${mcqTestId}/questions/${questionId}/${fileName}`;
+
+      const storageRef = ref(storage, storagePath);
+      const snapshot = await uploadBytes(storageRef, file);
+      const downloadURL = await getDownloadURL(snapshot.ref);
+
+      return downloadURL;
+    } catch (error) {
+      console.error("Error uploading before question image:", error);
+      throw new Error("Failed to upload before question image");
+    }
+  }
+
+  /**
+   * Upload after question image to Firebase Storage
+   * @param file - Image file to upload
+   * @param mcqTestId - MCQ test ID
+   * @param questionId - Question ID
+   * @returns Promise<string> - Download URL
+   */
+  static async uploadAfterQuestionImage(
+    file: File,
+    mcqTestId: string,
+    questionId: string
+  ): Promise<string> {
+    try {
+      const fileExtension = file.name.split(".").pop() || "jpg";
+      const fileName = `after_questionImage.${fileExtension}`;
+      const storagePath = `mcqTests/${mcqTestId}/questions/${questionId}/${fileName}`;
+
+      const storageRef = ref(storage, storagePath);
+      const snapshot = await uploadBytes(storageRef, file);
+      const downloadURL = await getDownloadURL(snapshot.ref);
+
+      return downloadURL;
+    } catch (error) {
+      console.error("Error uploading after question image:", error);
+      throw new Error("Failed to upload after question image");
     }
   }
 
@@ -92,32 +148,52 @@ export class StorageService {
   }
 
   /**
-   * Delete entire MCQ test folder from Firebase Storage
+   * Delete entire MCQ test folder from Firebase Storage recursively
    * @param mcqTestId - MCQ test ID
    */
   static async deleteMCQTestFolder(mcqTestId: string): Promise<void> {
     try {
       const storagePath = `mcqTests/${mcqTestId}`;
-      const folderRef = ref(storage, storagePath);
-
-      // List all files in the MCQ test folder
-      const listResult = await listAll(folderRef);
-
-      // Delete all files recursively
-      const deletePromises = listResult.items.map((item) => deleteObject(item));
-      await Promise.all(deletePromises);
-
-      // Also delete subfolders recursively
-      for (const folder of listResult.prefixes) {
-        const subListResult = await listAll(folder);
-        const subDeletePromises = subListResult.items.map((item) =>
-          deleteObject(item)
-        );
-        await Promise.all(subDeletePromises);
-      }
+      await this.deleteFolderRecursively(storagePath);
     } catch (error) {
       console.error("Error deleting MCQ test folder:", error);
       // Don't throw error as this is cleanup operation
+    }
+  }
+
+  /**
+   * Recursively delete a folder and all its contents
+   * @param folderPath - Path to the folder to delete
+   */
+  private static async deleteFolderRecursively(
+    folderPath: string
+  ): Promise<void> {
+    const folderRef = ref(storage, folderPath);
+
+    try {
+      // List all items in the current folder
+      const listResult = await listAll(folderRef);
+
+      // Delete all files in current folder
+      if (listResult.items.length > 0) {
+        const deletePromises = listResult.items.map((item) =>
+          deleteObject(item)
+        );
+        await Promise.all(deletePromises);
+      }
+
+      // Recursively delete all subfolders
+      if (listResult.prefixes.length > 0) {
+        const subfolderPromises = listResult.prefixes.map((prefix) =>
+          this.deleteFolderRecursively(prefix.fullPath)
+        );
+        await Promise.all(subfolderPromises);
+      }
+    } catch {
+      // If folder doesn't exist or is already deleted, that's fine
+      console.log(
+        `Folder ${folderPath} may already be deleted or doesn't exist`
+      );
     }
   }
 
