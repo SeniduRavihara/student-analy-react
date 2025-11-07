@@ -2,9 +2,18 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { CLASSES_TO_YEARS, ClassesType, EXAM_YEARS } from "@/constants";
+import { cn } from "@/lib/utils";
 import { MCQPack } from "@/types";
-import { Globe, Lock, Save } from "lucide-react";
+import { Globe, Lock, Save, SquareCheck } from "lucide-react";
 
 interface MCQPackInfoProps {
   pack: MCQPack;
@@ -90,6 +99,65 @@ export const MCQPackInfo = ({
               className="mt-1"
               rows={3}
             />
+          </div>
+
+          <div>
+            <Label>Exam Year</Label>
+            <Select
+              value={pack.examYear}
+              onValueChange={(value) =>
+                onPackUpdate({ ...pack, examYear: value })
+              }
+            >
+              <SelectTrigger className="mt-1">
+                <SelectValue placeholder="Select exam year" />
+              </SelectTrigger>
+              <SelectContent>
+                {EXAM_YEARS.map((year) => (
+                  <SelectItem key={year.year} value={year.year}>
+                    {year.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label>Class Types</Label>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              {CLASSES_TO_YEARS[
+                pack.examYear as keyof typeof CLASSES_TO_YEARS
+              ]?.map((classItem) => (
+                <Card
+                  key={classItem}
+                  onClick={() => {
+                    const currentClasses = pack.classType || [];
+                    const isSelected = currentClasses.includes(
+                      classItem as ClassesType
+                    );
+                    const newClasses = isSelected
+                      ? currentClasses.filter((c) => c !== classItem)
+                      : [...currentClasses, classItem as ClassesType];
+                    onPackUpdate({ ...pack, classType: newClasses });
+                  }}
+                  className={cn(
+                    "p-3 flex items-center justify-between cursor-pointer transition-all",
+                    (pack.classType || []).includes(classItem as ClassesType)
+                      ? "bg-primary text-primary-foreground"
+                      : "hover:bg-accent"
+                  )}
+                >
+                  <span className="font-medium">{classItem}</span>
+                  {(pack.classType || []).includes(
+                    classItem as ClassesType
+                  ) && <SquareCheck className="h-5 w-5" />}
+                </Card>
+              )) || (
+                <p className="text-sm text-gray-500 col-span-full">
+                  Select an exam year first
+                </p>
+              )}
+            </div>
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>

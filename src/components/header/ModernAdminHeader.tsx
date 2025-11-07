@@ -2,7 +2,7 @@ import ClassSelect from "@/_routes/admin/components/ClassSelect";
 import YearSelect from "@/_routes/admin/components/YearSelect";
 import { ClassesType as ClassesDataType } from "@/constants";
 import { useSidebar } from "@/context/SidebarContext";
-import { logout } from "@/firebase/api";
+import AuthService from "@/firebase/services/AuthService";
 import { useAuth } from "@/hooks/useAuth";
 import { useData } from "@/hooks/useData";
 import { Bell, LogOut, Menu, User } from "lucide-react";
@@ -32,7 +32,7 @@ export default function ModernAdminHeader({
     setIsLoggingOut(true);
     try {
       console.log("Logging out...");
-      await logout();
+      await AuthService.logout();
       console.log("Sign out successful, redirecting...");
       // Use window.location.href for more reliable redirect in production
       window.location.href = "/";

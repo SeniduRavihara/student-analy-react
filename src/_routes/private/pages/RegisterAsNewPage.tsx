@@ -8,12 +8,12 @@ import { Fragment, useEffect, useState } from "react";
 import PersonalDetailsForm from "../components/PersonalDetailsForm";
 import ExameDetailsForm from "../components/ExameDetailsForm";
 import ParentDetailsForm from "../components/ParentDetailsForm";
-import { registerStudent } from "@/firebase/api";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { CLASSES, EXAM_YEARS } from "@/constants";
 import { CircularProgress } from "@mui/material";
+import UserService from "@/firebase/services/UserService";
 
 const steps = ["Personal Details", "Exame Details", "Parent Details"];
 
@@ -116,7 +116,7 @@ const RegisterAsNewPage = () => {
         return;
       }
 
-      await registerStudent(
+      await UserService.registerStudent(
         {
           firstName,
           lastName,

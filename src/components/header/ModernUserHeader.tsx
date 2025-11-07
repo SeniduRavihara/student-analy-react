@@ -1,5 +1,5 @@
 import { useSidebar } from "@/context/SidebarContext";
-import { logout } from "@/firebase/api";
+import AuthService from "@/firebase/services/AuthService";
 import { useAuth } from "@/hooks/useAuth";
 import { useData } from "@/hooks/useData";
 import { Bell, LogOut, Menu, User } from "lucide-react";
@@ -17,7 +17,7 @@ export default function ModernUserHeader() {
     setIsLoggingOut(true);
     try {
       console.log("Logging out...");
-      await logout();
+      await AuthService.logout();
       console.log("Sign out successful, redirecting...");
       // Use window.location.href for more reliable redirect in production
       window.location.href = "/";

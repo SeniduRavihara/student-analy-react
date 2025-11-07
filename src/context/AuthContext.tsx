@@ -1,6 +1,6 @@
 import { INITIAL_AUTH_CONTEXT } from "@/constants";
-import { featchCurrentUserData } from "@/firebase/api";
 import { auth} from "@/firebase/config";
+import UserService from "@/firebase/services/UserService";
 import { useData } from "@/hooks/useData";
 import { AuthContextType } from "@/types";
 import { User, onAuthStateChanged } from "firebase/auth";
@@ -23,8 +23,11 @@ const AuthContextProvider = ({ children }: { children: React.ReactNode }) => {
         return;
       }
 
-      const userData = await featchCurrentUserData(user);
-      setCurrentUserData(userData);
+      const userData = await UserService.fetchCurrentUserData(user);
+      // setCurrentUserData(userData);
+
+      console.log(userData);
+      
 
       setCurrentUser(user);
 

@@ -80,6 +80,16 @@ const UserMCQPage = () => {
     navigate(`/dashboard/mcq/${packId}/test`);
   };
 
+  // Filter MCQ packs based on user's exam year and classes
+  const filteredPacks = mcqPacks.filter((pack) => {
+    const matchesYear = pack.examYear === currentUserData?.examYear;
+    const matchesClass =
+      currentUserData?.classes?.some((userClass) =>
+        pack.classType?.includes(userClass)
+      ) ?? false;
+    return matchesYear && matchesClass;
+  });
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -99,8 +109,13 @@ const UserMCQPage = () => {
           <div>
             <h1 className="text-2xl font-bold text-gray-900 mb-2">MCQ Tests</h1>
             <p className="text-gray-600">
-              {mcqPacks.length} total tests • {completedTests.size} completed •{" "}
-              {mcqPacks.length - completedTests.size} available
+              {filteredPacks.length} total tests • {completedTests.size}{" "}
+              completed •{" "}
+              {filteredPacks.length -
+                [...completedTests].filter((id) =>
+                  filteredPacks.some((pack) => pack.id === id)
+                ).length}{" "}
+              available
             </p>
           </div>
         </div>
@@ -109,19 +124,25 @@ const UserMCQPage = () => {
       {/* MCQ Tests Grid */}
       {loading ? (
         <MCQGridSkeleton count={6} />
-      ) : mcqPacks.length === 0 ? (
+      ) : filteredPacks.length === 0 ? (
         <div className="bg-white rounded-lg border border-gray-200 shadow-xs p-12">
           <div className="flex flex-col items-center justify-center text-gray-500">
             <Users className="h-12 w-12 mb-4 text-gray-300" />
-            <h3 className="text-lg font-medium mb-2">No MCQ Tests Available</h3>
+            <h3 className="text-lg font-medium mb-2">
+              {mcqPacks.length === 0
+                ? "No MCQ Tests Available"
+                : "No Tests Match Your Criteria"}
+            </h3>
             <p className="text-center">
-              There are currently no MCQ tests in the database.
+              {mcqPacks.length === 0
+                ? "There are currently no MCQ tests in the database."
+                : "No MCQ tests are available for your exam year and class combination."}
             </p>
           </div>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {mcqPacks.map((pack) => {
+          {filteredPacks.map((pack) => {
             const isCompleted = completedTests.has(pack.id);
             return (
               <Card
