@@ -1,0 +1,26 @@
+import UpcomingExamCalendar from "@/components/UpcomingExamCalendar";
+
+const StudentCalendarPage = () => {
+  return (
+    <div className="space-y-6">
+      {/* Page Header */}
+      <div>
+        <h1 className="text-2xl font-semibold text-gray-900">
+          My Exam Calendar
+        </h1>
+        <p className="mt-1 text-sm text-gray-500">
+          View your upcoming exams and important dates
+        </p>
+      </div>
+
+      {/* Calendar */}
+      <div className="bg-white rounded-lg border shadow-xs overflow-hidden">
+        <div className="p-6">
+          <UpcomingExamCalendar />
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default StudentCalendarPage;

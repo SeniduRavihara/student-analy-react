@@ -1,28 +1,39 @@
+import AuthLayout from "@/_routes/_auth/AuthLayout";
+import LoginPage from "@/_routes/_auth/forms/LoginPage";
+import AdminLayout from "@/_routes/admin/AdminLayout";
+import AdminDashboard from "@/_routes/admin/pages/AdminDashboard";
+import StudentDetailsPage from "@/_routes/admin/pages/StudentDetailsPage";
+import StudentProfilePage from "@/_routes/private/pages/StudentProfilePage";
+import PrivateLayout from "@/_routes/private/PrivateLayout";
+import HomePage from "@/_routes/public/pages/HomePage";
+import PublicLayout from "@/_routes/public/PublicLayout";
+import RootLayout from "@/_routes/RootLayout";
+import ToastContainer from "@/components/ui/toast-container";
+import AuthContextProvider from "@/context/AuthContext";
+import DataContextProvider from "@/context/DataContext";
+import { ModalProvider } from "@/context/ModalContext";
+import { ToastProvider } from "@/context/ToastContext";
 import {
   createBrowserRouter,
   createRoutesFromElements,
   Route,
   RouterProvider,
 } from "react-router-dom";
-import AuthLayout from "@/_routes/_auth/AuthLayout";
-import AuthContextProvider from "@/context/AuthContext";
-import HomePage from "@/_routes/public/pages/HomePage";
-import RootLayout from "@/_routes/RootLayout";
-import DataContextProvider from "@/context/DataContext";
-import LoginPage from "@/_routes/_auth/forms/LoginPage";
-import PublicLayout from "@/_routes/public/PublicLayout";
-import PrivateLayout from "@/_routes/private/PrivateLayout";
-import AdminLayout from "@/_routes/admin/AdminLayout";
-import StudentDetailsPage from "@/_routes/admin/pages/StudentDetailsPage";
-import StudentProfilePage from "@/_routes/private/pages/StudentProfilePage";
-import AddNewStudentPage from "@/_routes/admin/pages/AddNewStudentPage";
 import SignupPage from "./_routes/_auth/forms/SignupPage";
-import DashboardPage from "./_routes/private/pages/DashboardPage";
-import AnalyticsPage from "./_routes/admin/pages/AnalyticsPage";
-import StudentAnalyticsPage from "./_routes/private/pages/StudentAnalyticsPage";
-import RegisterAsNewPage from "./_routes/private/pages/RegisterAsNewPage";
-import ExamsPage from "./_routes/admin/pages/ExamsPage";
 import AddResultsPage from "./_routes/admin/pages/AddResultsPage";
+import AnalyticsPage from "./_routes/admin/pages/AnalyticsPage";
+import CalendarPage from "./_routes/admin/pages/CalendarPage";
+import ExamsPage from "./_routes/admin/pages/ExamsPage";
+import MCQEditPage from "./_routes/admin/pages/MCQEditPage";
+import MCQPage from "./_routes/admin/pages/MCQPage";
+import MCQViewPage from "./_routes/admin/pages/MCQViewPage";
+import DashboardPage from "./_routes/private/pages/DashboardPage";
+import MCQResultsPage from "./_routes/private/pages/MCQResultsPage";
+import MCQTestPage from "./_routes/private/pages/MCQTestPage";
+import RegisterAsNewPage from "./_routes/private/pages/RegisterAsNewPage";
+import StudentAnalyticsPage from "./_routes/private/pages/StudentAnalyticsPage";
+import StudentCalendarPage from "./_routes/private/pages/StudentCalendarPage";
+import UserMCQPage from "./_routes/private/pages/UserMCQPage";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -42,6 +53,10 @@ const router = createBrowserRouter(
       <Route element={<PrivateLayout />}>
         <Route path="/dashboard" element={<DashboardPage />}>
           <Route index element={<StudentAnalyticsPage />} />
+          <Route path="mcq" element={<UserMCQPage />} />
+          <Route path="mcq/:packId/test" element={<MCQTestPage />} />
+          <Route path="mcq/results" element={<MCQResultsPage />} />
+          <Route path="calendar" element={<StudentCalendarPage />} />
           <Route path="profile" element={<StudentProfilePage />} />
         </Route>
         <Route path="register-as-new" element={<RegisterAsNewPage />} />
@@ -49,10 +64,14 @@ const router = createBrowserRouter(
 
       {/* admin routes */}
       <Route path="/admin" element={<AdminLayout />}>
-        <Route index element={<StudentDetailsPage />} />
-        <Route path="add-student" element={<AddNewStudentPage />} />
+        <Route index element={<AdminDashboard />} />
+        <Route path="students" element={<StudentDetailsPage />} />
         <Route path="analytics" element={<AnalyticsPage />} />
         <Route path="exams" element={<ExamsPage />} />
+        <Route path="mcq" element={<MCQPage />} />
+        <Route path="mcq/:packId/edit" element={<MCQEditPage />} />
+        <Route path="mcq/:packId/view" element={<MCQViewPage />} />
+        <Route path="calendar" element={<CalendarPage />} />
         <Route
           path="exams/add-results/:examIdName"
           element={<AddResultsPage />}
@@ -64,11 +83,16 @@ const router = createBrowserRouter(
 
 const App = () => {
   return (
-    <DataContextProvider>
-      <AuthContextProvider>
-        <RouterProvider router={router} />
-      </AuthContextProvider>
-    </DataContextProvider>
+    <ModalProvider>
+      <ToastProvider>
+        <DataContextProvider>
+          <AuthContextProvider>
+            <RouterProvider router={router} />
+            <ToastContainer />
+          </AuthContextProvider>
+        </DataContextProvider>
+      </ToastProvider>
+    </ModalProvider>
   );
 };
 export default App;

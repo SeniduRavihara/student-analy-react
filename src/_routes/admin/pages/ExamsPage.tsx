@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -8,6 +8,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { ModernDataTable } from "@/components/ui/modern-data-table";
 import {
   Popover,
   PopoverContent,
@@ -20,7 +21,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import UpcomingExamCalendar from "@/components/UpcomingExamCalendar";
 import {
   CLASSES_TO_YEARS,
   ClassesType as ClassesDataType,
@@ -38,7 +38,6 @@ import { useEffect, useState } from "react";
 import { useNavigate, useOutletContext } from "react-router-dom";
 import { ConfirmDialog } from "../components/ConfirmDialog";
 import { columns } from "../components/exams/Coloumns";
-import { DataTable } from "../components/exams/DataTable";
 
 type OutletContextType = {
   selectedYear: string;
@@ -59,6 +58,7 @@ const ExamsPage = () => {
   });
 
   const [loading, setLoading] = useState(false);
+  const [dataLoading, setDataLoading] = useState(true);
 
   const { selectedYear, selectedClass } = useOutletContext<OutletContextType>();
 
@@ -79,6 +79,7 @@ const ExamsPage = () => {
   }, [examYear]);
 
   useEffect(() => {
+    setDataLoading(true);
     const collectionRef = collection(db, "exams");
 
     // Add query to sort by `createdAt` in ascending order
@@ -101,6 +102,7 @@ const ExamsPage = () => {
 
       // console.log("EXAM", examsDataArr);
       setExamsData(examsDataArr);
+      setDataLoading(false);
     });
 
     return unsubscribe;
@@ -149,41 +151,36 @@ const ExamsPage = () => {
   };
 
   return (
-    <div className="p-2 md:p-5 w-full h-full bg-[#ededed] overflow-auto flex flex-col gap-5 mb-10">
-      <Card>
-        <CardContent>
-          <DataTable
-            columns={columns(navigate, setConfirmDialog)}
-            data={examsData}
-          />
-
-          <Button className="" onClick={() => setIsDialogOpen(true)}>
+    <div className="space-y-6">
+      {/* Page Header with Action Button */}
+      <div className="bg-white rounded-lg border border-gray-200 shadow-xs p-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">
+              Exam Management
+            </h1>
+            <p className="text-gray-600">
+              Create and manage exams for your students
+            </p>
+          </div>
+          <Button
+            onClick={() => setIsDialogOpen(true)}
+            className="bg-blue-600 hover:bg-blue-700"
+          >
             Create New Exam
           </Button>
+        </div>
+      </div>
 
-          {/* <Button
-            className="ml-2"
-            variant="outline"
-            onClick={async () => {
-              try {
-                await updateExamClassTypeToArray("Cc5BFT9zaOjQR9izxkle");
-                toast({
-                  title: "Exam classType updated to array format successfully!",
-                  variant: "default",
-                });
-              } catch (error) {
-                console.error("Error updating exam classType:", error);
-                toast({
-                  title: "Error updating exam classType. Please try again.",
-                  variant: "destructive",
-                });
-              }
-            }}
-          >
-            Update Exam ClassType to Array
-          </Button> */}
-        </CardContent>
-      </Card>
+      {/* Table */}
+      <ModernDataTable
+        columns={columns(navigate, setConfirmDialog)}
+        data={examsData}
+        searchPlaceholder="Search by exam name..."
+        searchColumn="examName"
+        pageSize={8}
+        loading={dataLoading}
+      />
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         {/* <DialogTrigger asChild>
@@ -283,8 +280,6 @@ const ExamsPage = () => {
       </Dialog>
 
       {/* <Button onClick={updateAllExamCollection}>Fix User Classes</Button> */}
-
-      <UpcomingExamCalendar />
 
       {/* Confirmation Dialog */}
       <ConfirmDialog

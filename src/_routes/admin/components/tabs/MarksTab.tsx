@@ -1,8 +1,28 @@
 import { MarksChart } from "@/_routes/private/components/charts/MarksChart";
 import StudentMarksCard from "@/_routes/private/components/StudentMarksCard";
+import { ChartSkeleton, StatsCardSkeleton } from "@/components/ui/skeleton";
 import { ExamDataType } from "@/types";
 
-const MarksTab = ({ examsData }: { examsData: Array<ExamDataType> | null }) => {
+const MarksTab = ({
+  examsData,
+  loading,
+}: {
+  examsData: Array<ExamDataType> | null;
+  loading?: boolean;
+}) => {
+  if (loading) {
+    return (
+      <div className="w-full relative z-10 space-y-6">
+        <ChartSkeleton />
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <StatsCardSkeleton />
+          <StatsCardSkeleton />
+          <StatsCardSkeleton />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="w-full relative z-10">
       {examsData && examsData.length > 0 ? (

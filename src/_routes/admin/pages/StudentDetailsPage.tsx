@@ -1,18 +1,11 @@
 import { columns } from "@/_routes/admin/components/student-data/Coloumns";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Drawer, DrawerContent } from "@/components/ui/drawer";
+import { ModernDataTable } from "@/components/ui/modern-data-table";
 import { db } from "@/firebase/config";
 import { ExamDataType, UserDataType } from "@/types";
 import { collection, onSnapshot, orderBy, query } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import { useOutletContext } from "react-router-dom";
-import { DataTable } from "../components/student-data/DataTable";
 import { Tabs } from "../components/Tabs";
 import InfoTab from "../components/tabs/InfoTab";
 import MarksTab from "../components/tabs/MarksTab";
@@ -26,9 +19,11 @@ const StudentDetailsPage = () => {
   const [openDetailsPopup, setOpenDetailsPopup] = useState(false);
   const [selectedUser, setSelectedUser] = useState<UserDataType | null>(null);
   const [examsData, setExamsData] = useState<Array<ExamDataType> | null>(null);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (selectedUser) {
+      setLoading(true);
       const collectionRef = query(
         collection(db, "users", selectedUser?.uid, "exams"),
         orderBy("examDate", "asc")
@@ -39,6 +34,7 @@ const StudentDetailsPage = () => {
         })) as ExamDataType[];
 
         setExamsData(examsDataArr);
+        setLoading(false);
       });
 
       return unsubscribe;
@@ -49,7 +45,7 @@ const StudentDetailsPage = () => {
     {
       label: "Marks",
       value: "marks",
-      content: <MarksTab examsData={examsData} />,
+      content: <MarksTab examsData={examsData} loading={loading} />,
     },
     {
       label: "Info",
@@ -59,29 +55,24 @@ const StudentDetailsPage = () => {
   ];
 
   return (
-    <div className="p-2 md:p-5 w-full h-full overflow-auto">
-      <Card>
-        <CardHeader>
-          <CardTitle>Student Details</CardTitle>
-          <CardDescription>
-            A comprehensive list of all students. Click on a row to view
-            detailed information.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {usersData && (
-            <DataTable
-              columns={columns(setOpenDetailsPopup, setSelectedUser, usersData)}
-              data={usersData?.map((user) => ({
-                indexNo: user.regNo || "",
-                name: user.userName,
-                email: user.email,
-                lastResult: user.lastResult || 0,
-              }))}
-            />
-          )}
-        </CardContent>
-      </Card>
+    <div className="space-y-6">
+      {/* Student Details Section */}
+      {usersData && (
+        <ModernDataTable
+          columns={columns(setOpenDetailsPopup, setSelectedUser, usersData)}
+          data={usersData?.map((user) => ({
+            indexNo: user.regNo || "",
+            name: user.userName,
+            email: user.email,
+            lastResult: user.lastResult || 0,
+          }))}
+          searchPlaceholder="Search by index number or name..."
+          searchColumn="indexNo"
+          pageSize={8}
+          title="Student Details"
+          description="A comprehensive list of all students. Click on a row to view detailed information."
+        />
+      )}
 
       <Drawer open={openDetailsPopup} onOpenChange={setOpenDetailsPopup}>
         <DrawerContent className="w-full h-[90%] p-10 overflow-auto">

@@ -1,12 +1,4 @@
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
   CategoryScale,
   Chart as ChartJS,
   Filler,
@@ -119,14 +111,25 @@ export function MarksChart({
   const chartWidth = Math.max(400, labels.length * dataPointWidth);
 
   return (
-    <Card className="w-full">
-      <CardHeader>
-        <CardTitle>Your Marks vs Average Marks</CardTitle>
-        <CardDescription>
-          A comparison of your marks against the class average for each exam.
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
+    <div className="bg-white rounded-lg border border-gray-200 shadow-xs overflow-hidden">
+      <div className="p-6 border-b border-gray-200">
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="text-lg font-semibold text-gray-900">
+              Your Performance vs Class Average
+            </h3>
+            <p className="text-sm text-gray-600 mt-1">
+              Compare your marks against the class average
+            </p>
+          </div>
+          <div className="flex items-center gap-2 text-sm text-blue-600">
+            <TrendingUp className="h-4 w-4" />
+            <span className="font-medium">Performance Trend</span>
+          </div>
+        </div>
+      </div>
+
+      <div className="p-6">
         <div className="overflow-x-auto">
           <div
             style={{
@@ -138,15 +141,14 @@ export function MarksChart({
             <Line options={options} data={data} />
           </div>
         </div>
-      </CardContent>
-      <CardFooter className="flex-col items-start gap-2 text-sm">
-        <div className="flex gap-2 font-medium leading-none">
-          Exam performance trend <TrendingUp className="h-4 w-4" />
-        </div>
-        <div className="leading-none text-muted-foreground">
-          Displaying your marks for recent exams.
-        </div>
-      </CardFooter>
-    </Card>
+      </div>
+
+      <div className="px-6 py-4 bg-gray-50 border-t border-gray-200">
+        <p className="text-xs text-gray-500">
+          Displaying your marks for {chartData.length} completed exam
+          {chartData.length !== 1 ? "s" : ""}
+        </p>
+      </div>
+    </div>
   );
 }

@@ -40,12 +40,13 @@ export const columns: (
     cell: ({ row }) => <div className="lowercase">{row.getValue("email")}</div>,
   },
   {
-    accessorKey: "lastResult",
-    header: () => <div className="text-right">Last Result</div>,
-    cell: ({ row }) => (
-      <div className="text-right font-medium">{row.getValue("lastResult")}</div>
-    ),
-  },
+  accessorKey: "lastResult",
+  header: () => <div className="text-right">Last Result</div>,
+  cell: ({ row }) => (
+  <div className="text-right font-medium">{row.getValue("lastResult")}</div>
+  ),
+    enableHiding: true,
+   },
   {
     id: "actions",
     enableHiding: false,

@@ -106,7 +106,7 @@ const HeroSection = () => {
                 <div className="aspect-[4/3] rounded-lg overflow-hidden relative">
                   {/* This is a placeholder - replace with your actual teacher image */}
                   <img
-                    src="/pasan-image.jpg"
+                    src="/pasan-image.JPG"
                     alt="Physics Teacher"
                     className="w-full h-full object-cover"
                   />

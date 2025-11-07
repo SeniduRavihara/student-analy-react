@@ -1,3 +1,4 @@
+import { ChartSkeleton } from "@/components/ui/skeleton";
 import { db } from "@/firebase/config";
 import { ExamDataType, UserDataType } from "@/types";
 import {
@@ -7,6 +8,7 @@ import {
   query,
   where,
 } from "firebase/firestore";
+import { BarChart3 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useOutletContext } from "react-router-dom";
 import { AvgChart } from "../components/charts/AvgChart";
@@ -30,7 +32,7 @@ const AnalyticsPage = () => {
     const collectionRef = query(
       collection(db, "exams"),
       where("examYear", "==", selectedYear),
-      where("classType", "==", selectedClass),
+      where("classType", "array-contains", selectedClass),
       orderBy("examDate", "asc")
     );
     const unsubscribe = onSnapshot(
@@ -74,24 +76,43 @@ const AnalyticsPage = () => {
   //   : [];
 
   return (
-    <div className="p-2 md:p-5 bg-[#ededed] w-full h-full overflow-auto flex flex-col gap-5">
-      {/* Chart Section */}
-      <div className="flex justify-center items-center">
-        {loading ? (
-          <div className="text-gray-500">Loading exam data...</div>
-        ) : examsData && examsData.length > 0 ? (
-          <AvgChart
-            chartData={examsData
-              .filter((exam) => exam.examStatus === "completed")
-              .map(({ examName, avgResult }) => ({
-                exam: examName,
-                avgMark: avgResult ?? null,
-              }))}
-          />
-        ) : (
-          <div className="text-gray-500">No exam data available</div>
-        )}
+    <div className="space-y-6">
+      {/* Page Header */}
+      <div className="bg-white rounded-lg border border-gray-200 shadow-xs p-6">
+        <h1 className="text-2xl font-bold text-gray-900 mb-2">
+          System Analytics
+        </h1>
+        <p className="text-gray-600">
+          Overview of exam performance and system statistics for{" "}
+          <span className="font-medium text-blue-600">{selectedYear}</span> -{" "}
+          <span className="font-medium text-blue-600">{selectedClass}</span>{" "}
+          (includes exams with multiple class types)
+        </p>
       </div>
+
+      {/* Analytics Chart */}
+      {loading ? (
+        <ChartSkeleton />
+      ) : examsData && examsData.length > 0 ? (
+        <AvgChart
+          chartData={examsData
+            .filter((exam) => exam.examStatus === "completed")
+            .map(({ examName, avgResult }) => ({
+              exam: examName,
+              avgMark: avgResult ?? null,
+            }))}
+        />
+      ) : (
+        <div className="bg-white rounded-lg border border-gray-200 shadow-xs p-12">
+          <div className="flex flex-col items-center justify-center text-gray-500">
+            <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+              <BarChart3 className="h-8 w-8 text-gray-400" />
+            </div>
+            <p className="text-lg font-medium">No exam data available</p>
+            <p className="text-sm">Create some exams to see analytics</p>
+          </div>
+        </div>
+      )}
 
       {/* Ranking Section */}
       {/* <div className="flex justify-center items-center">
