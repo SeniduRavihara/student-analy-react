@@ -119,7 +119,7 @@ export type MCQQuestion = {
   question?: string; // Optional text question
   questionImageBeforeUrl?: string; // Optional image before question text
   questionImageAfterUrl?: string; // Optional image after question text
-   questionImageUrl?: string;
+  questionImageUrl?: string;
   questionContentType: "text" | "image"; // Type of question content
   options: MCQOption[];
   explanation?: string;
@@ -129,6 +129,18 @@ export type MCQQuestion = {
   marks: number;
   order: number;
   createdAt: Date;
+};
+
+export type MCQQuestionInput = {
+  questionText?: string;
+  questionImageUrl?: string;
+  questionImageBeforeUrl?: string;
+  questionImageAfterUrl?: string;
+  questionContentType: "text" | "image";
+  options: MCQOption[];
+  explanation?: string;
+  difficulty: "easy" | "medium" | "hard";
+  marks: number;
 };
 
 export type MCQPack = {
