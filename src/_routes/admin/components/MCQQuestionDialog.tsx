@@ -51,6 +51,7 @@ export const MCQQuestionDialog = ({
     { id: "2", text: "", isCorrect: false, contentType: "text" },
     { id: "3", text: "", isCorrect: false, contentType: "text" },
     { id: "4", text: "", isCorrect: false, contentType: "text" },
+    { id: "5", text: "", isCorrect: false, contentType: "text" },
   ]);
   const [explanation, setExplanation] = useState("");
   const [difficulty, setDifficulty] = useState<"easy" | "medium" | "hard">(
@@ -136,6 +137,7 @@ export const MCQQuestionDialog = ({
       { id: "2", text: "", isCorrect: false, contentType: "text" },
       { id: "3", text: "", isCorrect: false, contentType: "text" },
       { id: "4", text: "", isCorrect: false, contentType: "text" },
+      { id: "5", text: "", isCorrect: false, contentType: "text" },
     ]);
     setExplanation("");
     setDifficulty("medium");
