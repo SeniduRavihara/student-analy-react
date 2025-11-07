@@ -10,7 +10,7 @@ import { db } from "@/firebase/config";
 import { useData } from "@/hooks/useData";
 import { MCQResult } from "@/types";
 import { collection, getDocs, orderBy, query } from "firebase/firestore";
-import { ArrowLeft, CheckCircle, Eye, XCircle } from "lucide-react";
+import { ArrowLeft, CheckCircle, XCircle } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -50,10 +50,10 @@ const MCQResultsPage = () => {
     }
   };
 
-  const handleViewDetails = (result: MCQResult) => {
-    // TODO: Navigate to detailed result view
-    console.log("View details for:", result);
-  };
+  // const handleViewDetails = (result: MCQResult) => {
+  //   // TODO: Navigate to detailed result view
+  //   console.log("View details for:", result);
+  // };
 
   if (loading) {
     return (
@@ -174,14 +174,14 @@ const MCQResultsPage = () => {
                 </div>
 
                 <div className="flex gap-2">
-                  <Button
+                  {/* <Button
                     variant="outline"
                     size="sm"
                     onClick={() => handleViewDetails(result)}
                   >
                     <Eye className="h-4 w-4 mr-2" />
                     View Details
-                  </Button>
+                  </Button> */}
                 </div>
               </CardContent>
             </Card>

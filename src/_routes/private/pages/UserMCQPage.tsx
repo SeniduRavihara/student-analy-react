@@ -64,7 +64,12 @@ const UserMCQPage = () => {
           console.error("Error fetching user results:", error);
         }
 
-        setMcqPacks(packsData);
+        // Filter to only show published packs for students
+        const publishedPacks = packsData.filter(
+          (pack) => pack.status === "published"
+        );
+
+        setMcqPacks(publishedPacks);
         setLoading(false);
       },
       (error) => {

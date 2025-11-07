@@ -782,7 +782,7 @@ export const MCQQuestionDialog = ({
           </div>
 
           {/* Question Settings Section */}
-          <div className="space-y-4">
+          {/* <div className="space-y-4">
             <div className="flex items-center gap-2">
               <h3 className="text-lg font-semibold text-gray-900">
                 Question Settings
@@ -832,7 +832,7 @@ export const MCQQuestionDialog = ({
                 />
               </div>
             </div>
-          </div>
+          </div> */}
 
           {/* Explanation Section */}
           <div className="space-y-4">
