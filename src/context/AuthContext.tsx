@@ -24,7 +24,10 @@ const AuthContextProvider = ({ children }: { children: React.ReactNode }) => {
       }
 
       const userData = await UserService.fetchCurrentUserData(user);
-      setCurrentUserData(userData);
+      // setCurrentUserData(userData);
+
+      console.log(userData);
+      
 
       setCurrentUser(user);
 

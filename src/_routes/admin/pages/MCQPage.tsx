@@ -73,7 +73,7 @@ const MCQPage = () => {
   const [passingMarks, setPassingMarks] = useState(50);
   const [packYear, setPackYear] = useState(EXAM_YEARS[0].year);
   const [classTypes, setClassTypes] = useState<ClassesType[]>([]);
-  
+
   const [showAllPacks, setShowAllPacks] = useState(true); // Show all by default
 
   useEffect(() => {
@@ -412,15 +412,15 @@ const MCQPage = () => {
 
       {/* Create Pack Dialog */}
       <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-        <DialogContent className="sm:max-w-[500px]">
-          <DialogHeader>
+        <DialogContent className="sm:max-w-[500px] max-h-[90vh] flex flex-col">
+          <DialogHeader className="flex-shrink-0">
             <DialogTitle>Create New MCQ Pack</DialogTitle>
             <DialogDescription>
               Create a new multiple choice question pack for your students.
             </DialogDescription>
           </DialogHeader>
 
-          <div className="space-y-4">
+          <div className="flex-1 overflow-y-auto space-y-4 pr-1">
             <div>
               <label className="text-sm font-medium">Pack Title *</label>
               <Input
@@ -514,7 +514,7 @@ const MCQPage = () => {
             </div>
           </div>
 
-          <div className="flex justify-end gap-2 pt-4">
+          <div className="flex justify-end gap-2 pt-4 flex-shrink-0 border-t">
             <Button
               variant="outline"
               onClick={() => setIsCreateDialogOpen(false)}
