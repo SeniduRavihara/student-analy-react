@@ -7,8 +7,8 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 // import { Skeleton } from "@/components/ui/skeleton";
+import { useToast } from "@/context/ToastContext";
 import { db } from "@/firebase/config";
-import { toast } from "@/hooks/use-toast";
 import { useData } from "@/hooks/useData";
 import { MCQPack, MCQQuestion, MCQResult } from "@/types";
 import {
@@ -33,6 +33,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
 const MCQTestPage = () => {
+  const { success: showSuccess, error: showError } = useToast();
   const { packId } = useParams<{ packId: string }>();
   const navigate = useNavigate();
   const { currentUserData } = useData();
@@ -50,11 +51,7 @@ const MCQTestPage = () => {
   const fetchMCQData = useCallback(async () => {
     try {
       if (!currentUserData?.uid) {
-        toast({
-          title: "Error",
-          description: "User not authenticated",
-          variant: "destructive",
-        });
+        showError("Error", "User not authenticated");
         navigate("/dashboard");
         return;
       }
@@ -70,12 +67,10 @@ const MCQTestPage = () => {
       const userResultDoc = await getDoc(userResultRef);
 
       if (userResultDoc.exists()) {
-        toast({
-          title: "Test Already Completed",
-          description:
-            "You have already attempted this MCQ test. You can only take each test once.",
-          variant: "destructive",
-        });
+        showError(
+          "Test Already Completed",
+          "You have already attempted this MCQ test. You can only take each test once."
+        );
         navigate("/dashboard/mcq");
         return;
       }
@@ -104,24 +99,16 @@ const MCQTestPage = () => {
         })) as MCQQuestion[];
         setQuestions(questionsData);
       } else {
-        toast({
-          title: "Error",
-          description: "MCQ test not found",
-          variant: "destructive",
-        });
+        showError("Error", "MCQ test not found");
         navigate("/dashboard/mcq");
       }
     } catch (error) {
       console.error("Error fetching MCQ data:", error);
-      toast({
-        title: "Error",
-        description: "Failed to load MCQ test",
-        variant: "destructive",
-      });
+      showError("Error", "Failed to load MCQ test");
     } finally {
       setLoading(false);
     }
-  }, [currentUserData, packId, navigate]);
+  }, [currentUserData, packId, navigate, showError]);
 
   const handleSubmitTest = useCallback(async () => {
     if (!pack || !currentUserData || submitting) return;
@@ -176,23 +163,28 @@ const MCQTestPage = () => {
       setTestCompleted(true);
       setTestStarted(false);
 
-      toast({
-        title: "Test Completed!",
-        description: `You scored ${percentage.toFixed(1)}% - ${
+      showSuccess(
+        "Test Completed!",
+        `You scored ${percentage.toFixed(1)}% - ${
           isPassed ? "Passed" : "Failed"
-        }`,
-      });
+        }`
+      );
     } catch (error) {
       console.error("Error submitting test:", error);
-      toast({
-        title: "Error",
-        description: "Failed to submit test. Please try again.",
-        variant: "destructive",
-      });
+      showError("Error", "Failed to submit test. Please try again.");
     } finally {
       setSubmitting(false);
     }
-  }, [pack, currentUserData, submitting, questions, answers, timeLeft]);
+  }, [
+    pack,
+    currentUserData,
+    submitting,
+    questions,
+    answers,
+    timeLeft,
+    showSuccess,
+    showError,
+  ]);
 
   useEffect(() => {
     if (packId) {

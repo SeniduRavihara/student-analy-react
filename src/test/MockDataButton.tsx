@@ -1,18 +1,12 @@
 import { Button } from "@/components/ui/button";
+import { useToast } from "@/context/ToastContext";
 import { db } from "@/firebase/config";
-import { useToast } from "@/hooks/use-toast";
 import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 import { useState } from "react";
 
 const MockDataButton = () => {
   const [isLoading, setIsLoading] = useState(false);
-  const { toast } = useToast();
-
-  const showSuccess = (title: string, description?: string) =>
-    toast({ title, description, variant: "default" });
-
-  const showError = (title: string, description?: string) =>
-    toast({ title, description, variant: "destructive" });
+  const { success: showSuccess, error: showError } = useToast();
 
   const generateMockMCQData = async () => {
     setIsLoading(true);

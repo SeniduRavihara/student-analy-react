@@ -9,9 +9,9 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { useToast } from "@/context/ToastContext";
 import { db } from "@/firebase/config";
 import { StorageService } from "@/firebase/services/StorageService";
-import { toast } from "@/hooks/use-toast";
 import { MCQOption, MCQPack, MCQQuestion } from "@/types";
 import {
   addDoc,
@@ -38,6 +38,7 @@ export const MCQQuestionDialog = ({
   onOpenChange,
   onQuestionSaved,
 }: MCQQuestionDialogProps) => {
+  const { success: showSuccess, error: showError } = useToast();
   // Question form state
   const [questionText, setQuestionText] = useState("");
   const [questionImageUrl, setQuestionImageUrl] = useState("");
@@ -161,17 +162,10 @@ export const MCQQuestionDialog = ({
         setQuestionImageUrl(localUrl);
         setQuestionImageFile(file); // Store file for later upload
 
-        toast({
-          title: "Success",
-          description: "Question image selected successfully",
-        });
+        showSuccess("Success", "Question image selected successfully");
       } catch (error) {
         console.error("Preview error:", error);
-        toast({
-          title: "Error",
-          description: "Failed to create image preview.",
-          variant: "destructive",
-        });
+        showError("Error", "Failed to create image preview.");
       }
     }
   };
@@ -187,17 +181,10 @@ export const MCQQuestionDialog = ({
         setQuestionImageBeforeUrl(localUrl);
         setQuestionImageBeforeFile(file); // Store file for later upload
 
-        toast({
-          title: "Success",
-          description: "Image before question selected successfully",
-        });
+        showSuccess("Success", "Image before question selected successfully");
       } catch (error) {
         console.error("Preview error:", error);
-        toast({
-          title: "Error",
-          description: "Failed to create image preview",
-          variant: "destructive",
-        });
+        showError("Error", "Failed to create image preview");
       }
     }
   };
@@ -213,17 +200,10 @@ export const MCQQuestionDialog = ({
         setQuestionImageAfterUrl(localUrl);
         setQuestionImageAfterFile(file); // Store file for later upload
 
-        toast({
-          title: "Success",
-          description: "Image after question selected successfully",
-        });
+        showSuccess("Success", "Image after question selected successfully");
       } catch (error) {
         console.error("Preview error:", error);
-        toast({
-          title: "Error",
-          description: "Failed to create image preview",
-          variant: "destructive",
-        });
+        showError("Error", "Failed to create image preview");
       }
     }
   };
@@ -251,17 +231,10 @@ export const MCQQuestionDialog = ({
         // Store file for later upload
         setOptionImageFiles((prev) => ({ ...prev, [optionId]: file }));
 
-        toast({
-          title: "Success",
-          description: "Option image selected successfully!",
-        });
+        showSuccess("Success", "Option image selected successfully!");
       } catch (error) {
         console.error("Preview error:", error);
-        toast({
-          title: "Error",
-          description: "Failed to create image preview.",
-          variant: "destructive",
-        });
+        showError("Error", "Failed to create image preview.");
       }
     }
   };
@@ -461,19 +434,15 @@ export const MCQQuestionDialog = ({
       onOpenChange(false);
       resetForm();
 
-      toast({
-        title: "Success",
-        description: editingQuestion
+      showSuccess(
+        "Success",
+        editingQuestion
           ? "Question updated successfully!"
-          : "Question created successfully with images uploaded!",
-      });
+          : "Question created successfully with images uploaded!"
+      );
     } catch (error) {
       console.error("Error saving question:", error);
-      toast({
-        title: "Error",
-        description: "Failed to save question. Please try again.",
-        variant: "destructive",
-      });
+      showError("Error", "Failed to save question. Please try again.");
     } finally {
       setIsSaving(false);
     }

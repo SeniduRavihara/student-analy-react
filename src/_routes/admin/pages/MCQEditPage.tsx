@@ -1,6 +1,6 @@
+import { useToast } from "@/context/ToastContext";
 import { db } from "@/firebase/config";
 import { StorageService } from "@/firebase/services/StorageService";
-import { toast } from "@/hooks/use-toast";
 import { MCQPack, MCQQuestion } from "@/types";
 import {
   collection,
@@ -21,6 +21,7 @@ import { MCQQuestionsList } from "../components/MCQQuestionsList";
 const MCQEditPage = () => {
   const { packId } = useParams<{ packId: string }>();
   const navigate = useNavigate();
+  const { success: showSuccess, error: showError } = useToast();
   const [pack, setPack] = useState<MCQPack | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -68,20 +69,12 @@ const MCQEditPage = () => {
 
           console.log(packData);
         } else {
-          toast({
-            title: "Error",
-            description: "Pack not found",
-            variant: "destructive",
-          });
+          showError("Error", "Pack not found");
           navigate("/admin/mcq");
         }
       } catch (error) {
         console.error("Error fetching pack:", error);
-        toast({
-          title: "Error",
-          description: "Failed to load pack",
-          variant: "destructive",
-        });
+        showError("Error", "Failed to load pack");
       } finally {
         setLoading(false);
       }
@@ -90,7 +83,7 @@ const MCQEditPage = () => {
     if (packId) {
       fetchPack();
     }
-  }, [packId, navigate]);
+  }, [packId, navigate, showError]);
 
   const handlePublishPack = async () => {
     if (!pack) return;
@@ -104,19 +97,15 @@ const MCQEditPage = () => {
 
       setPack({ ...pack, status: newStatus });
 
-      toast({
-        title: "Success",
-        description: `MCQ pack ${
+      showSuccess(
+        "Success",
+        `MCQ pack ${
           newStatus === "published" ? "published" : "unpublished"
-        } successfully!`,
-      });
+        } successfully!`
+      );
     } catch (error) {
       console.error("Error updating pack status:", error);
-      toast({
-        title: "Error",
-        description: "Failed to update pack status. Please try again.",
-        variant: "destructive",
-      });
+      showError("Error", "Failed to update pack status. Please try again.");
     }
   };
 
@@ -142,17 +131,10 @@ const MCQEditPage = () => {
         updatedAt: new Date(),
       });
 
-      toast({
-        title: "Success",
-        description: "Pack saved successfully!",
-      });
+      showSuccess("Success", "Pack saved successfully!");
     } catch (error) {
       console.error("Error saving pack:", error);
-      toast({
-        title: "Error",
-        description: "Failed to save pack",
-        variant: "destructive",
-      });
+      showError("Error", "Failed to save pack");
     } finally {
       setSaving(false);
     }
@@ -211,17 +193,10 @@ const MCQEditPage = () => {
         ),
       });
 
-      toast({
-        title: "Success",
-        description: "Question deleted successfully!",
-      });
+      showSuccess("Success", "Question deleted successfully!");
     } catch (error) {
       console.error("Error deleting question:", error);
-      toast({
-        title: "Error",
-        description: "Failed to delete question. Please try again.",
-        variant: "destructive",
-      });
+      showError("Error", "Failed to delete question. Please try again.");
     }
   };
 

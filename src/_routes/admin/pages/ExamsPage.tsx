@@ -26,8 +26,9 @@ import {
   ClassesType as ClassesDataType,
   EXAM_YEARS,
 } from "@/constants";
+import { useToast } from "@/context/ToastContext";
 import { db } from "@/firebase/config";
-import { toast } from "@/hooks/use-toast";
+import ExamService from "@/firebase/services/ExamService";
 import { cn } from "@/lib/utils";
 import { ExamDataType, ExamTable } from "@/types";
 import { format } from "date-fns";
@@ -37,7 +38,6 @@ import { useEffect, useState } from "react";
 import { useNavigate, useOutletContext } from "react-router-dom";
 import { ConfirmDialog } from "../components/ConfirmDialog";
 import { columns } from "../components/exams/Coloumns";
-import ExamService from "@/firebase/services/ExamService";
 
 type OutletContextType = {
   selectedYear: string;
@@ -46,6 +46,7 @@ type OutletContextType = {
 };
 
 const ExamsPage = () => {
+  const { success: showSuccess, error: showError } = useToast();
   const [examsData, setExamsData] = useState<ExamTable[]>([]);
   const [examName, setExamName] = useState("");
   const [examDate, setExamDate] = useState<Date>();
@@ -121,10 +122,10 @@ const ExamsPage = () => {
     setLoading(true);
 
     if (!examName || !examDate || !examYear || classTypes.length === 0) {
-      toast({
-        title: "Please fill all the fields and select at least one class type",
-        variant: "destructive",
-      });
+      showError(
+        "Error",
+        "Please fill all the fields and select at least one class type"
+      );
       setLoading(false);
       return;
     }
@@ -137,10 +138,7 @@ const ExamsPage = () => {
     console.log({ examName, examDate, examYear, classTypes });
     await ExamService.createExam(examName, examDate, examYear, classTypes);
 
-    toast({
-      title: "Exam created successfully",
-      variant: "default",
-    });
+    showSuccess("Success", "Exam created successfully");
 
     setExamName("");
     setExamDate(undefined);

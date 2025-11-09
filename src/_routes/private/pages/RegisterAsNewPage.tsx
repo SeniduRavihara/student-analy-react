@@ -1,25 +1,25 @@
 import { Card, CardContent } from "@/components/ui/card";
+import { CLASSES, EXAM_YEARS } from "@/constants";
+import { useToast } from "@/context/ToastContext";
+import UserService from "@/firebase/services/UserService";
+import { useAuth } from "@/hooks/useAuth";
+import { CircularProgress } from "@mui/material";
 import Box from "@mui/material/Box";
-import Stepper from "@mui/material/Stepper";
+import Button from "@mui/material/Button";
 import Step from "@mui/material/Step";
 import StepLabel from "@mui/material/StepLabel";
-import Button from "@mui/material/Button";
+import Stepper from "@mui/material/Stepper";
 import { Fragment, useEffect, useState } from "react";
-import PersonalDetailsForm from "../components/PersonalDetailsForm";
+import { useNavigate } from "react-router-dom";
 import ExameDetailsForm from "../components/ExameDetailsForm";
 import ParentDetailsForm from "../components/ParentDetailsForm";
-import { useAuth } from "@/hooks/useAuth";
-import { useNavigate } from "react-router-dom";
-import { useToast } from "@/hooks/use-toast";
-import { CLASSES, EXAM_YEARS } from "@/constants";
-import { CircularProgress } from "@mui/material";
-import UserService from "@/firebase/services/UserService";
+import PersonalDetailsForm from "../components/PersonalDetailsForm";
 
 const steps = ["Personal Details", "Exame Details", "Parent Details"];
 
 const RegisterAsNewPage = () => {
   const { currentUser } = useAuth();
-  const { toast } = useToast();
+  const { error: showError } = useToast();
   const [loading, setLoading] = useState(false);
 
   const [activeStep, setActiveStep] = useState(0);
@@ -108,10 +108,7 @@ const RegisterAsNewPage = () => {
         !media ||
         !stream
       ) {
-        toast({
-          title: "Please fill all the fields",
-          variant: "destructive",
-        });
+        showError("Error", "Please fill all the fields");
         setLoading(false);
         return;
       }
@@ -131,7 +128,7 @@ const RegisterAsNewPage = () => {
           gurdianName,
           gurdianPhone,
           address,
-          classes
+          classes,
         },
         currentUser?.uid
       );
