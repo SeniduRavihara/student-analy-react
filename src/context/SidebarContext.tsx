@@ -13,7 +13,7 @@ const SidebarContext = createContext<SidebarContextType | undefined>(undefined);
 
 export function SidebarProvider({ children }: { children: React.ReactNode }) {
   const [isOpen, setIsOpen] = useState(false); // For mobile overlay
-  const [isCollapsed, setIsCollapsed] = useState(true); // For desktop collapse (closed by default)
+  const [isCollapsed, setIsCollapsed] = useState(false); // For desktop collapse (open by default)
   const [mounted, setMounted] = useState(false);
 
   // Set mounted state
