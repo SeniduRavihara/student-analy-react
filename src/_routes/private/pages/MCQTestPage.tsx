@@ -31,6 +31,7 @@ import {
 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { toRomanNumeral } from "@/lib/utils";
 
 const MCQTestPage = () => {
   const { success: showSuccess, error: showError } = useToast();
@@ -550,7 +551,7 @@ const MCQTestPage = () => {
                   className="w-4 h-4 text-blue-600 mt-1"
                 />
                 <span className="font-medium mt-1">
-                  {String.fromCharCode(65 + index)}.
+                  {toRomanNumeral(index + 1)}.
                 </span>
                 <div className="flex-1">
                   {option.contentType === "text" ? (
@@ -560,7 +561,7 @@ const MCQTestPage = () => {
                       {option.imageUrl && (
                         <img
                           src={option.imageUrl}
-                          alt={`Option ${String.fromCharCode(65 + index)}`}
+                          alt={`Option ${toRomanNumeral(index + 1)}`}
                           className="max-w-full h-auto max-h-32 border rounded"
                         />
                       )}

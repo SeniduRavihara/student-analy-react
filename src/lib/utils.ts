@@ -70,9 +70,9 @@ export const toRoundLettersAndNumbers = (text: string): string => {
     L: "🅛",
     M: "🅜",
     N: "🅝",
-    O: "🅞", // Uppercase enclosed O
-    P: "🅟", // Uppercase enclosed P
-    Q: "🅠",
+    O: "🅾", // Uppercase enclosed O
+    P: "🅿", // Uppercase enclosed P
+    Q: "🆠",
     R: "🅡",
     S: "🅢",
     T: "🅣",
@@ -100,4 +100,15 @@ export const toRoundLettersAndNumbers = (text: string): string => {
     .split("")
     .map((char) => squareCharMap[char] || char) // Map supported chars or return as-is
     .join("");
+};
+
+export const toRomanNumeral = (num: number): string => {
+  const romanNumerals: { [key: number]: string } = {
+    1: "I",
+    2: "II",
+    3: "III",
+    4: "IV",
+    5: "V",
+  };
+  return romanNumerals[num] || num.toString();
 };

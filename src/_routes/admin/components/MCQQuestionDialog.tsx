@@ -22,6 +22,7 @@ import {
 } from "firebase/firestore";
 import { FileText, Image, Loader2, Plus, X } from "lucide-react";
 import { useEffect, useState } from "react";
+import { toRomanNumeral } from "@/lib/utils";
 
 interface MCQQuestionDialogProps {
   open: boolean;
@@ -379,7 +380,7 @@ export const MCQQuestionDialog = ({
 
       // Upload option images
       for (const [optionId, file] of Object.entries(optionImageFiles)) {
-        const optionLetter = String.fromCharCode(65 + parseInt(optionId) - 1); // 1 -> A, 2 -> B, etc.
+        const optionLetter = toRomanNumeral(parseInt(optionId)); // 1 -> I, 2 -> II, etc.
         const imageUrl = await StorageService.uploadOptionImage(
           file,
           pack.id,
@@ -670,7 +671,7 @@ export const MCQQuestionDialog = ({
                 >
                   <div className="flex items-center justify-between mb-3">
                     <span className="font-medium text-gray-700">
-                      Option {String.fromCharCode(65 + index)}
+                      Option {toRomanNumeral(index + 1)}
                     </span>
                     <div className="flex items-center gap-4">
                       <div className="flex items-center gap-2">
@@ -739,7 +740,7 @@ export const MCQQuestionDialog = ({
                       {option.imageUrl && (
                         <img
                           src={option.imageUrl}
-                          alt={`Option ${String.fromCharCode(65 + index)}`}
+                          alt={`Option ${toRomanNumeral(index + 1)}`}
                           className="max-w-full h-auto max-h-32 border rounded"
                         />
                       )}

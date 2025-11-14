@@ -9,6 +9,7 @@ import {
 import { QuestionCardSkeleton } from "@/components/ui/skeleton";
 import { MCQQuestion } from "@/types";
 import { Edit, Plus, Trash2 } from "lucide-react";
+import { toRomanNumeral } from "@/lib/utils";
 
 interface MCQQuestionsListProps {
   questions: MCQQuestion[];
@@ -139,7 +140,7 @@ export const MCQQuestionsList = ({
                             className="flex items-center gap-2"
                           >
                             <span className="text-sm text-gray-500 w-6">
-                              {String.fromCharCode(65 + optIndex)}.
+                              {toRomanNumeral(optIndex + 1)}.
                             </span>
                             <div
                               className={`text-sm ${
