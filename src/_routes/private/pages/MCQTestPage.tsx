@@ -10,6 +10,7 @@ import {
 import { useToast } from "@/context/ToastContext";
 import { db } from "@/firebase/config";
 import { useData } from "@/hooks/useData";
+import { toRomanNumeral } from "@/lib/utils";
 import { MCQPack, MCQQuestion, MCQResult } from "@/types";
 import {
   collection,
@@ -31,7 +32,6 @@ import {
 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { toRomanNumeral } from "@/lib/utils";
 
 const MCQTestPage = () => {
   const { success: showSuccess, error: showError } = useToast();
@@ -148,8 +148,8 @@ const MCQTestPage = () => {
         timeSpent,
         completedAt: new Date(),
         isPassed,
-        examYear: pack.examYear,
-        classType: pack.classType,
+        examYears: pack.examYears,
+        classType: pack.classTypes?.[currentUserData?.examYear || ""] || [],
       };
 
       // Save result to user's sub-collection
@@ -571,6 +571,32 @@ const MCQTestPage = () => {
               </label>
             ))}
           </div>
+
+          {/* Explanation Section - Show after answering */}
+          {answers[currentQuestion.id] && (
+            <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+              <h4 className="text-lg font-semibold text-blue-900 mb-3">
+                Explanation
+              </h4>
+              {currentQuestion.explanationContentType === "image" ? (
+                currentQuestion.explanationImageUrl ? (
+                  <img
+                    src={currentQuestion.explanationImageUrl}
+                    alt="Answer explanation"
+                    className="max-w-full h-auto max-h-96 border rounded-lg"
+                  />
+                ) : (
+                  <p className="text-gray-600 italic">
+                    No explanation image available
+                  </p>
+                )
+              ) : currentQuestion.explanation ? (
+                <p className="text-gray-700">{currentQuestion.explanation}</p>
+              ) : (
+                <p className="text-gray-600 italic">No explanation available</p>
+              )}
+            </div>
+          )}
         </CardContent>
       </Card>
 

@@ -122,7 +122,9 @@ export type MCQQuestion = {
   questionImageUrl?: string;
   questionContentType: "text" | "image"; // Type of question content
   options: MCQOption[];
-  explanation?: string;
+  explanation?: string; // Optional text explanation
+  explanationImageUrl?: string; // Optional image explanation
+  explanationContentType?: "text" | "image"; // Type of explanation content
   difficulty: "easy" | "medium" | "hard";
   subject?: string;
   topic?: string;
@@ -139,6 +141,8 @@ export type MCQQuestionInput = {
   questionContentType: "text" | "image";
   options: MCQOption[];
   explanation?: string;
+  explanationImageUrl?: string;
+  explanationContentType?: "text" | "image";
   difficulty: "easy" | "medium" | "hard";
   marks: number;
 };
@@ -147,8 +151,8 @@ export type MCQPack = {
   id: string;
   title: string;
   description: string;
-  examYear: string;
-  classType: string[];
+  examYears: string[]; // Multiple exam years
+  classTypes: { [year: string]: string[] }; // Class types per exam year
   timeLimit: number; // in minutes
   passingMarks: number;
   status: "draft" | "published" | "archived";
@@ -176,7 +180,7 @@ export type MCQResult = {
   timeSpent: number; // total minutes
   completedAt: Date;
   isPassed: boolean;
-  examYear: string;
+  examYears: string[]; // Changed from examYear to examYears
   classType: string[];
 };
 

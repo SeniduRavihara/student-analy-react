@@ -123,6 +123,34 @@ export class StorageService {
   }
 
   /**
+   * Upload explanation image to Firebase Storage
+   * @param file - Image file to upload
+   * @param mcqTestId - MCQ test ID
+   * @param questionId - Question ID
+   * @returns Promise<string> - Download URL
+   */
+  static async uploadExplanationImage(
+    file: File,
+    mcqTestId: string,
+    questionId: string
+  ): Promise<string> {
+    try {
+      const fileExtension = file.name.split(".").pop() || "jpg";
+      const fileName = `explanation-image.${fileExtension}`;
+      const storagePath = `mcqTests/${mcqTestId}/questions/${questionId}/${fileName}`;
+
+      const storageRef = ref(storage, storagePath);
+      const snapshot = await uploadBytes(storageRef, file);
+      const downloadURL = await getDownloadURL(snapshot.ref);
+
+      return downloadURL;
+    } catch (error) {
+      console.error("Error uploading explanation image:", error);
+      throw new Error("Failed to upload explanation image");
+    }
+  }
+
+  /**
    * Delete question image from Firebase Storage
    * @param mcqTestId - MCQ test ID
    * @param questionId - Question ID

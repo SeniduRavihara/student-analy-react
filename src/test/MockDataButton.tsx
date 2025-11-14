@@ -16,8 +16,8 @@ const MockDataButton = () => {
           title: "Physics Fundamentals - Mechanics",
           description:
             "Basic mechanics concepts including motion, forces, and energy.",
-          examYear: "2027",
-          classType: ["THEORY"],
+          examYears: ["2027"],
+          classTypes: { "2027": ["THEORY"] },
           timeLimit: 45,
           passingMarks: 40,
           status: "published" as const,
@@ -254,8 +254,8 @@ const MockDataButton = () => {
           title: "Advanced Physics - Thermodynamics",
           description:
             "Thermodynamics concepts including heat, temperature, and gas laws.",
-          examYear: "2027",
-          classType: ["REVISION"],
+          examYears: ["2027"],
+          classTypes: { "2027": ["REVISION"] },
           timeLimit: 50,
           passingMarks: 45,
           status: "published" as const,
@@ -500,8 +500,8 @@ const MockDataButton = () => {
           const packRef = await addDoc(collection(db, "mcqTests"), {
             title: testData.title,
             description: testData.description,
-            examYear: testData.examYear,
-            classType: testData.classType,
+            examYears: testData.examYears,
+            classTypes: testData.classTypes,
             timeLimit: testData.timeLimit,
             passingMarks: testData.passingMarks,
             status: testData.status,
