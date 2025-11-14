@@ -87,11 +87,16 @@ const UserMCQPage = () => {
 
   // Filter MCQ packs based on user's exam year and classes
   const filteredPacks = mcqPacks.filter((pack) => {
-    const matchesYear = pack.examYear === currentUserData?.examYear;
-    const matchesClass =
-      currentUserData?.classes?.some((userClass) =>
-        pack.classType?.includes(userClass)
-      ) ?? false;
+    const matchesYear = (pack.examYears || []).includes(
+      currentUserData?.examYear || ""
+    );
+    const userClass = currentUserData?.classes || [];
+    const packClassTypes = pack.classTypes || {};
+    const userExamYear = currentUserData?.examYear || "";
+    const packClassesForYear = packClassTypes[userExamYear] || [];
+    const matchesClass = userClass.some((userClassItem) =>
+      packClassesForYear.includes(userClassItem)
+    );
     return matchesYear && matchesClass;
   });
 
@@ -200,14 +205,16 @@ const UserMCQPage = () => {
 
                     {/* Class Types */}
                     <div className="flex flex-wrap gap-1">
-                      {pack.classType?.map((type, index) => (
-                        <span
-                          key={index}
-                          className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full"
-                        >
-                          {type}
-                        </span>
-                      ))}
+                      {Object.values(pack.classTypes || {})
+                        .flat()
+                        .map((type, index) => (
+                          <span
+                            key={index}
+                            className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full"
+                          >
+                            {type}
+                          </span>
+                        ))}
                     </div>
 
                     {/* Passing Marks */}

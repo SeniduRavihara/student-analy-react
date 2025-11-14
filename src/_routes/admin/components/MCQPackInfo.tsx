@@ -2,13 +2,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { CLASSES_TO_YEARS, ClassesType, EXAM_YEARS } from "@/constants";
 import { cn } from "@/lib/utils";
@@ -102,62 +95,109 @@ export const MCQPackInfo = ({
           </div>
 
           <div>
-            <Label>Exam Year</Label>
-            <Select
-              value={pack.examYear}
-              onValueChange={(value) =>
-                onPackUpdate({ ...pack, examYear: value })
-              }
-            >
-              <SelectTrigger className="mt-1">
-                <SelectValue placeholder="Select exam year" />
-              </SelectTrigger>
-              <SelectContent>
-                {EXAM_YEARS.map((year) => (
-                  <SelectItem key={year.year} value={year.year}>
-                    {year.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <Label>Class Types</Label>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              {CLASSES_TO_YEARS[
-                pack.examYear as keyof typeof CLASSES_TO_YEARS
-              ]?.map((classItem) => (
+            <Label>Exam Years</Label>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-1">
+              {EXAM_YEARS.map((year) => (
                 <Card
-                  key={classItem}
+                  key={year.year}
                   onClick={() => {
-                    const currentClasses = pack.classType || [];
-                    const isSelected = currentClasses.includes(
-                      classItem as ClassesType
-                    );
-                    const newClasses = isSelected
-                      ? currentClasses.filter((c) => c !== classItem)
-                      : [...currentClasses, classItem as ClassesType];
-                    onPackUpdate({ ...pack, classType: newClasses });
+                    const currentYears = pack.examYears || [];
+                    const isSelected = currentYears.includes(year.year);
+                    let newYears: string[];
+                    const currentClassTypes = pack.classTypes || {};
+                    let newClassTypes = { ...currentClassTypes };
+
+                    if (isSelected) {
+                      // Remove year
+                      newYears = currentYears.filter((y) => y !== year.year);
+                      delete newClassTypes[year.year];
+                    } else {
+                      // Add year
+                      newYears = [...currentYears, year.year];
+                      newClassTypes[year.year] = [];
+                    }
+
+                    onPackUpdate({
+                      ...pack,
+                      examYears: newYears,
+                      classTypes: newClassTypes,
+                    });
                   }}
                   className={cn(
                     "p-3 flex items-center justify-between cursor-pointer transition-all",
-                    (pack.classType || []).includes(classItem as ClassesType)
+                    (pack.examYears || []).includes(year.year)
                       ? "bg-primary text-primary-foreground"
                       : "hover:bg-accent"
                   )}
                 >
-                  <span className="font-medium">{classItem}</span>
-                  {(pack.classType || []).includes(
-                    classItem as ClassesType
-                  ) && <SquareCheck className="h-5 w-5" />}
+                  <span className="font-medium">{year.label}</span>
+                  {(pack.examYears || []).includes(year.year) && (
+                    <SquareCheck className="h-5 w-5" />
+                  )}
                 </Card>
-              )) || (
-                <p className="text-sm text-gray-500 col-span-full">
-                  Select an exam year first
-                </p>
-              )}
+              ))}
             </div>
+          </div>
+
+          <div className="space-y-4">
+            <Label>Class Types by Exam Year</Label>
+            {(pack.examYears || []).length === 0 ? (
+              <p className="text-sm text-gray-500">Select exam years first</p>
+            ) : (
+              <div className="space-y-4">
+                {(pack.examYears || []).map((year) => (
+                  <div key={year} className="border rounded-lg p-4">
+                    <h4 className="font-medium text-gray-900 mb-3">
+                      {EXAM_YEARS.find((y) => y.year === year)?.label || year}
+                    </h4>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                      {CLASSES_TO_YEARS[
+                        year as keyof typeof CLASSES_TO_YEARS
+                      ]?.map((classItem) => (
+                        <Card
+                          key={classItem}
+                          onClick={() => {
+                            const currentClassTypes = pack.classTypes || {};
+                            const yearClasses = currentClassTypes[year] || [];
+                            const isSelected = yearClasses.includes(
+                              classItem as ClassesType
+                            );
+                            const newYearClasses = isSelected
+                              ? yearClasses.filter((c) => c !== classItem)
+                              : [...yearClasses, classItem as ClassesType];
+
+                            onPackUpdate({
+                              ...pack,
+                              classTypes: {
+                                ...currentClassTypes,
+                                [year]: newYearClasses,
+                              },
+                            });
+                          }}
+                          className={cn(
+                            "p-3 flex items-center justify-between cursor-pointer transition-all",
+                            ((pack.classTypes || {})[year] || []).includes(
+                              classItem as ClassesType
+                            )
+                              ? "bg-primary text-primary-foreground"
+                              : "hover:bg-accent"
+                          )}
+                        >
+                          <span className="font-medium">{classItem}</span>
+                          {((pack.classTypes || {})[year] || []).includes(
+                            classItem as ClassesType
+                          ) && <SquareCheck className="h-5 w-5" />}
+                        </Card>
+                      )) || (
+                        <p className="text-sm text-gray-500 col-span-full">
+                          No class types available for this year
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>

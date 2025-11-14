@@ -7,9 +7,9 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { QuestionCardSkeleton } from "@/components/ui/skeleton";
+import { toRomanNumeral } from "@/lib/utils";
 import { MCQQuestion } from "@/types";
 import { Edit, Plus, Trash2 } from "lucide-react";
-import { toRomanNumeral } from "@/lib/utils";
 
 interface MCQQuestionsListProps {
   questions: MCQQuestion[];
@@ -102,6 +102,12 @@ export const MCQQuestionsList = ({
                         >
                           {question.difficulty}
                         </span>
+                        {(question.explanation ||
+                          question.explanationImageUrl) && (
+                          <span className="bg-purple-100 text-purple-800 text-xs font-medium px-2 py-1 rounded">
+                            Has Explanation
+                          </span>
+                        )}
                       </div>
                       <div className="font-medium mb-2">
                         <div className="space-y-2">

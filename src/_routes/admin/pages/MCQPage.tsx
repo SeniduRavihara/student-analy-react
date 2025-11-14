@@ -25,7 +25,7 @@ import { useToast } from "@/context/ToastContext";
 import { db } from "@/firebase/config";
 import { StorageService } from "@/firebase/services/StorageService";
 import { cn } from "@/lib/utils";
-import MockDataButton from "@/test/MockDataButton";
+// import MockDataButton from "@/test/MockDataButton";
 import { MCQPack } from "@/types";
 import {
   addDoc,
@@ -100,8 +100,8 @@ const MCQPage = () => {
           ? packsData
           : packsData.filter(
               (pack) =>
-                pack.examYear === selectedYear &&
-                pack.classType.includes(selectedClass)
+                (pack.examYears || []).includes(selectedYear) &&
+                (pack.classTypes?.[selectedYear] || []).includes(selectedClass)
             );
 
         setMcqPacks(filteredPacks);
@@ -202,8 +202,8 @@ const MCQPage = () => {
       const newPack = {
         title: packTitle,
         description: packDescription,
-        examYear: packYear,
-        classType: classTypes,
+        examYears: [packYear],
+        classTypes: { [packYear]: classTypes },
         timeLimit,
         passingMarks,
         status: "draft",
@@ -254,13 +254,16 @@ const MCQPage = () => {
       enableHiding: true,
     },
     {
-      accessorKey: "classType",
+      accessorKey: "classTypes",
       header: "Class Types",
       cell: ({ row }: any) => {
-        const classTypes = row.getValue("classType") as string[];
+        const classTypesObj = row.getValue("classTypes") as {
+          [year: string]: string[];
+        };
+        const allClassTypes = Object.values(classTypesObj || {}).flat();
         return (
           <div className="flex flex-wrap gap-1">
-            {classTypes.map((type, index) => (
+            {allClassTypes.map((type, index) => (
               <span
                 key={index}
                 className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full"
@@ -379,7 +382,7 @@ const MCQPage = () => {
             >
               {showAllPacks ? "Show Filtered" : "Show All Packs"}
             </Button>
-            <MockDataButton />
+            {/* <MockDataButton /> */}
             <Button
               onClick={() => setIsCreateDialogOpen(true)}
               className="bg-blue-600 hover:bg-blue-700"

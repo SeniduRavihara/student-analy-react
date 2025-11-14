@@ -122,8 +122,8 @@ const MCQEditPage = () => {
       await updateDoc(doc(db, "mcqTests", pack.id), {
         title: pack.title,
         description: pack.description,
-        examYear: pack.examYear,
-        classType: pack.classType,
+        examYears: pack.examYears,
+        classTypes: pack.classTypes,
         timeLimit: pack.timeLimit,
         passingMarks: pack.passingMarks,
         totalQuestions,

@@ -12,6 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/context/ToastContext";
 import { db } from "@/firebase/config";
 import { StorageService } from "@/firebase/services/StorageService";
+import { toRomanNumeral } from "@/lib/utils";
 import { MCQOption, MCQPack, MCQQuestion } from "@/types";
 import {
   addDoc,
@@ -22,7 +23,6 @@ import {
 } from "firebase/firestore";
 import { FileText, Image, Loader2, Plus, X } from "lucide-react";
 import { useEffect, useState } from "react";
-import { toRomanNumeral } from "@/lib/utils";
 
 interface MCQQuestionDialogProps {
   open: boolean;
@@ -74,6 +74,15 @@ export const MCQQuestionDialog = ({
     Record<string, File>
   >({});
 
+  // Explanation state
+  const [explanationContentType, setExplanationContentType] = useState<
+    "text" | "image"
+  >("text");
+  const [explanationImageFile, setExplanationImageFile] = useState<File | null>(
+    null
+  );
+  const [explanationImageUrl, setExplanationImageUrl] = useState("");
+
   // Load editing question data
   useEffect(() => {
     if (editingQuestion) {
@@ -90,6 +99,11 @@ export const MCQQuestionDialog = ({
       setOptions(optionsWithContentType);
 
       setExplanation(editingQuestion.explanation || "");
+      setExplanationImageUrl(editingQuestion.explanationImageUrl || "");
+      setExplanationContentType(
+        editingQuestion.explanationContentType ||
+          (editingQuestion.explanationImageUrl ? "image" : "text")
+      );
       setDifficulty(editingQuestion.difficulty);
       setMarks(editingQuestion.marks || 1);
     } else if (open) {
@@ -142,6 +156,8 @@ export const MCQQuestionDialog = ({
       { id: "5", text: "", isCorrect: false, contentType: "text" },
     ]);
     setExplanation("");
+    setExplanationContentType("text");
+    setExplanationImageUrl("");
     setDifficulty("medium");
     setMarks(1);
     // Reset file objects
@@ -149,6 +165,7 @@ export const MCQQuestionDialog = ({
     setQuestionImageBeforeFile(null);
     setQuestionImageAfterFile(null);
     setOptionImageFiles({});
+    setExplanationImageFile(null);
   };
 
   // Image upload handlers (create local previews)
@@ -330,6 +347,8 @@ export const MCQQuestionDialog = ({
             return optionData;
           }),
           explanation: explanation || "",
+          explanationImageUrl: "",
+          explanationContentType,
           difficulty,
           marks,
           order: 0, // Default order, can be updated later
@@ -400,6 +419,16 @@ export const MCQQuestionDialog = ({
         }
       }
 
+      // Upload explanation image if file exists
+      let finalExplanationImageUrl = explanationImageUrl;
+      if (explanationImageFile) {
+        finalExplanationImageUrl = await StorageService.uploadExplanationImage(
+          explanationImageFile,
+          pack.id,
+          questionId
+        );
+      }
+
       // Step 3: Update document with final image URLs
       const updateData = {
         question: questionText,
@@ -408,6 +437,10 @@ export const MCQQuestionDialog = ({
         questionImageBeforeUrl: finalQuestionImageBeforeUrl,
         questionImageAfterUrl: finalQuestionImageAfterUrl,
         options: finalOptions,
+        explanation: explanationContentType === "text" ? explanation : "",
+        explanationImageUrl:
+          explanationContentType === "image" ? finalExplanationImageUrl : "",
+        explanationContentType,
         ...(editingQuestion ? { updatedAt: new Date() } : {}),
       };
 
@@ -422,7 +455,10 @@ export const MCQQuestionDialog = ({
         questionImageAfterUrl: finalQuestionImageAfterUrl,
         questionContentType,
         options: finalOptions,
-        explanation,
+        explanation: explanationContentType === "text" ? explanation : "",
+        explanationImageUrl:
+          explanationContentType === "image" ? finalExplanationImageUrl : "",
+        explanationContentType,
         difficulty,
         marks,
         order: editingQuestion?.order || 0,
@@ -813,20 +849,96 @@ export const MCQQuestionDialog = ({
               <div className="h-px bg-gray-200 flex-1"></div>
             </div>
 
-            <div className="bg-gray-50 p-4 rounded-lg">
-              <Label className="text-sm font-medium text-gray-700">
-                Answer Explanation (Optional)
-              </Label>
-              <Textarea
-                value={explanation}
-                onChange={(e) => setExplanation(e.target.value)}
-                placeholder="Provide an explanation for the correct answer to help students understand..."
-                className="mt-2 w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                rows={3}
-              />
-              <p className="text-xs text-gray-500 mt-1">
-                This will be shown to students after they submit their answer.
-              </p>
+            <div className="bg-gray-50 p-4 rounded-lg space-y-4">
+              <div>
+                <Label className="text-sm font-medium text-gray-700">
+                  Explanation Type
+                </Label>
+                <div className="flex gap-4 mt-2">
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="explanation-type"
+                      value="text"
+                      checked={explanationContentType === "text"}
+                      onChange={(e) =>
+                        setExplanationContentType(
+                          e.target.value as "text" | "image"
+                        )
+                      }
+                      className="w-4 h-4 text-blue-600"
+                    />
+                    <span className="text-sm">Text</span>
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="explanation-type"
+                      value="image"
+                      checked={explanationContentType === "image"}
+                      onChange={(e) =>
+                        setExplanationContentType(
+                          e.target.value as "text" | "image"
+                        )
+                      }
+                      className="w-4 h-4 text-blue-600"
+                    />
+                    <span className="text-sm">Image</span>
+                  </label>
+                </div>
+              </div>
+
+              {explanationContentType === "text" ? (
+                <div>
+                  <Label className="text-sm font-medium text-gray-700">
+                    Answer Explanation (Optional)
+                  </Label>
+                  <Textarea
+                    value={explanation}
+                    onChange={(e) => setExplanation(e.target.value)}
+                    placeholder="Provide an explanation for the correct answer to help students understand..."
+                    className="mt-2 w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    rows={3}
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    This will be shown to students after they submit their
+                    answer.
+                  </p>
+                </div>
+              ) : (
+                <div>
+                  <Label className="text-sm font-medium text-gray-700">
+                    Explanation Image (Optional)
+                  </Label>
+                  <div className="mt-2">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          setExplanationImageFile(file);
+                          setExplanationImageUrl(URL.createObjectURL(file));
+                        }
+                      }}
+                      className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                    {explanationImageUrl && (
+                      <div className="mt-2">
+                        <img
+                          src={explanationImageUrl}
+                          alt="Explanation preview"
+                          className="max-w-full h-auto max-h-32 border rounded"
+                        />
+                      </div>
+                    )}
+                  </div>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Upload an image that explains the correct answer. This will
+                    be shown to students after they submit their answer.
+                  </p>
+                </div>
+              )}
             </div>
           </div>
         </div>
